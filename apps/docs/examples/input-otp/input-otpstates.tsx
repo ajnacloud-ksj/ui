@@ -8,7 +8,6 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-  REGEXP_ONLY_DIGITS,
 } from "@ajnacloud/ui";
 import { useId } from "react";
 
@@ -20,15 +19,18 @@ export function InputOTPStates() {
         <FieldLabel htmlFor={`${id}-invalid`}>Verification code</FieldLabel>
         <InputOTP
           id={`${id}-invalid`}
-          maxLength={6}
-          pattern={REGEXP_ONLY_DIGITS}
+          length={6}
           value="000000"
           aria-invalid
           aria-describedby={`${id}-error`}
         >
           <InputOTPGroup>
             {Array.from({ length: 6 }, (_, index) => (
-              <InputOTPSlot key={index} index={index} />
+              <InputOTPSlot
+                key={index}
+                aria-invalid
+                aria-label={index === 0 ? undefined : `Character ${index + 1}`}
+              />
             ))}
           </InputOTPGroup>
         </InputOTP>
@@ -38,10 +40,13 @@ export function InputOTPStates() {
       </Field>
       <Field data-disabled>
         <FieldLabel htmlFor={`${id}-disabled`}>Code unavailable</FieldLabel>
-        <InputOTP id={`${id}-disabled`} maxLength={6} value="123456" disabled>
+        <InputOTP id={`${id}-disabled`} length={6} value="123456" disabled>
           <InputOTPGroup>
             {Array.from({ length: 6 }, (_, index) => (
-              <InputOTPSlot key={index} index={index} />
+              <InputOTPSlot
+                key={index}
+                aria-label={index === 0 ? undefined : `Character ${index + 1}`}
+              />
             ))}
           </InputOTPGroup>
         </InputOTP>

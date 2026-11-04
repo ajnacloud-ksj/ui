@@ -9,7 +9,6 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-  REGEXP_ONLY_DIGITS,
 } from "@ajnacloud/ui";
 import { useId, useState } from "react";
 
@@ -37,10 +36,9 @@ export function InputOTPForm() {
           id={id}
           name="code"
           required
-          maxLength={6}
-          pattern={REGEXP_ONLY_DIGITS}
+          length={6}
           value={value}
-          onChange={(next) => {
+          onValueChange={(next) => {
             setValue(next);
             setComplete(false);
           }}
@@ -49,7 +47,11 @@ export function InputOTPForm() {
         >
           <InputOTPGroup>
             {Array.from({ length: 6 }, (_, index) => (
-              <InputOTPSlot key={index} index={index} />
+              <InputOTPSlot
+                aria-invalid={invalid || undefined}
+                key={index}
+                aria-label={index === 0 ? undefined : `Character ${index + 1}`}
+              />
             ))}
           </InputOTPGroup>
         </InputOTP>

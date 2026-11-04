@@ -7,7 +7,6 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-  REGEXP_ONLY_DIGITS_AND_CHARS,
 } from "@ajnacloud/ui";
 import { useId } from "react";
 
@@ -18,21 +17,23 @@ export function InputOTPAlphanumeric() {
       <FieldLabel htmlFor={id}>Recovery code</FieldLabel>
       <InputOTP
         id={id}
-        maxLength={6}
-        pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+        length={6}
         inputMode="text"
-        autoCapitalize="characters"
-        pasteTransformer={(text) => text.replace(/[\s-]/g, "").toUpperCase()}
+        validationType="alphanumeric"
+        normalizeValue={(value) => value.toUpperCase()}
         aria-describedby={`${id}-description`}
       >
         <InputOTPGroup>
           {Array.from({ length: 6 }, (_, index) => (
-            <InputOTPSlot key={index} index={index} />
+            <InputOTPSlot
+              key={index}
+              aria-label={index === 0 ? undefined : `Character ${index + 1}`}
+            />
           ))}
         </InputOTPGroup>
       </InputOTP>
       <FieldDescription id={`${id}-description`}>
-        Letters and numbers. Pasted spaces and hyphens are removed.
+        Letters and numbers. Codes are converted to uppercase.
       </FieldDescription>
     </Field>
   );

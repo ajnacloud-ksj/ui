@@ -8,7 +8,6 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-  REGEXP_ONLY_DIGITS,
 } from "@ajnacloud/ui";
 import { useId } from "react";
 
@@ -20,20 +19,19 @@ export function InputOTPBasic() {
       <InputOTP
         id={id}
         name="code"
-        maxLength={6}
-        pattern={REGEXP_ONLY_DIGITS}
+        length={6}
         aria-describedby={`${id}-description`}
       >
         <InputOTPGroup>
-          <InputOTPSlot index={0} />
-          <InputOTPSlot index={1} />
-          <InputOTPSlot index={2} />
+          <InputOTPSlot />
+          <InputOTPSlot aria-label="Character 2" />
+          <InputOTPSlot aria-label="Character 3" />
         </InputOTPGroup>
         <InputOTPSeparator />
         <InputOTPGroup>
-          <InputOTPSlot index={3} />
-          <InputOTPSlot index={4} />
-          <InputOTPSlot index={5} />
+          <InputOTPSlot aria-label="Character 4" />
+          <InputOTPSlot aria-label="Character 5" />
+          <InputOTPSlot aria-label="Character 6" />
         </InputOTPGroup>
       </InputOTP>
       <FieldDescription id={`${id}-description`}>

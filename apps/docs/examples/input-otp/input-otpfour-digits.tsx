@@ -7,7 +7,6 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-  REGEXP_ONLY_DIGITS,
 } from "@ajnacloud/ui";
 import { useId } from "react";
 
@@ -16,10 +15,13 @@ export function InputOTPFourDigits() {
   return (
     <Field className="max-w-sm">
       <FieldLabel htmlFor={id}>Four-digit PIN</FieldLabel>
-      <InputOTP id={id} maxLength={4} pattern={REGEXP_ONLY_DIGITS}>
+      <InputOTP id={id} length={4}>
         <InputOTPGroup>
           {Array.from({ length: 4 }, (_, index) => (
-            <InputOTPSlot key={index} index={index} />
+            <InputOTPSlot
+              key={index}
+              aria-label={index === 0 ? undefined : `Character ${index + 1}`}
+            />
           ))}
         </InputOTPGroup>
       </InputOTP>
