@@ -455,7 +455,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "beta"
+    "tag": "latest"
   },
   "repository": {
     "type": "git",

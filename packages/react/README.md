@@ -5,7 +5,7 @@ Accessible React components built with Base UI. Supports React 18.2+ and 19, wit
 ## Install
 
 ```bash
-npm install @ajnacloud/ui@beta
+npm install @ajnacloud/ui
 ```
 
 Keep your application's existing compatible React and React DOM versions. Other package dependencies install automatically.
