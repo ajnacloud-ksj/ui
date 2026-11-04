@@ -21,8 +21,39 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm test:package
-      - name: Check React 18 compatibility
+  react-18:
+    name: React 18 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare isolated library checkout
         run: |
-          pnpm --filter @ajnacloud/ui add --save-dev react@18.3.1 react-dom@18.3.1 @types/react@18.2.55 @types/react-dom@18.2.19
-          pnpm --filter @ajnacloud/ui typecheck
-          pnpm --filter @ajnacloud/ui test
+          mkdir -p "$RUNNER_TEMP/react-18/packages"
+          cp -R packages/react "$RUNNER_TEMP/react-18/packages/react"
+          cp tsconfig.base.json "$RUNNER_TEMP/react-18/tsconfig.base.json"
+      - name: Configure React 18 dependencies
+        working-directory: ${{ runner.temp }}/react-18/packages/react
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from "node:fs";
+          const manifest = JSON.parse(readFileSync("package.json", "utf8"));
+          const versions = {
+            react: "18.3.1",
+            "react-dom": "18.3.1",
+            "@types/react": "18.3.12",
+            "@types/react-dom": "18.3.1",
+          };
+          Object.assign(manifest.devDependencies, versions);
+          manifest.pnpm = { overrides: versions };
+          writeFileSync("package.json", JSON.stringify(manifest, null, 2) + "\n");
+          NODE
+      - run: pnpm install --no-frozen-lockfile
+        working-directory: ${{ runner.temp }}/react-18/packages/react
+      - run: pnpm typecheck
+        working-directory: ${{ runner.temp }}/react-18/packages/react
+      - run: pnpm test
+        working-directory: ${{ runner.temp }}/react-18/packages/react
