@@ -1,0 +1,268 @@
+---
+title: Installation
+description: Install Ajna and set up styles in Next.js, Vite, or a Tailwind v3.4 application.
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+## Requirements
+
+A React application with React and React DOM **18 (18.2+) or 19**. Ajna works with Next.js, Vite, and other React build tools. Tailwind is optional.
+
+## Install the package
+
+The beta release is being prepared and has not been published yet. Once available, install it with your package manager:
+
+<Tabs groupId="package-manager" persist items={["npm", "pnpm", "yarn", "bun"]}>
+<Tab value="npm">
+
+```bash
+npm install @ajnacloud/ui@beta
+```
+
+</Tab>
+<Tab value="pnpm">
+
+```bash
+pnpm add @ajnacloud/ui@beta
+```
+
+</Tab>
+<Tab value="yarn">
+
+```bash
+yarn add @ajnacloud/ui@beta
+```
+
+</Tab>
+<Tab value="bun">
+
+```bash
+bun add @ajnacloud/ui@beta
+```
+
+</Tab>
+</Tabs>
+
+Keep your application's compatible React and React DOM versions. Other package dependencies install automatically.
+
+## Choose your styling setup
+
+| Your application            | Setup                                                                            |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| No Tailwind, or Tailwind v4 | Import standalone CSS using the [Next.js](#nextjs) or [Vite](#vite) steps below. |
+| Tailwind v3.4               | Use the [preset and content path](#tailwind-v34).                                |
+
+Each setup includes the component styles and default theme. No theme provider is required.
+
+Copyable [blocks](/blocks) use your application's Tailwind build for their layouts. Each block includes setup for Tailwind v3.4 and v4.
+
+## Next.js
+
+For standalone CSS, including applications using Tailwind v4:
+
+<Steps>
+<Step>
+
+### Import the styles
+
+Import Ajna before your application stylesheet in the root layout. If your project uses `src/`, the same file lives at `src/app/layout.tsx`.
+
+```tsx title="app/layout.tsx"
+import type { ReactNode } from "react";
+import "@ajnacloud/ui/styles.css";
+import "./globals.css";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <div className="app-root">{children}</div>
+      </body>
+    </html>
+  );
+}
+```
+
+</Step>
+<Step>
+
+### Use a component
+
+```tsx title="app/page.tsx"
+import { Button } from "@ajnacloud/ui";
+
+export default function Page() {
+  return <Button variant="primary">Create project</Button>;
+}
+```
+
+Add `"use client"` to files that use state, event handlers, or interactive parts such as `Dialog` and `DialogContent`.
+
+</Step>
+</Steps>
+
+## Vite
+
+For standalone CSS, including applications using Tailwind v4:
+
+<Steps>
+<Step>
+
+### Import the styles
+
+Import Ajna before your application stylesheet in the entry point.
+
+```tsx title="src/main.tsx"
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "@ajnacloud/ui/styles.css";
+import "./index.css";
+import App from "./App";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <div className="app-root">
+      <App />
+    </div>
+  </StrictMode>,
+);
+```
+
+</Step>
+<Step>
+
+### Use a component
+
+```tsx title="src/App.tsx"
+import { Button } from "@ajnacloud/ui";
+
+export default function App() {
+  return <Button variant="primary">Create project</Button>;
+}
+```
+
+</Step>
+</Steps>
+
+Standalone CSS includes Ajna's own utilities. To style your application or add `className` overrides, use your existing Tailwind build, CSS, or inline styles. Keep Ajna out of Tailwind v4's content sources.
+
+## Tailwind v3.4
+
+Use this setup instead of importing `@ajnacloud/ui/styles.css`. Keep your existing Tailwind v3.4 installation.
+
+<Steps>
+<Step>
+
+### Add the preset and content path
+
+Merge these entries into your Tailwind configuration, preserving existing content paths, presets, plugins, and theme settings.
+
+<Tabs items={["CommonJS", "ES modules"]}>
+<Tab value="CommonJS">
+
+```js title="tailwind.config.cjs"
+const path = require("node:path");
+
+module.exports = {
+  presets: [require("@ajnacloud/ui/tailwind")],
+  content: [
+    "./index.html",
+    "./{app,pages,components,src}/**/*.{js,ts,jsx,tsx,mdx}",
+    path.join(
+      path.dirname(require.resolve("@ajnacloud/ui/tailwind")),
+      "**/*.js",
+    ),
+  ],
+};
+```
+
+</Tab>
+<Tab value="ES modules">
+
+```js title="tailwind.config.js"
+import { createRequire } from "node:module";
+import path from "node:path";
+import ajnaPreset from "@ajnacloud/ui/tailwind";
+
+const require = createRequire(import.meta.url);
+
+export default {
+  presets: [ajnaPreset],
+  content: [
+    "./index.html",
+    "./{app,pages,components,src}/**/*.{js,ts,jsx,tsx,mdx}",
+    path.join(
+      path.dirname(require.resolve("@ajnacloud/ui/tailwind")),
+      "**/*.js",
+    ),
+  ],
+};
+```
+
+</Tab>
+</Tabs>
+
+The preset supplies theme variables and utilities such as `bg-ajna-primary`. The package content path lets Tailwind find the utility classes used by Ajna's components. Both are needed. Add any source directories outside the listed paths.
+
+</Step>
+<Step>
+
+### Keep the Tailwind directives
+
+Keep these directives in your application stylesheet and import that file from `app/layout.tsx` in Next.js or `src/main.tsx` in Vite.
+
+```css title="app/globals.css or src/index.css"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Keep `@tailwind base` even if Preflight is disabled: Ajna emits its theme defaults there. No separate Ajna CSS or token import is needed.
+
+</Step>
+<Step>
+
+### Restart the development server
+
+Use your application's usual development command, such as `npm run dev` or `pnpm dev`. You can now use the components shown above, along with your own Tailwind utilities.
+
+</Step>
+</Steps>
+
+This integration expects Tailwind's default empty utility prefix. Use standalone CSS if your application has a custom prefix.
+
+## Overlay setup
+
+Add these rules to your application stylesheet. With Tailwind v3.4, put them after the Tailwind directives.
+
+```css title="app/globals.css or src/index.css"
+body {
+  position: relative;
+}
+
+.app-root {
+  isolation: isolate;
+}
+```
+
+The `.app-root` wrapper in the examples keeps page content in one stacking context while dialogs render outside it. The body rule is needed for iOS Safari when using [Drawer](/docs/components/drawer), Sidebar's mobile panel, or Filter Bar.
+
+For notifications, mount one [Toaster](/docs/components/toast#usage) in your application. Other component-specific setup is covered in each guide.
+
+## Theming
+
+Add the `dark` class to `<html>` for Ajna's dark theme. Put token overrides after Ajna's defaults in your application stylesheet.
+
+See [Theming](/docs/theming) for changing colors, connecting an existing shadcn theme, and styling portaled content. If you import icons or date helpers in your own code, declare those direct dependencies as described in [Icons](/docs/icons) and [Date Input](/docs/components/date-input).
+
+## Troubleshooting
+
+| Problem                                | Check                                                                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Components are unstyled                | Import `styles.css`, or configure both the Tailwind v3.4 preset and package content path.                                                    |
+| Layout works but colors are missing    | In Tailwind v3.4, check the preset and `@tailwind base`. Scanning alone does not define Ajna's colors.                                       |
+| Tailwind cannot find component classes | Keep the resolved package path in `content` and restart development.                                                                         |
+| `require` is not defined               | Use the ES modules configuration, or name your CommonJS file `tailwind.config.cjs`.                                                          |
+| Theme overrides only affect the page   | Put shared overrides on `:root` and `:root.dark` so portaled content can inherit them. See [Theming](/docs/theming#customize-ajna-directly). |

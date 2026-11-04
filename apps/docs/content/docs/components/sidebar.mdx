@@ -1,0 +1,420 @@
+---
+title: Sidebar
+description: Build application navigation with collapsible menus, icon rails, resizing, and mobile panels.
+---
+
+import { SidebarDemo } from "@/examples/sidebar/sidebar-demo";
+import { SidebarLayouts } from "@/examples/sidebar/sidebar-layouts";
+import { SidebarControlled } from "@/examples/sidebar/sidebar-controlled";
+import { SidebarPeeking } from "@/examples/sidebar/sidebar-peeking";
+import { SidebarResizable } from "@/examples/sidebar/sidebar-resizable";
+import { SidebarLoadingExample } from "@/examples/sidebar/sidebar-loading-example";
+import { SidebarSliding } from "@/examples/sidebar/sidebar-sliding";
+import { SidebarScrolling } from "@/examples/sidebar/sidebar-scrolling";
+import { SidebarMobile } from "@/examples/sidebar/sidebar-mobile";
+import { SidebarComposition } from "@/examples/sidebar/sidebar-composition";
+import { SidebarTheme } from "@/examples/sidebar/sidebar-theme";
+
+<ComponentPreview>
+  <SidebarDemo />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-demo.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Sidebar } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Sidebar } from "@ajnacloud/ui/sidebar";
+```
+
+### Basic usage
+
+```tsx
+<Sidebar.Provider style={{ minHeight: "100vh" }}>
+  <Sidebar>
+    <Sidebar.Header>Workspace</Sidebar.Header>
+    <Sidebar.Content>
+      <Sidebar.Group>
+        <Sidebar.GroupLabel>Projects</Sidebar.GroupLabel>
+        <Sidebar.Menu>
+          <Sidebar.MenuButton render={<a href="/projects" />}>
+            All projects
+          </Sidebar.MenuButton>
+        </Sidebar.Menu>
+      </Sidebar.Group>
+    </Sidebar.Content>
+    <Sidebar.Footer>Acme workspace</Sidebar.Footer>
+    <Sidebar.Rail />
+  </Sidebar>
+  <main>
+    <Sidebar.Trigger />
+    <h1>Projects</h1>
+  </main>
+</Sidebar.Provider>
+```
+
+Sidebar keeps application navigation beside your content. It can collapse to icons, slide out of view, resize by dragging, or temporarily expand on hover and keyboard focus. On small screens, it becomes a modal navigation panel.
+
+`Sidebar.Provider` owns the layout, side, collapse mode, width, and open state. Place both `Sidebar` and your main content inside it. `Sidebar.Header` and `Sidebar.Footer` remain outside the scrolling navigation; `Sidebar.Content` contains the scrollable groups and menus.
+
+The examples use `contained`, an explicit height, and `mobileBreakpoint={0}` to demonstrate desktop navigation inside the page. For an application shell, omit `contained`, use your normal viewport breakpoint, and give the provider a viewport height, for example `className="h-svh"`.
+
+### Parts
+
+```text
+Sidebar.Provider
+├── Sidebar
+│   ├── Sidebar.Header
+│   ├── Sidebar.Content
+│   │   ├── Sidebar.Group
+│   │   │   ├── Sidebar.GroupLabel
+│   │   │   └── Sidebar.Menu
+│   │   │       ├── Sidebar.MenuButton
+│   │   │       └── Sidebar.MenuItem
+│   │   │           └── Sidebar.Collapsible
+│   │   │               ├── Sidebar.CollapsibleTrigger
+│   │   │               └── Sidebar.CollapsibleContent
+│   │   │                   └── Sidebar.MenuSub
+│   │   │                       └── Sidebar.MenuSubButton
+│   │   └── Sidebar.Separator
+│   ├── Sidebar.Footer
+│   └── Sidebar.Rail or Sidebar.ResizeHandle
+└── main
+    └── Sidebar.Trigger
+```
+
+`MenuButton` and `MenuSubButton` automatically create their surrounding list item. Use `MenuItem` explicitly when an item contains a collapsible section or more than one piece of content. Use `MenuSubItem` for the same purpose in nested lists. Avoid placing buttons inside other buttons; put independent item actions beside a menu button in an explicit item.
+
+The compound parts also have named exports, such as `SidebarProvider`, `SidebarMenuButton`, and `SidebarCollapsibleContent`. Their behavior is identical.
+
+## Examples
+
+### Layout, side, and collapse mode
+
+Set these options on **Sidebar.Provider**:
+
+| Option        | Values                         | Behavior                                                                                                                                   |
+| ------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `variant`     | `sidebar`, `floating`, `inset` | Standard edge divider; bordered floating panel; or a panel without the edge divider, with a recessed wrapper background for inset content. |
+| `side`        | `left`, `right`                | Positions the collapsed overlay, mobile panel, rail, and resize handle. Put main content before Sidebar in the DOM for a right sidebar.    |
+| `collapsible` | `icon`, `offcanvas`, `none`    | Collapse to an icon rail, hide the whole panel, or keep it expanded at all widths.                                                         |
+
+Defaults are `variant="sidebar"`, `side="left"`, and `collapsible="icon"`. The inset variant does not create a main-content wrapper. Add your desired inset margin, background, border, and radius to your own `main`.
+
+<ComponentPreview>
+  <SidebarLayouts />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-layouts.tsx</include>
+
+### Controlled state and transition completion
+
+Use `defaultOpen` for local desktop state, or `open` with `onOpenChange` when your application owns it. A controlled `open` also controls the mobile panel. With uncontrolled state, desktop starts expanded by default and mobile starts closed.
+
+`onOpenChange` runs when the user requests a change. `onOpenChangeComplete` runs after the visible opening or closing transition finishes. It receives the completed boolean state, honors reduced motion, and uses a timer fallback when no transition event fires. Rapid changes complete the most recent state.
+
+Sidebar does not write cookies or local storage and does not register a global shortcut. Keep persistence and hotkeys in your application; initialize `defaultOpen` consistently between the server and client. Use `useSidebar().toggleSidebar()` for a custom toggle. Existing click handlers can call `event.preventDefault()` to cancel a built-in trigger action.
+
+<ComponentPreview>
+  <SidebarControlled />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-controlled.tsx</include>
+
+### Icons, tooltips, and temporary expansion
+
+Pass an icon **element**, for example `icon={<Home />}`. It is decorative; the visible menu text provides the accessible name. Provide `aria-label` when your item contains no text. Icons can come from any React icon library.
+
+The `tooltip` prop shows a label when the desktop sidebar is collapsed. Tooltips appear on the side facing the main content. They remain disabled while expanded or when `peekable` is enabled.
+
+With `peekable`, hovering or focusing the collapsed header or content temporarily expands it over the page. The layout rail keeps its collapsed width, so main content stays in place. The footer stays outside the hover area. Read `state === "peeking"` or `isPeeking` through `useSidebar` for related application UI.
+
+<ComponentPreview>
+  <SidebarPeeking />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-peeking.tsx</include>
+
+### Resizing
+
+Enable `resizable` on the provider and add `Sidebar.ResizeHandle` inside Sidebar. Widths are pixels. Dragging inward below `minWidth` collapses the sidebar; dragging outward beyond that threshold expands it again. `maxWidth` bounds expansion. `onWidthChange` reports each new width if the application needs to remember it.
+
+The handle supports keyboard resizing: the arrow toward the page grows the panel by 10px, the opposite arrow shrinks it, Home collapses it, and End expands it to `maxWidth`. It is hidden on mobile and for `collapsible="none"`.
+
+`Sidebar.Rail` is a separate click-to-toggle strip, not a resize handle. Choose one edge control for a layout; keep a visible `Sidebar.Trigger` available for keyboard users.
+
+<ComponentPreview>
+  <SidebarResizable />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-resizable.tsx</include>
+
+### Loading navigation
+
+Use `Sidebar.Loading` in place of `Sidebar.Content` while navigation or permissions load. Its grouped skeleton rows show icons only when collapsed. The status has an accessible `label`, and the shimmer stops under reduced motion.
+
+<ComponentPreview>
+  <SidebarLoadingExample />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-loading-example.tsx</include>
+
+### Nested menus and automatic scrolling
+
+Wrap a disclosure in `Sidebar.MenuItem`, then compose `Sidebar.Collapsible`, `Sidebar.CollapsibleTrigger`, and `Sidebar.CollapsibleContent`. The trigger's `render` receives a MenuButton or MenuSubButton and adds the expanded state and content relationship. `Sidebar.MenuChevron` follows the disclosure's open state.
+
+Collapsible supports `defaultOpen`, controlled `open`/`onOpenChange`, and `onOpenChangeComplete`. The completion callback reports visible content: closing the whole sidebar also hides an open disclosure. Set `autoScrollOnOpen` to reveal newly opened content inside its owning sidebar viewport. Scrolling respects reduced motion.
+
+The content remains mounted while closed and becomes inert and hidden from assistive technology. Keyboard focus can temporarily open a closed section; it closes again when focus leaves unless explicitly opened or containing an active descendant. Mark the actual destination with `active`; links receive `aria-current="page"`. Derive active state from your router rather than asking Sidebar to manage routing.
+
+The first example includes a complete nested menu. Add additional levels with MenuSub and MenuSubItem, retaining valid list structure and descriptive link text.
+
+### Sliding navigation views
+
+Use `Sidebar.SlidingViews` when account and project navigation need separate surfaces. Its `activeKey` matches a direct `Sidebar.SlidingView value`. Each view can contain its own Sidebar.Content and preserve independent scroll position. Inactive views stay mounted, inert, and hidden from assistive technology.
+
+`direction="left"` places subsequent views to the right; `direction="right"` places them to the left. The active view's position follows its order among the children. Keep the view-switching control outside the sliding track so focus stays on a visible control during navigation. Transitions respect reduced motion.
+
+<ComponentPreview>
+  <SidebarSliding />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-sliding.tsx</include>
+
+### Scroll to an item
+
+Tag a MenuButton or MenuItem with a unique `itemId`, then call `scrollToItem(id, options)` from a descendant. It scrolls only that item's owning Sidebar.Content viewport, including when several views are mounted. It does not scroll the document.
+
+Use `align: "start" | "center" | "end" | "auto"`. The default `auto` leaves fully visible items alone and otherwise scrolls the minimum distance. `behavior` defaults to `"auto"`; use `"smooth"` for deliberate in-page jumps. Reduced motion forces instant scrolling. Missing or unmounted targets are ignored. Open the relevant disclosure or sliding view before scrolling to a hidden item; after an animation, use its completion callback if the final geometry matters.
+
+`scrollItemIntoView(id, options)` first checks visibility and does nothing when the item is fully visible, even if an explicit alignment was provided.
+
+<ComponentPreview>
+  <SidebarScrolling />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-scrolling.tsx</include>
+
+### Mobile navigation
+
+The default breakpoint is 768px. Below it, a collapsible sidebar becomes a modal drawer with a backdrop. Put a Sidebar.Trigger in your main content so the closed panel can be opened. Swipe left to dismiss a left sidebar, or right to dismiss a right sidebar. The panel follows your thumb and the backdrop fades during the swipe. Vertical drags scroll navigation. Escape, a backdrop interaction, or Sidebar.Close also dismisses it. Focus moves into the panel, stays within the modal and its nested overlays, and returns to the opener on dismissal.
+
+Use `fullScreenOnMobile` on Sidebar for a full-width panel. It removes the visible backdrop; always include a Close control in its header. `collapsible="none"` keeps a static panel at every viewport width.
+
+The drawer uses Base UI’s gesture handling. For embedded controls that own horizontal drags, add `data-base-ui-swipe-ignore="x"` to their wrapper; use `data-base-ui-swipe-ignore` without a value to exclude all gestures on a descendant. No edge-swipe opening is registered: use the visible Trigger to open navigation.
+
+For iOS Safari, add `body { position: relative; }` to application CSS, as shown in the [installation guide](/docs/installation). This application-level rule is shared with Ajna Drawer.
+
+This demo forces mobile mode with `mobileBreakpoint={9999}`. In an application, omit that override or supply your own breakpoint. `contained` limits the demo panel's positioning to its provider; the panel still has modal interaction semantics.
+
+<ComponentPreview>
+  <SidebarMobile />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-mobile.tsx</include>
+
+### Search, workspace menus, sizes, and disabled items
+
+Compose SearchInput and DropdownMenu with the header, content, or footer. Hide controls that cannot fit the icon rail with `group-data-[state=collapsed]/sidebar:hidden`. Add independent actions next to a MenuButton using an explicit MenuItem; no action-slot abstraction is required.
+
+MenuButton accepts `size="base"` (34px minimum height) or `size="sm"` (28px). Use MenuBadge for supplementary counts and status. Disabled buttons cannot activate; disabled links are removed from keyboard navigation and their activation is prevented.
+
+<ComponentPreview>
+  <SidebarComposition />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-composition.tsx</include>
+
+### Router links
+
+A MenuButton or MenuSubButton with `href` renders an anchor. Use `render` for a router link that forwards its DOM props and ref. Put the URL in the Sidebar part's `href` too, so it retains link semantics. The forwarded ref points to the actual anchor. Do not pass a link to Sidebar.CollapsibleTrigger; navigation and disclosure are separate actions.
+
+```tsx
+"use client";
+
+import { Sidebar } from "@ajnacloud/ui/sidebar";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export function ProjectNavigation() {
+  const pathname = usePathname();
+  return (
+    <Sidebar.Menu>
+      <Sidebar.MenuButton href="/projects" render={<Link href="/projects" />} active={pathname === "/projects"} tooltip="Projects">
+        Projects
+      </Sidebar.MenuButton>
+    </Sidebar.Menu>
+  );
+}
+```
+
+## Behavior
+
+### Theming
+
+Sidebar uses the exact current shadcn sidebar variable names. They intentionally have no `--ajna-` prefix. Like the other Ajna color tokens, their values contain **HSL channels**, not a complete `hsl(...)`, hex, or OKLCH color.
+
+| Variable                       | Purpose                                  | Tailwind v3.4 utility example          |
+| ------------------------------ | ---------------------------------------- | -------------------------------------- |
+| `--sidebar`                    | Panel background                         | `bg-ajna-sidebar`                      |
+| `--sidebar-foreground`         | Navigation text and icons                | `text-ajna-sidebar-foreground`         |
+| `--sidebar-primary`            | Prominent sidebar actions                | `bg-ajna-sidebar-primary`              |
+| `--sidebar-primary-foreground` | Text on those actions                    | `text-ajna-sidebar-primary-foreground` |
+| `--sidebar-accent`             | Hovered and active navigation            | `bg-ajna-sidebar-accent`               |
+| `--sidebar-accent-foreground`  | Highlighted navigation text              | `text-ajna-sidebar-accent-foreground`  |
+| `--sidebar-border`             | Edges, group dividers, and submenu guide | `border-ajna-sidebar-border`           |
+| `--sidebar-ring`               | Keyboard focus                           | `outline-ajna-sidebar-ring`            |
+
+The background defaults to `240 5% 98%` in light mode and `240 5% 10%` in dark mode. The other roles default to the corresponding Ajna foreground, primary, accent, border, and ring tokens. This preserves the application palette while allowing a distinct navigation theme. Prominent custom actions can use the primary roles; ordinary active items use accent.
+
+Override tokens after Ajna's standalone stylesheet or after `@tailwind base` in a native Tailwind v3.4 application. Include both `:root` and `:root.dark` when an override should apply to both modes:
+
+```css
+:root,
+:root.dark {
+  --sidebar: 223 62.5% 18.8235%;
+  --sidebar-foreground: 210 47.619% 91.7647%;
+  --sidebar-primary: 27.7358 100% 58.4314%;
+  --sidebar-primary-foreground: 223 62.5% 18.8235%;
+  --sidebar-accent: 223 50% 28%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 223 40% 35%;
+  --sidebar-ring: 27.7358 100% 58.4314%;
+}
+```
+
+Older Tailwind v3 shadcn projects may have `--sidebar-background` instead of `--sidebar`; alias it with `--sidebar: var(--sidebar-background)`. Current Tailwind v4 shadcn themes often contain complete OKLCH colors. Convert those sidebar values to HSL channels before sharing them with Ajna; identical variable names do not make different value formats interchangeable.
+
+A scoped provider theme also reaches its mobile panel because that panel portals into the provider. Nested Tooltip and DropdownMenu popups use their existing document-level overlay tokens. See [theming](/docs/theming#sidebar-colors) for shared theme setup and alias inheritance.
+
+<ComponentPreview>
+  <SidebarTheme />
+</ComponentPreview>
+
+<include>../../../examples/sidebar/sidebar-theme.tsx</include>
+
+### Width and animation variables
+
+Without resizing, the default expanded width is 16.25rem and the icon rail is 57px. Set provider `style` variables to override fixed widths. With `resizable`, use `defaultWidth`, `minWidth`, `maxWidth`, and `onWidthChange`; avoid overriding `--sidebar-width` at the same time because the provider updates that variable from the numeric resize state.
+
+`Sidebar.Header` uses `--ajna-sidebar-header-height`, which defaults to `3.5rem`. Use `h-[var(--ajna-sidebar-header-height)]` on an adjacent application header to align their borders. In icon mode, hide branding text with `group-data-[state=collapsed]/sidebar:hidden` and give account buttons a compact layout; menu icons center automatically. See [App Shell](/blocks/app-shell) for a complete layout.
+
+```tsx
+import { Sidebar } from "@ajnacloud/ui";
+import type { CSSProperties, ReactNode } from "react";
+
+export function WorkspaceLayout({ children }: { children: ReactNode }) {
+  return (
+    <Sidebar.Provider animationDuration={200} className="h-svh" style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "3.5rem" } as CSSProperties}>
+      <Sidebar aria-label="Workspace">
+        <Sidebar.Content>
+          <Sidebar.Menu><Sidebar.MenuButton href="/overview" tooltip="Overview">Overview</Sidebar.MenuButton></Sidebar.Menu>
+        </Sidebar.Content>
+        <Sidebar.Footer><Sidebar.Trigger /></Sidebar.Footer>
+      </Sidebar>
+      <main className="min-w-0 flex-1 overflow-auto">{children}</main>
+    </Sidebar.Provider>
+  );
+}
+```
+
+`animationDuration` defaults to 250ms and also drives completion callbacks. `--sidebar-easing` customizes the transition curve. Use the duration prop instead of overriding `--sidebar-animation-duration` if callbacks depend on its timing.
+
+## Accessibility
+
+- Give each sidebar a distinct `aria-label` or `aria-labelledby`, especially when a page has multiple navigation areas.
+- Use links for destinations and buttons for actions. Active links expose `aria-current="page"`.
+- Tab moves through ordinary navigation controls; Enter activates links, and Enter/Space activate buttons and disclosures. Sidebar is navigation, not a menu with arrow-key item navigation.
+- Keep a visible Trigger available; Rail is a pointer convenience. ResizeHandle supports arrows, Home, and End.
+- Mobile navigation is a modal drawer with a dialog role. It supports directional swipe dismissal and manages focus, Escape, outside interaction, nested overlays, and focus return. Include a Close control for full-width mobile panels.
+- Hidden offcanvas content, closed disclosure regions, and inactive sliding views cannot receive focus. Keep view-switch controls visible outside inactive panels.
+- Provide meaningful icon-only labels. Decorative built-in icons and icon slots are hidden from assistive technology.
+- Reduced motion disables panel, disclosure, and sliding transitions and uses instant scrolling.
+- `side` describes a physical edge. For a right-hand or RTL application, choose `side="right"`, place main content first, and arrange custom label/icon content as appropriate; Sidebar does not automatically mirror its submenu indentation.
+
+## API reference
+
+### Sidebar.Provider
+
+| Prop                             | Type                                      | Default                                              |
+| -------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| `defaultOpen`                    | `boolean`                                 | `true` on desktop; uncontrolled mobile starts closed |
+| `open`                           | `boolean`                                 | Uncontrolled                                         |
+| `onOpenChange`                   | `(open: boolean) => void`                 | —                                                    |
+| `onOpenChangeComplete`           | `(open: boolean) => void`                 | —                                                    |
+| `variant`                        | `"sidebar" \| "floating" \| "inset"`      | `"sidebar"`                                          |
+| `side`                           | `"left" \| "right"`                       | `"left"`                                             |
+| `collapsible`                    | `"icon" \| "offcanvas" \| "none"`         | `"icon"`                                             |
+| `resizable`                      | `boolean`                                 | `false`                                              |
+| `defaultWidth`                   | `number`                                  | `256` pixels when resizable                          |
+| `minWidth` / `maxWidth`          | `number`                                  | `200` / `480`                                        |
+| `onWidthChange`                  | `(width: number) => void`                 | —                                                    |
+| `peekable`                       | `boolean`                                 | `false`                                              |
+| `contained`                      | `boolean`                                 | `false`                                              |
+| `animationDuration`              | `number`                                  | `250` milliseconds                                   |
+| `mobileBreakpoint`               | `number`                                  | `768` pixels                                         |
+| `className`, `style`, `children` | Standard wrapper presentation and content | —                                                    |
+
+### Sidebar and its parts
+
+All DOM parts forward their ref and accept the corresponding native element's props, unless described otherwise.
+
+| Part                         | Purpose and additional props                                                                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Sidebar` / `SidebarRoot`    | Outer aside; add an accessible name. `contentClassName` styles the inner desktop container and the mobile panel. `fullScreenOnMobile` defaults to false.        |
+| `Sidebar.Header`             | Top row, outside the scroll area.                                                                                                                               |
+| `Sidebar.Content`            | Scroll area with a vertical scrollbar and edge fades; its ref points to the root, not the internal viewport.                                                    |
+| `Sidebar.Footer`             | Bottom row, outside the hover-expansion zone. Render it as a direct Sidebar child.                                                                              |
+| `Sidebar.Loading`            | Full navigation placeholder; `label` defaults to `"Loading"`.                                                                                                   |
+| `Sidebar.Group`              | Groups related navigation.                                                                                                                                      |
+| `Sidebar.GroupLabel`         | Group heading; becomes a divider on the icon rail.                                                                                                              |
+| `Sidebar.Menu`               | Navigation list (`ul`).                                                                                                                                         |
+| `Sidebar.MenuItem`           | Explicit list item; optional `itemId` registers it as a scroll target.                                                                                          |
+| `Sidebar.MenuButton`         | Button or link; `icon`, `active`, `size`, `href`, `target`, `rel`, `render`, `tooltip`, `itemId`, and native button props, including `disabled`.                |
+| `Sidebar.MenuBadge`          | Supplementary count or short status; hidden on the icon rail.                                                                                                   |
+| `Sidebar.MenuSub`            | Nested list with an indentation guide.                                                                                                                          |
+| `Sidebar.MenuSubItem`        | Optional explicit nested list item.                                                                                                                             |
+| `Sidebar.MenuSubButton`      | Nested button/link; `active`, `href`, `target`, `rel`, `render`, and native button props.                                                                       |
+| `Sidebar.MenuChevron`        | Decorative chevron that follows the nearest disclosure; accepts `className`.                                                                                    |
+| `Sidebar.Separator`          | Visual horizontal divider.                                                                                                                                      |
+| `Sidebar.Trigger`            | Toggle with an animated panel icon, accessible name, and expanded state; children replace the icon. Uses page colors outside Sidebar and sidebar colors inside. |
+| `Sidebar.Close`              | Mobile dismiss button; customize its accessible name with `aria-label`.                                                                                         |
+| `Sidebar.Rail`               | Pointer toggle at the panel edge, excluded from tab order.                                                                                                      |
+| `Sidebar.ResizeHandle`       | Keyboard and pointer resize control; requires `resizable`.                                                                                                      |
+| `Sidebar.Collapsible`        | Nested section; `defaultOpen`, `open`, `onOpenChange`, `onOpenChangeComplete`, `autoScrollOnOpen`.                                                              |
+| `Sidebar.CollapsibleTrigger` | Requires `render`; merges disclosure attributes and the click handler onto that element.                                                                        |
+| `Sidebar.CollapsibleContent` | Mounted, animated disclosure region; inert while hidden.                                                                                                        |
+| `Sidebar.SlidingViews`       | Viewport/track; required `activeKey`, optional `direction="left" \| "right"`.                                                                                   |
+| `Sidebar.SlidingView`        | Mounted panel with required `value`. Inactive panels become inert.                                                                                              |
+
+### useSidebar
+
+Call this hook below Sidebar.Provider. Calling it outside a provider throws an error.
+
+| Value                                                    | Purpose                                                                                |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `state`                                                  | `"expanded" \| "collapsed" \| "peeking"`; desktop presentation state.                  |
+| `open`, `setOpen`                                        | Desktop open state and its setter; setter accepts a boolean or updater function.       |
+| `openMobile`, `setOpenMobile`                            | Mobile open state and boolean setter; controlled provider `open` owns it on mobile.    |
+| `isMobile`, `toggleSidebar`                              | Current media-query result and a toggle for the appropriate mode.                      |
+| `variant`, `side`, `collapsible`, `contained`            | Current provider layout settings.                                                      |
+| `width`, `setWidth`, `minWidth`, `maxWidth`, `resizable` | Numeric resize state and bounded width setter.                                         |
+| `isResizing`, `setIsResizing`                            | Active drag state. Prefer ResizeHandle for standard resizing.                          |
+| `isPeeking`, `peekable`, `startPeek`, `stopPeek`         | Temporary expansion state and actions.                                                 |
+| `animationDuration`                                      | Transition duration in milliseconds.                                                   |
+| `scrollToItem`, `scrollItemIntoView`                     | Scroll an item by its registered ID.                                                   |
+| `registerItem`                                           | Internal registration used by MenuItem/MenuButton. Applications normally use `itemId`. |
+
+### State attributes
+
+Sidebar exposes `data-state`, `data-side`, `data-variant`, and `data-collapsible`; mobile adds `data-mobile="true"`. Menu buttons expose `data-active` when active and MenuButton adds `data-size`. Parts use `data-sidebar` for identification. Use these attributes for application-specific presentation without replacing the built-in interaction handlers.

@@ -1,0 +1,116 @@
+---
+title: Checkbox
+description: Select an option with checked, unchecked, or indeterminate states.
+---
+
+import { CheckboxExample } from "@/examples/checkbox/checkbox-example";
+import { CheckboxStates } from "@/examples/checkbox/checkbox-states";
+import { CheckboxControlled } from "@/examples/checkbox/checkbox-controlled";
+import { CheckboxCard } from "@/examples/checkbox/checkbox-card";
+
+<ComponentPreview>
+  <CheckboxExample />
+</ComponentPreview>
+
+<include>../../../examples/checkbox/checkbox-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Checkbox,
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldDescription,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Checkbox } from "@ajnacloud/ui/checkbox";
+import {
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldDescription,
+} from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field orientation="horizontal">
+  <Checkbox id="terms" name="terms" aria-describedby="terms-help" />
+  <FieldContent>
+    <FieldLabel htmlFor="terms">Accept terms and conditions</FieldLabel>
+    <FieldDescription id="terms-help">
+      Read the agreement before continuing.
+    </FieldDescription>
+  </FieldContent>
+</Field>
+```
+
+Connect the label through `id` and `htmlFor`, and supporting text through `aria-describedby`.
+
+## Examples
+
+### Checked, indeterminate, disabled, and invalid
+
+`checked` is boolean; use the separate `indeterminate` prop for a mixed state. Clear `indeterminate` in your own state when appropriate. `disabled` prevents interaction; `readOnly` keeps the control focusable while preventing changes. Set these props on the Checkbox itself, not only its Field wrapper.
+
+<ComponentPreview>
+  <CheckboxStates />
+</ComponentPreview>
+
+<include>../../../examples/checkbox/checkbox-states.tsx</include>
+
+### Controlled checkbox
+
+Use `checked` and `onCheckedChange` for controlled state, or `defaultChecked` for uncontrolled state. The callback receives a boolean and Base UI event details.
+
+<ComponentPreview>
+  <CheckboxControlled />
+</ComponentPreview>
+
+<include>../../../examples/checkbox/checkbox-controlled.tsx</include>
+
+### Choice card
+
+Wrap one control in FieldLabel and use FieldTitle for its text to avoid nested labels.
+
+<ComponentPreview>
+  <CheckboxCard />
+</ComponentPreview>
+
+<include>../../../examples/checkbox/checkbox-card.tsx</include>
+
+## Behavior
+
+### Forms and refs
+
+Base UI renders an interactive root and a hidden native input. Give the checkbox a `name` to include it in submitted form data. Checked controls submit `value` (default `"on"`); unchecked controls are omitted unless `uncheckedValue` is supplied. Disabled controls are omitted. `required` participates in native form validation.
+
+The forwarded `ref` targets the interactive root, a `span` by default. Use `inputRef` for the hidden `HTMLInputElement`; form-library focus refs should target the interactive root when they need visible keyboard focus.
+
+When disabling a group with native `FieldSet`, also pass `disabled` to each Checkbox so its interactive root receives the disabled state and leaves keyboard navigation.
+
+## API reference
+
+| Prop                                      | Behavior / default                          |
+| ----------------------------------------- | ------------------------------------------- |
+| `checked`                                 | Controlled boolean.                         |
+| `defaultChecked`                          | Uncontrolled initial state; `false`.        |
+| `indeterminate`                           | Mixed state; `false`.                       |
+| `onCheckedChange`                         | `(checked: boolean, eventDetails) => void`. |
+| `disabled`, `readOnly`, `required`        | Base UI control states; `false`.            |
+| `name`, `value`, `uncheckedValue`, `form` | Native form participation.                  |
+| `className`                               | String or Base UI state callback.           |
+| `ref`, `inputRef`                         | Interactive root and hidden input refs.     |
+
+`CheckboxProps` forwards Base UI Root's props, including `render`, callbacks, and event details. The indicator uses decorative Lucide Check/Minus icons, installed automatically with Ajna; no application icon setup is required. Use `aria-label`/`aria-labelledby` if there is no visible label. The unstyled composition remains available from `/primitives/checkbox`.

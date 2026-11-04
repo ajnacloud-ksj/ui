@@ -1,0 +1,35 @@
+---
+title: Description List
+description: Semantic label and value pairs for read-only details.
+---
+
+import { DescriptionListExample } from "@/examples/description-list/description-list-example";
+
+<ComponentPreview>
+  <DescriptionListExample />
+</ComponentPreview>
+
+<include>
+  ../../../examples/description-list/description-list-example.tsx
+</include>
+
+Import the parts from `@ajnacloud/ui/description-list` (also available from the package root).
+
+```tsx
+import { DescriptionList, DescriptionGroup, DescriptionTerm, DescriptionDetail } from "@ajnacloud/ui/description-list";
+
+<DescriptionList orientation="horizontal">
+  <DescriptionGroup>
+    <DescriptionTerm>Quantity</DescriptionTerm>
+    <DescriptionDetail>{0}</DescriptionDetail>
+  </DescriptionGroup>
+  <DescriptionGroup>
+    <DescriptionTerm>Owner</DescriptionTerm>
+    <DescriptionDetail><a href="/users/alex">Alex</a></DescriptionDetail>
+  </DescriptionGroup>
+</DescriptionList>
+```
+
+`DescriptionList` renders a `dl`, `DescriptionGroup` a `div`, `DescriptionTerm` a `dt`, and `DescriptionDetail` a `dd`. All parts forward their native props and refs. Use these for read-only details; use Field for form controls.
+
+The default `orientation="stacked"` places values below labels. `orientation="horizontal"` uses two columns from 640px and stacks on smaller screens. Nested lists control their own orientation. Use `className="md:grid-cols-2"` on the list for a grid of pairs. Long values wrap; links and other React content remain interactive. Format dates, booleans, and empty values in your app.

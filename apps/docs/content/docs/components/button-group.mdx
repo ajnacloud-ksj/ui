@@ -1,0 +1,141 @@
+---
+title: Button Group
+description: Arrange related buttons and controls with adjoining borders.
+---
+
+import { ButtonGroupExample } from "@/examples/button-group/button-group-example";
+import { ButtonGroupVertical } from "@/examples/button-group/button-group-vertical";
+import { ButtonGroupWithInput } from "@/examples/button-group/button-group-with-input";
+import { ButtonGroupDividers } from "@/examples/button-group/button-group-dividers";
+import { ButtonGroupSizes } from "@/examples/button-group/button-group-sizes";
+import { ButtonGroupNested } from "@/examples/button-group/button-group-nested";
+import { ButtonGroupSplit } from "@/examples/button-group/button-group-split";
+
+<ComponentPreview>
+  <ButtonGroupExample />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { ButtonGroup, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { ButtonGroup } from "@ajnacloud/ui/button-group";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<ButtonGroup aria-label="History">
+  <Button variant="secondary">Undo</Button>
+  <Button variant="secondary">Redo</Button>
+</ButtonGroup>
+```
+
+Keep controls as direct children so their borders and corners join. Use [Toggle Group](/docs/components/toggle-group) when the buttons represent selected values, or [Input Group](/docs/components/input-group) for controls inside a shared input surface.
+
+### Parts
+
+| Part                   | Purpose                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| `ButtonGroup`          | Joins its children's borders and corners.               |
+| `ButtonGroupText`      | Displays a value, prefix, or label beside the controls. |
+| `ButtonGroupSeparator` | Adds a decorative divider between filled buttons.       |
+
+## Examples
+
+### Sizes
+
+Set `size` on each Button, keeping the sizes consistent within a group. `ButtonGroupText` has a default minimum height of `2.25rem`; adjust it when composing smaller controls.
+
+<ComponentPreview>
+  <ButtonGroupSizes />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-sizes.tsx</include>
+
+### Vertical
+
+Use `orientation="vertical"` to stack the controls.
+
+<ComponentPreview>
+  <ButtonGroupVertical />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-vertical.tsx</include>
+
+### Input with an action
+
+<ComponentPreview>
+  <ButtonGroupWithInput />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-with-input.tsx</include>
+
+### Dividers
+
+For a vertical group, set the divider's `orientation` to `"horizontal"`.
+
+<ComponentPreview>
+  <ButtonGroupDividers />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-dividers.tsx</include>
+
+### Nested groups
+
+Nest groups to leave a gap between separate sets of actions.
+
+<ComponentPreview>
+  <ButtonGroupNested />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-nested.tsx</include>
+
+### Split button
+
+Use Dropdown Menu's `render` prop to keep its trigger directly inside the group.
+
+<ComponentPreview>
+  <ButtonGroupSplit />
+</ComponentPreview>
+
+<include>../../../examples/button-group/button-group-split.tsx</include>
+
+## Accessibility
+
+Give each group an `aria-label` or `aria-labelledby`. Each interactive child keeps its own accessible name and focus behavior; grouping does not add arrow-key navigation or selection state.
+
+## API reference
+
+### ButtonGroup
+
+| Prop          | Type                         | Default        | Description                                                                            |
+| ------------- | ---------------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Direction in which controls join.                                                      |
+| `...props`    | Native `div` props           | —              | Includes children, `className`, `style`, ARIA attributes, and an `HTMLDivElement` ref. |
+
+### ButtonGroupText
+
+Accepts native `div` props and a `render` element or callback. Its ref targets the rendered element, a `div` by default.
+
+### ButtonGroupSeparator
+
+Accepts [Separator props](/docs/components/separator#api-reference). Defaults to `orientation="vertical"`, `role="presentation"`, and `aria-hidden="true"`.
+
+### buttonGroupVariants
+
+`buttonGroupVariants({ orientation })` returns the group's class string. The argument is optional and defaults to horizontal. When applying it to a custom element with standalone CSS, include `data-ajna-component="button-group"`.
+
+The parts, helper, and their prop types are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/button-group`.

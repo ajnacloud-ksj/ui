@@ -1,0 +1,179 @@
+---
+title: Tooltip
+description: Show a short explanation when someone hovers over or focuses a control.
+---
+
+import { TooltipExample } from "@/examples/tooltip/tooltip-example";
+import { TooltipIconExample } from "@/examples/tooltip/tooltip-icon-example";
+import { TooltipSides } from "@/examples/tooltip/tooltip-sides";
+import { TooltipDelays } from "@/examples/tooltip/tooltip-delays";
+import { TooltipControlled } from "@/examples/tooltip/tooltip-controlled";
+import { TooltipDisabledAction } from "@/examples/tooltip/tooltip-disabled-action";
+
+<ComponentPreview>
+  <TooltipExample />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Tooltip, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Tooltip } from "@ajnacloud/ui/tooltip";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Tooltip.Root>
+  <Tooltip.Trigger render={<Button variant="secondary" />}>Save</Tooltip.Trigger>
+  <Tooltip.Content>Save your changes</Tooltip.Content>
+</Tooltip.Root>
+```
+
+Use Tooltip for a brief explanation that supports a control, such as the meaning of an icon or an action's effect. Keep essential instructions visible in the page. Use [Popover](/docs/components/popover) when the content contains links, inputs, or buttons.
+
+In Next.js, put compound component compositions in a file beginning with `"use client"`.
+
+### Parts
+
+Root connects the trigger and explanation. Trigger renders a button by default; `render={<Button />}` gives that button Ajna's appearance without nesting two buttons. Content includes its portal, positioning, surface, and decorative arrow. You do not need separate Portal or Positioner elements.
+
+## Examples
+
+### Icon buttons
+
+<ComponentPreview>
+  <TooltipIconExample />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-icon-example.tsx</include>
+
+Keep `aria-label` or `aria-labelledby` on an icon-only button even when it has a tooltip. The control needs a name before the tooltip opens. Tooltip supplies an additional description while open; it does not replace the button's name.
+
+These icons come from Lucide; see [Icons](/docs/icons) for application setup.
+
+### Placement
+
+<ComponentPreview>
+  <TooltipSides />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-sides.tsx</include>
+
+`side` chooses a preferred side, and `align` chooses `start`, `center`, or `end` along that side. The popup can flip or shift when it would leave the available space. `side="inline-start"` and `side="inline-end"` follow the surrounding writing direction.
+
+For RTL placement, set the document/container direction and use Base UI's DirectionProvider from `/primitives/direction-provider`. The provider controls directional behavior; `dir` controls text and CSS layout. Local RTL sections should also set `dir="rtl"` on portaled Content when the document itself is LTR.
+
+```tsx
+import { Tooltip } from "@ajnacloud/ui";
+
+<Tooltip.Content side="bottom" align="start" sideOffset={12} alignOffset={4}>
+  Your changes are saved locally.
+</Tooltip.Content>
+```
+
+`sideOffset` and `alignOffset` use pixels. Content wraps long explanations and is limited to the available width. Use a Popover or visible help text if an explanation is too long to scan comfortably.
+
+### Delays and groups
+
+<ComponentPreview>
+  <TooltipDelays />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-delays.tsx</include>
+
+A Provider is optional. Without one, hover opens a tooltip after 600ms; keyboard focus opens it without that hover delay. The default close delay is 0ms. Trigger's `delay` and `closeDelay` override values from a surrounding Provider.
+
+Provider groups nearby tooltips. After one opens, moving to another can open it immediately, making a row of actions easier to explore. `timeout` controls that shared window after closing, and defaults to 400ms. Wrap the relevant row or section instead of requiring a provider around your entire application.
+
+### Controlled state and arrow
+
+<ComponentPreview>
+  <TooltipControlled />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-controlled.tsx</include>
+
+Use `open` and `onOpenChange` when the application owns visibility; `defaultOpen` is for an initial uncontrolled value. Set `triggerId` when opening a controlled tooltip programmatically so it knows which trigger to anchor to. For an initially open uncontrolled tooltip, pair `defaultOpen` with `defaultTriggerId`.
+
+`showArrow={false}` removes the arrow. `className` styles the popup and can be a function receiving Base UI's popup state. It does not style the trigger; pass trigger styling through `render` or Trigger's own props.
+
+### Disabled controls
+
+<ComponentPreview>
+  <TooltipDisabledAction />
+</ComponentPreview>
+
+<include>../../../examples/tooltip/tooltip-disabled-action.tsx</include>
+
+A disabled native button cannot be focused. Use a named, focusable wrapper when its tooltip must be discoverable by keyboard, and keep essential explanations visible.
+
+`disabled` on Tooltip.Root or Tooltip.Trigger disables the explanation itself. It does **not** disable the action rendered by the trigger. Pass `disabled` to Button separately when the action must be unavailable.
+
+### Custom portal
+
+Content portals to `document.body` by default. Use `container` to select a different destination, for example within a Shadow DOM. The selected container should have room for the popup and must not clip it unintentionally.
+
+```tsx
+"use client";
+
+import { Button, Tooltip } from "@ajnacloud/ui";
+import { useRef } from "react";
+
+export function ScopedTooltip() {
+  const container = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={container}>
+      <Tooltip.Root>
+        <Tooltip.Trigger render={<Button variant="secondary" />}>Save</Tooltip.Trigger>
+        <Tooltip.Content container={container} keepMounted>
+          Save your changes
+        </Tooltip.Content>
+      </Tooltip.Root>
+    </div>
+  );
+}
+```
+
+`keepMounted` retains closed content without showing it.
+
+## Accessibility
+
+| Interaction                 | Result                                                            |
+| --------------------------- | ----------------------------------------------------------------- |
+| Hover the trigger           | Opens after its configured hover delay.                           |
+| Focus the trigger with Tab  | Opens without moving focus into the tooltip.                      |
+| Escape                      | Dismisses the tooltip while leaving focus on the trigger.         |
+| Leave the trigger and popup | Closes after the configured close delay.                          |
+| Click the trigger           | Closes the tooltip by default and preserves the trigger's action. |
+
+Tooltip connects the popup's `role="tooltip"` to the trigger through `aria-describedby`. Tooltip content is explanatory text, not another tab stop. Do not put interactive content inside it, and do not depend on hover-only content for touch users.
+
+Entering and leaving animate opacity and scale. Reduced motion removes the transition. The portal sits above Ajna Dialog and Popover surfaces, including when the trigger lives inside a dialog.
+
+## API reference
+
+Content and its arrow use `--ajna-popover`; text uses `--ajna-popover-foreground`. Override the popup background and foreground together when customizing its theme. See [Theming](/docs/theming#default-surfaces).
+
+| Part       | Relevant props                                                                     | Default                                                            |
+| ---------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `Root`     | `open`, `defaultOpen`, `onOpenChange`, `disabled`, `triggerId`, `defaultTriggerId` | Closed, enabled                                                    |
+| `Provider` | `delay`, `closeDelay`, `timeout`                                                   | Inherited/default timing; timeout 400ms                            |
+| `Trigger`  | `render`, `delay`, `closeDelay`, `closeOnClick`, `disabled`                        | Native button; hover delay 600ms; close delay 0ms; closes on click |
+| `Content`  | `side`, `align`, `sideOffset`, `alignOffset`                                       | `top`, `center`, `8`, `0`                                          |
+| `Content`  | `collisionPadding`, `collisionBoundary`                                            | 8px padding; Base UI's default boundary                            |
+| `Content`  | `showArrow`, `container`, `keepMounted`                                            | `true`, body, `false`                                              |
+
+Content accepts Base UI Popup props, state-based `className`, and an `HTMLDivElement` ref. Root, Provider, and Trigger preserve Base UI's APIs. Use the unstyled `/primitives/tooltip` export when you need to compose Portal, Positioner, Arrow, or other advanced parts individually.

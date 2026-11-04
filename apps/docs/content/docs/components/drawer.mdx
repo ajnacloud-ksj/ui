@@ -1,0 +1,259 @@
+---
+title: Drawer
+description: Present forms, actions, and supporting content in a panel that slides from a screen edge and supports swipe dismissal.
+---
+
+import { DrawerExample } from "@/examples/drawer/drawer-example";
+import { DrawerPositions } from "@/examples/drawer/drawer-positions";
+import { DrawerForm } from "@/examples/drawer/drawer-form";
+import { DrawerNested } from "@/examples/drawer/drawer-nested";
+import { DrawerSnapPoints } from "@/examples/drawer/drawer-snap-points";
+import { DrawerNonModal } from "@/examples/drawer/drawer-non-modal";
+import { DrawerSizing } from "@/examples/drawer/drawer-sizing";
+
+<ComponentPreview>
+  <DrawerExample />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+  Button,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@ajnacloud/ui/drawer";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Drawer>
+  <DrawerTrigger render={<Button variant="secondary" />}>View project</DrawerTrigger>
+  <DrawerContent>
+    <DrawerHeader>
+      <DrawerTitle>Project details</DrawerTitle>
+      <DrawerDescription>
+        Review the project before continuing.
+      </DrawerDescription>
+    </DrawerHeader>
+    <DrawerFooter>
+      <DrawerClose render={<Button variant="secondary" />}>Close</DrawerClose>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>
+```
+
+Drawer opens a panel from a viewport edge. Users can dismiss it with a swipe, Escape, an outside press, or a close button. It is modal by default: focus stays inside, the background cannot be operated, and document scrolling is locked.
+
+For iOS Safari, add this to the application's global CSS:
+
+```css
+body {
+  position: relative;
+}
+```
+
+The Safari overlay needs a positioned body to cooperate with scroll locking. Add this application rule explicitly; Ajna does not inject document-wide styles.
+
+### Parts
+
+| Part                         | Purpose                                                                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Drawer                       | Owns open state, modality, dismissal gestures, snap points, and nested drawer state. Renders no element.                                 |
+| DrawerTrigger                | Opens the drawer. Use render to compose with Button.                                                                                     |
+| DrawerContent                | Includes the portal, modal overlay, viewport, sliding panel, and inner content region. Its ref and styling props target the outer panel. |
+| DrawerHeader                 | Groups the title and description with padding. Vertical drawers center the header text.                                                  |
+| DrawerTitle                  | Supplies the accessible dialog name.                                                                                                     |
+| DrawerDescription            | Supplies the accessible dialog description.                                                                                              |
+| DrawerFooter                 | Groups actions at the end of the content.                                                                                                |
+| DrawerClose                  | Requests dismissal. Use render to compose with Button.                                                                                   |
+| DrawerSwipeHandle            | Optional decorative grip that provides an area for mouse and touch swipes.                                                               |
+| DrawerPortal / DrawerOverlay | Lower-level portal and styled overlay exports for custom composition with the drawer primitives.                                         |
+
+Do not wrap DrawerContent in another DrawerPortal or add another DrawerOverlay next to it: Content already includes those parts. For fully custom anatomy, use the lower-level Drawer primitives from `/primitives/drawer` with the exported portal and overlay.
+
+Pass showSwipeHandle to Drawer to add a grip automatically. Without it, swipe dismissal still works. The grip is decorative, so keep a named close button available. It is not a keyboard-operated slider or button.
+
+## Examples
+
+### Position
+
+<ComponentPreview>
+  <DrawerPositions />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-positions.tsx</include>
+
+swipeDirection describes the dismissal gesture and determines the anchored edge: down is a bottom drawer, up is a top drawer, and left/right use their respective screen edges. These directions are physical rather than start/end aliases.
+
+Top and bottom drawers size to content with a default maximum height of calc(100dvh - 6rem). Side drawers occupy 75% of the viewport width below the sm breakpoint and 24rem from sm upward. Override the panel's height, width, or maximum size through className or style.
+
+### Controlled forms and initial focus
+
+<ComponentPreview>
+  <DrawerForm />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-form.tsx</include>
+
+Use `open` and `onOpenChange` to close after successful submission. Closed content normally unmounts, so uncontrolled fields use their latest defaults when reopened.
+
+DrawerContent forwards initialFocus and finalFocus to the panel. Use a ref to choose an initial field, or initialFocus false to leave focus in place. The default focus behavior comes from Base UI and can vary by interaction type. Closing normally restores focus to the trigger.
+
+Use Base UI’s `VirtualKeyboardProvider` from `/primitives/drawer` for keyboard-aware focus and scrolling in bottom-sheet forms.
+
+When saving remotely, keep the drawer open until the request succeeds, show a loading Button, and display request errors beside the form. onOpenChange receives event details: call details.cancel() to reject a close request when your application needs to protect an unsaved or pending operation. disablePointerDismissal only prevents outside-press dismissal; it does not disable Escape, swipe gestures, or close buttons.
+
+### Custom sizes and scrolling
+
+<ComponentPreview>
+  <DrawerSizing />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-sizing.tsx</include>
+
+Set the outer panel’s dimensions through `style` or application-generated classes. Keep scrolling on a separate content region.
+
+A scrollable body should be a flex item with flex 1, minHeight 0, and overflowY auto. Keep the header and footer outside that region. Avoid h-full for a body inside a content-sized panel; there may be no explicit parent height for it to resolve against.
+
+Drawer's inner content region allows normal mouse text selection. Drag the handle or another area outside that region for a mouse swipe. Touch scrolling and drawer swipes are coordinated by Base UI. Add data-base-ui-swipe-ignore to a custom gesture control to opt it out of drawer swipe dismissal; use x or y as its value when only one drag axis should be ignored.
+
+### Nested drawers
+
+<ComponentPreview>
+  <DrawerNested />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-nested.tsx</include>
+
+Place the child Drawer inside the parent's content. Each root manages its own state, focus, and dismissal. Parent panels remain mounted, scale back, and keep a visible peek behind the frontmost drawer. Their content fades while a child is open. Escape closes the frontmost drawer first and returns focus to its trigger inside the parent.
+
+Keep nested content inside DrawerContent so its measurements and gesture regions remain connected.
+
+### Snap points
+
+<ComponentPreview>
+  <DrawerSnapPoints />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-snap-points.tsx</include>
+
+Use snapPoints for vertical drawers. Numbers between 0 and 1 represent fractions of the viewport height; numbers greater than 1 represent pixels. String values support px and rem units. Choose useful points that leave the title and a dismissal control visible at the smallest height.
+
+Use snapPoint and onSnapPointChange for controlled snapping, or defaultSnapPoint for an uncontrolled initial point. snapToSequentialPoints prevents velocity-based skipping, so swiping advances according to drag distance.
+
+The panel exposes data-snap-points and data-expanded. Expanded identifies the full snap point. Snap points set the vertical panel's height and transform together; avoid replacing that transform with a consumer transform utility, which would disconnect its snapping, swipe, and nested-stack movement.
+
+### Non-modal drawers
+
+<ComponentPreview>
+  <DrawerNonModal />
+</ComponentPreview>
+
+<include>../../../examples/drawer/drawer-non-modal.tsx</include>
+
+Set modal false to keep the rest of the page available for pointer and keyboard interaction. The wrapper omits the overlay and allows pointer events through unused viewport space. disablePointerDismissal keeps it open when another page control is pressed or focused. Escape and its close button still work.
+
+modal trap-focus is a third mode: keyboard focus stays inside, while page scrolling and outside pointer interaction remain available. The modal focus behavior can hide outside content from assistive technology. Choose the mode according to the task rather than using a focus trap for supporting content that users should navigate alongside the page.
+
+## Behavior
+
+### Styling and themes
+
+The panel uses card, card-foreground, border, and muted-foreground tokens. Nested Select, Combobox, and Popover content uses the lighter popover surface. The overlay uses backdrop. All public Ajna variables use the --ajna- prefix. Color tokens still contain HSL channels; see [Theming](/docs/theming).
+
+| Variable                          | Set on                                             | Default                    | Purpose                                               |
+| --------------------------------- | -------------------------------------------------- | -------------------------- | ----------------------------------------------------- |
+| --ajna-drawer-inset               | DrawerContent                                      | 0px                        | Adds a margin between the panel and viewport edges.   |
+| --ajna-drawer-bleed-background    | DrawerContent                                      | hsl(var(--ajna-card))      | Fills the gap behind a panel when a swipe overshoots. |
+| --ajna-drawer-overlay-min-opacity | Overlay, through overlayClassName or its own style | 0, or 0.5 with snap points | Minimum overlay opacity during a swipe.               |
+
+For an inset panel, set --ajna-drawer-inset on DrawerContent's style and set borderRadius to var(--ajna-radius) to keep all corners rounded. Custom properties passed through style need a CSSProperties type assertion in TypeScript. Apply any matching background override to --ajna-drawer-bleed-background as well.
+
+Base UI also supplies gesture and measurement variables such as --drawer-swipe-movement-x, --drawer-swipe-movement-y, --drawer-snap-point-offset, --drawer-height, and --nested-drawers. Those upstream names are retained for its behavior; they are not Ajna theme tokens. Other --ajna-drawer-\* variables in the generated styles are implementation details for sizing and stacking.
+
+Portaled content inherits theme variables from its portal destination. Use root-level theme overrides, or set container on DrawerContent to portal into a themed subtree. container accepts an element, shadow root, or ref. Ensure a custom container supports the overlay's containing block and does not unexpectedly clip or transform the panel.
+
+## Accessibility
+
+- Give each drawer a DrawerTitle. Pair it with DrawerDescription when an explanation is useful. If intentionally omitting a description, pass aria-describedby undefined to DrawerContent.
+- Keep an explicit close button for users who cannot or do not want to swipe. The decorative handle does not replace it.
+- Compose triggers and closes with Button using render; do not nest a button inside a button.
+- Modal drawers trap focus, block outside interaction, and lock page scroll. Non-modal drawers leave the page available. Opening and closing use Base UI focus management.
+- Changes in nested drawer state preserve each panel's identity and restore focus when the child closes.
+- Popup, overlay, handle, and content transitions honor reduced-motion preferences. Gesture movement itself remains available.
+
+Drawer does not automatically switch to Dialog at a breakpoint. If your application needs that behavior, choose the presentation in application code and share the form/content. No viewport hook or responsive-dialog wrapper is installed.
+
+## API reference
+
+### Drawer
+
+DrawerProps is based on Base UI Drawer.Root.Props. Key controls include:
+
+| Prop                                               | Default                        | Purpose                                                                                      |
+| -------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
+| open / defaultOpen                                 | Uncontrolled, initially closed | Controlled or initial visibility.                                                            |
+| onOpenChange(open, details)                        | —                              | Handle open/close requests; details.cancel() can reject them.                                |
+| onOpenChangeComplete(open)                         | —                              | Notification after the opening or closing transition completes.                              |
+| swipeDirection                                     | down                           | Dismissal direction: down, up, left, right.                                                  |
+| showSwipeHandle                                    | false                          | Render a decorative grip outside the text-selection region.                                  |
+| modal                                              | true                           | true, false, or trap-focus behavior.                                                         |
+| disablePointerDismissal                            | false                          | Prevent outside presses from closing; in non-modal mode, also prevent focus-out dismissal.   |
+| snapPoints                                         | —                              | Vertical drawer snap points.                                                                 |
+| snapPoint / defaultSnapPoint                       | —                              | Controlled or initial active point.                                                          |
+| onSnapPointChange(point, details)                  | —                              | Handle active point changes.                                                                 |
+| snapToSequentialPoints                             | false                          | Disable velocity-based snap skipping.                                                        |
+| handle / triggerId / defaultTriggerId / actionsRef | —                              | Base UI detached-trigger and imperative controls; use its primitive API for handle creation. |
+
+The root renders no DOM element. Nested roots work without an extra provider. DrawerProps supports Base UI's payload generic.
+
+### DrawerContent
+
+Accepts Base UI Popup props, including render, initialFocus, finalFocus, native div attributes, and className/style callbacks. The forwarded ref targets the outer panel.
+
+| Additional prop   | Default       | Purpose                                                               |
+| ----------------- | ------------- | --------------------------------------------------------------------- |
+| container         | document.body | Portal destination element, shadow root, or ref.                      |
+| keepMounted       | false         | Preserve the portal and its contents while closed.                    |
+| overlayClassName  | —             | Customize the overlay; accepts a Base UI state callback.              |
+| viewportClassName | —             | Customize the positioning viewport; accepts a Base UI state callback. |
+
+className and style target the panel. It exposes data-swipe-direction, data-swipe-axis, data-snap-points, data-expanded, data-swiping, data-nested-drawer-open, and Base UI transition attributes.
+
+### Other parts
+
+DrawerTrigger, DrawerClose, and DrawerPortal preserve their Base UI props and refs, including render composition. DrawerPortal also accepts container and keepMounted. These are unstyled primitive controls; compose trigger/close with Button for the normal Ajna appearance.
+
+DrawerOverlay preserves Base UI Backdrop props and ref, adds the styled overlay, and uses the root's snap-point state. DrawerTitle and DrawerDescription preserve Base UI semantics, refs, render, and className/style callbacks. DrawerHeader, DrawerFooter, and DrawerSwipeHandle accept native div props and forwarded refs. The handle is always decorative.
+
+The complete upstream interaction contract is documented in the [Base UI Drawer reference](https://base-ui.com/react/components/drawer). Ajna adds the styling and composed content anatomy described here.

@@ -1,0 +1,234 @@
+---
+title: Tabs
+description: Switch between related panels with segmented or underlined tabs.
+---
+
+import { TabsExample } from "@/examples/tabs/tabs-example";
+import { TabsUnderline } from "@/examples/tabs/tabs-underline";
+import { TabsSizes } from "@/examples/tabs/tabs-sizes";
+import { TabsControlled } from "@/examples/tabs/tabs-controlled";
+import { TabsIconsAndDisabled } from "@/examples/tabs/tabs-icons-and-disabled";
+import { TabsVertical } from "@/examples/tabs/tabs-vertical";
+import { TabsKeepMounted } from "@/examples/tabs/tabs-keep-mounted";
+import { TabsAutomaticActivation } from "@/examples/tabs/tabs-automatic-activation";
+import { TabsOverflow } from "@/examples/tabs/tabs-overflow";
+
+<ComponentPreview>
+  <TabsExample />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@ajnacloud/ui/tabs";
+```
+
+### Basic usage
+
+```tsx
+<Tabs defaultValue="account">
+  <TabsList aria-label="Settings">
+    <TabsTrigger value="account">Account</TabsTrigger>
+    <TabsTrigger value="security">Security</TabsTrigger>
+  </TabsList>
+  <TabsContent value="account">Manage your account details.</TabsContent>
+  <TabsContent value="security">
+    Manage passwords and sign-in options.
+  </TabsContent>
+</Tabs>
+```
+
+Use tabs to organize related content into panels displayed one at a time: workspace settings, project views, or account sections. Each tab selects its matching panel and exposes that relationship to assistive technology.
+
+`Tabs` owns selection and orientation. `TabsList` groups the triggers and includes the moving active indicator. Every `TabsTrigger` and its `TabsContent` must share a value. Keep trigger values unique within a root and give each list an accessible name with `aria-label` or `aria-labelledby`.
+
+Set an explicit `defaultValue` to an enabled tab for a predictable initial panel, including server rendering. Omit it only when you want Base UI's automatic initial selection. Use separate `Tabs` roots for independent groups.
+
+## Examples
+
+### Styling and composition
+
+Each part accepts native Base UI props, refs, `style`, and state-based `className`. Use normal children to compose richer trigger labels or panel layouts. Nested roots keep selection, size, and variant independent.
+
+```tsx
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@ajnacloud/ui";
+
+export function CustomizedTabs() {
+  return (
+    <Tabs defaultValue="one">
+      <TabsList
+        variant="underline"
+        aria-label="Custom sections"
+        indicatorClassName="bg-ajna-brand-orange"
+      >
+        <TabsTrigger value="one">One</TabsTrigger>
+        <TabsTrigger value="two">Two</TabsTrigger>
+      </TabsList>
+      <TabsContent value="one">First section</TabsContent>
+      <TabsContent value="two">Second section</TabsContent>
+    </Tabs>
+  );
+}
+```
+
+Application utilities need your own Tailwind build; inline styles work with standalone CSS. Indicator positioning comes from Base UI's `--active-tab-*` variables. Change its appearance with `indicatorClassName` while preserving those positioning utilities. The `data-slot="tabs-indicator"` element is decorative and hidden from assistive technology.
+
+Tabs uses existing muted, background, foreground, border, primary, and ring tokens. It adds no theme variables. Import styles through your existing standalone or Tailwind v3.4 setup.
+
+### Underline style
+
+Use `variant="underline"` on the list when tabs sit above a content section. The default `segmented` variant places a raised active indicator on a muted track.
+
+<ComponentPreview>
+  <TabsUnderline />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-underline.tsx</include>
+
+Both variants use one moving indicator. You do not need to render an indicator part yourself. The underline uses the application's primary color; the segmented indicator uses the background and border tokens.
+
+### Sizes
+
+Set `size="sm"` for compact spaces or `size="base"` for the default height. The size belongs to `TabsList` and applies to all of its triggers.
+
+<ComponentPreview>
+  <TabsSizes />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-sizes.tsx</include>
+
+Horizontal bars are 26px in the small size and 36px in the base size when they fit without a scrollbar. Native scrollbars can add height when tabs overflow. Vertical lists grow with their items.
+
+### Controlled state
+
+Use `value` and `onValueChange` when the application needs to read or change the selected tab.
+
+<ComponentPreview>
+  <TabsControlled />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-controlled.tsx</include>
+
+For uncontrolled tabs, use `defaultValue`. Changing `defaultValue` after mount does not select a different tab; use controlled state for subsequent changes. Set a controlled `value` to `null` to leave all tabs unselected.
+
+`onValueChange` receives `(value, details)`. Values are forwarded without conversion. The details include `activationDirection`, the originating event, and `cancel()` for preventing a user-initiated change. Base UI also reports automatic selection changes with reasons such as `initial`, `disabled`, or `missing`; those automatic changes cannot be canceled. Controlled applications own their value and must update it when accepting a change.
+
+### Icons, badges, and disabled tabs
+
+Compose icons and badges as trigger children. A disabled trigger remains visible but cannot activate its panel.
+
+<ComponentPreview>
+  <TabsIconsAndDisabled />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-icons-and-disabled.tsx</include>
+
+Hide decorative icons with `aria-hidden`. Visible trigger text provides its accessible name. Supply an `aria-label` if a trigger contains only an icon. Applications importing Lucide icons directly should declare `lucide-react` as their own dependency.
+
+Base UI keeps disabled tabs focusable through arrow-key navigation so they remain discoverable. They have `aria-disabled="true"`, and neither clicking nor Enter/Space activates them. Avoid selecting a disabled tab as the initial value.
+
+### Vertical tabs
+
+Set `orientation="vertical"` on `Tabs`. The list becomes a column beside the active panel. The underline moves to the logical start edge of the list.
+
+<ComponentPreview>
+  <TabsVertical />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-vertical.tsx</include>
+
+Vertical lists use Up/Down for keyboard navigation. The segmented variant also supports vertical orientation. Orientation does not change automatically at a breakpoint; choose the layout that suits the surrounding content.
+
+### Keep form drafts when switching tabs
+
+By default, inactive panels unmount. That removes their uncontrolled inputs and resets local component state when the panel returns. Add `keepMounted` to a panel whose draft should survive tab changes.
+
+<ComponentPreview>
+  <TabsKeepMounted />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-keep-mounted.tsx</include>
+
+Kept panels stay mounted while hidden and are removed from ordinary focus navigation and the accessibility tree. Their native form inputs still belong to a surrounding form and can be submitted while the panel is hidden. Disable inputs explicitly if they should be excluded from submission.
+
+For larger applications, another option is to store form values above the panels and render controlled fields. `keepMounted` preserves local state; it does not save data to a server.
+
+### Activate on focus
+
+By default, arrow keys move focus and Enter/Space selects the focused tab. Set `activateOnFocus` on the list to select as soon as an arrow key moves focus.
+
+<ComponentPreview>
+  <TabsAutomaticActivation />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-automatic-activation.tsx</include>
+
+Automatic activation works best for panels that appear immediately. Keep manual activation when selecting a tab starts a noticeable loading operation or an expensive render.
+
+### Overflow
+
+Tab labels stay on one row. When the list is narrower than its content, it uses native horizontal scrolling. Touch gestures, trackpads, and keyboard focus can reveal off-screen triggers.
+
+<ComponentPreview>
+  <TabsOverflow />
+</ComponentPreview>
+
+<include>../../../examples/tabs/tabs-overflow.tsx</include>
+
+Constrain the root or its containing layout to the available width. The list keeps its labels intact rather than wrapping them into multiple tab rows. Native scrollbar appearance follows the browser and operating system; there are no additional scroll buttons or mouse-drag handlers.
+
+## Accessibility
+
+| Key             | Behavior                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| Tab / Shift+Tab | Enter or leave the list through its roving tab stop, then continue through the active panel and its controls. |
+| Left / Right    | Move focus in a horizontal list, following direction.                                                         |
+| Up / Down       | Move focus in a vertical list.                                                                                |
+| Home / End      | Focus the first or last tab.                                                                                  |
+| Enter / Space   | Activate the focused enabled tab in manual mode.                                                              |
+
+`loopFocus` defaults to `true`. Set it to `false` on the list to stop arrow navigation at either end. With `activateOnFocus`, moving focus also selects enabled tabs. Disabled tabs remain discoverable but cannot activate.
+
+Base UI supplies `tablist`, `tab`, and `tabpanel` roles, selected state, and matching IDs. Preserve those semantics when using `render` to customize an element. Triggers and focusable panels have visible focus indicators. Reduced motion removes the active indicator's movement and trigger color transitions.
+
+Use [Toggle Group](/docs/components/toggle-group) for pressed choices that do not select corresponding panels. Route navigation is application-owned; replacing a trigger with a link through `render` does not add routing or URL synchronization automatically.
+
+## API reference
+
+| Part          | Purpose                                                                            | Ref              |
+| ------------- | ---------------------------------------------------------------------------------- | ---------------- |
+| `Tabs`        | Owns selection, associates triggers and panels, and arranges the list and content. | `HTMLDivElement` |
+| `TabsList`    | Groups triggers, sets shared appearance, and renders the active indicator.         | `HTMLDivElement` |
+| `TabsTrigger` | Selects the panel with the same value. Renders a button by default.                | `HTMLElement`    |
+| `TabsContent` | Displays the panel associated with its value.                                      | `HTMLDivElement` |
+
+| Part / prop                          | Type or behavior                                                                    | Default                     |
+| ------------------------------------ | ----------------------------------------------------------------------------------- | --------------------------- |
+| `Tabs.value`                         | Controlled Base UI tab value; `null` leaves all tabs unselected.                    | —                           |
+| `Tabs.defaultValue`                  | Initial uncontrolled value. Prefer an explicit enabled trigger's value for SSR.     | Base UI automatic selection |
+| `Tabs.onValueChange`                 | `(value, details) => void`; preserves cancellation and activation direction.        | —                           |
+| `Tabs.orientation`                   | `"horizontal"` or `"vertical"`.                                                     | `"horizontal"`              |
+| `TabsList.variant`                   | `"segmented"` or `"underline"`.                                                     | `"segmented"`               |
+| `TabsList.size`                      | `"sm"` or `"base"`.                                                                 | `"base"`                    |
+| `TabsList.activateOnFocus`           | Select enabled tabs when arrow keys move focus.                                     | `false`                     |
+| `TabsList.loopFocus`                 | Wrap arrow navigation at the list ends.                                             | `true`                      |
+| `TabsList.indicatorClassName`        | Utility classes for the built-in indicator.                                         | —                           |
+| `TabsTrigger.value`                  | Required unique value associated with a panel.                                      | —                           |
+| `TabsTrigger.disabled`               | Prevent activation; remains focusable for discoverability.                          | `false`                     |
+| `TabsTrigger.render`, `nativeButton` | Customize the trigger element. Set `nativeButton={false}` for a non-button element. | Native button               |
+| `TabsContent.value`                  | Required value matching its trigger.                                                | —                           |
+| `TabsContent.keepMounted`            | Retain a hidden panel's DOM and local state.                                        | `false`                     |
+
+All four parts forward Base UI's `render`, `style`, and `className` props. Triggers expose `data-active` and `data-disabled`; orientation is exposed on the corresponding parts. Lists and triggers also expose `data-variant` and `data-size`. See the [Base UI Tabs reference](https://base-ui.com/react/components/tabs) for the inherited API.

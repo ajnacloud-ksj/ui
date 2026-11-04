@@ -1,0 +1,130 @@
+---
+title: Radio Group
+description: A group of options that share one selected value.
+---
+
+import { RadioGroupExample } from "@/examples/radio-group/radio-group-example";
+import { RadioGroupControlled } from "@/examples/radio-group/radio-group-controlled";
+import { RadioGroupStates } from "@/examples/radio-group/radio-group-states";
+
+<ComponentPreview>
+  <RadioGroupExample />
+</ComponentPreview>
+
+<include>../../../examples/radio-group/radio-group-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  RadioGroup,
+  RadioGroupItem,
+  FieldSet,
+  FieldLegend,
+  Field,
+  FieldLabel,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { RadioGroup, RadioGroupItem } from "@ajnacloud/ui/radio-group";
+import { FieldSet, FieldLegend, Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<FieldSet>
+  <FieldLegend id="plan-label">Plan</FieldLegend>
+  <RadioGroup name="plan" defaultValue="free" aria-labelledby="plan-label">
+    <Field orientation="horizontal">
+      <RadioGroupItem id="plan-free" value="free" />
+      <FieldLabel htmlFor="plan-free">Free</FieldLabel>
+    </Field>
+    <Field orientation="horizontal">
+      <RadioGroupItem id="plan-pro" value="pro" />
+      <FieldLabel htmlFor="plan-pro">Pro</FieldLabel>
+    </Field>
+  </RadioGroup>
+</FieldSet>
+```
+
+Every item needs a unique `value` within its group. `RadioGroup` owns the selection, form name, and change handler. Individual items belong inside it; there is no separate styled Radio entry point.
+
+`FieldSet` and `FieldLegend` group the question visually and semantically. Explicitly connect the group to its legend through `aria-labelledby`, and each item's label through `id`/`htmlFor`. Use `aria-describedby` for helper text and errors.
+
+## Examples
+
+### Controlled selection
+
+<ComponentPreview>
+  <RadioGroupControlled />
+</ComponentPreview>
+
+<include>../../../examples/radio-group/radio-group-controlled.tsx</include>
+
+Use `defaultValue` for uncontrolled selection or `value` with `onValueChange` for controlled selection. The callback receives the selected value and Base UI event details. String values are the simplest choice for native forms; the generic TypeScript API also preserves other value types.
+
+### Disabled, read-only, and invalid
+
+Disable the entire group using `disabled` on `RadioGroup`, or one option using `disabled` on its item. Group-level `readOnly` prevents selection changes while retaining focusability. Use group props for these states rather than relying only on native `FieldSet disabled`.
+
+```tsx
+import { RadioGroup, RadioGroupItem } from "@ajnacloud/ui";
+
+<RadioGroup aria-label="Plan" defaultValue="free" disabled>
+  <RadioGroupItem value="free" aria-label="Free" />
+  <RadioGroupItem value="pro" aria-label="Pro" />
+</RadioGroup>
+```
+
+<ComponentPreview>
+  <RadioGroupStates />
+</ComponentPreview>
+
+<include>../../../examples/radio-group/radio-group-states.tsx</include>
+
+Import `FieldError` from `@ajnacloud/ui/field` for validation messages. Your application owns validation. Put `aria-invalid="true"` on the group, and on items that should receive error styling. Associate the message with `aria-describedby`.
+
+```tsx
+import { Field, FieldError, FieldLabel, RadioGroup, RadioGroupItem } from "@ajnacloud/ui";
+
+export function RadioValidation() {
+ return (<>
+<RadioGroup aria-label="Payment method" aria-invalid="true" aria-describedby="payment-error">
+  <Field orientation="horizontal" data-invalid>
+    <RadioGroupItem id="credit-card" value="card" aria-invalid="true" aria-describedby="payment-error" />
+    <FieldLabel htmlFor="credit-card">Credit card</FieldLabel>
+  </Field>
+  <Field orientation="horizontal" data-invalid>
+    <RadioGroupItem id="invoice" value="invoice" aria-invalid="true" aria-describedby="payment-error" />
+    <FieldLabel htmlFor="invoice">Invoice</FieldLabel>
+  </Field>
+</RadioGroup>
+<FieldError id="payment-error">Choose a payment method.</FieldError>
+</>);
+}
+```
+
+## Behavior
+
+### Keyboard and forms
+
+Tab enters or leaves the group; arrow keys move between enabled options and update selection. Space selects a focused option. Base UI manages the group's focus and mutual exclusion.
+
+Set `name` on the group for native form submission. The selected item supplies the value. `required` on the group requires a selection. Disabled items cannot be selected. The root ref targets the group `div`; an item's ref targets its interactive element, and `inputRef` targets its hidden native input.
+
+## API reference
+
+| Part             | Key props                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| `RadioGroup`     | `name`, `value`, `defaultValue`, `onValueChange`, `disabled`, `readOnly`, `required`, `form`. |
+| `RadioGroupItem` | Required `value`; `disabled`, `readOnly`, `required`, `inputRef`.                             |
+
+Both parts preserve Base UI props, including `render`, state-based `className`, and refs. The default group layout is a grid with an 8px gap; use your own generated utilities or `style` for another layout. Neither part adds a label automatically. Raw Base UI exports remain available through `/primitives/radio` and `/primitives/radio-group`.

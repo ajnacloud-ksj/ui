@@ -1,0 +1,18 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["cn", "clsx", "cva"],
+  "tailwindPreserveDuplicates": true,
+  "overrides": [
+    {
+      "files": ["packages/react/**/*", "tests/consumer/**/*"],
+      "options": { "tailwindConfig": "./packages/react/tailwind.config.cjs" }
+    },
+    {
+      "files": ["apps/docs/**/*"],
+      "options": { "tailwindStylesheet": "./apps/docs/app/global.css" }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm codegen:check
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm test:browser
+      - run: pnpm test:package
+      - name: Check React 18 compatibility
+        run: |
+          pnpm --filter @ajnacloud/ui add --save-dev react@18.3.1 react-dom@18.3.1 @types/react@18.2.55 @types/react-dom@18.2.19
+          pnpm --filter @ajnacloud/ui typecheck
+          pnpm --filter @ajnacloud/ui test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-results
+          path: |
+            playwright-report/
+            test-results/

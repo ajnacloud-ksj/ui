@@ -1,0 +1,174 @@
+---
+title: Command
+description: Search commands and run quick actions in an inline menu or dialog.
+---
+
+import { CommandDemo } from "@/examples/command/command-demo";
+import { CommandBasic } from "@/examples/command/command-basic";
+import { CommandShortcuts } from "@/examples/command/command-shortcuts";
+import { CommandGroups } from "@/examples/command/command-groups";
+import { CommandScrollable } from "@/examples/command/command-scrollable";
+import { CommandFiltering } from "@/examples/command/command-filtering";
+
+<ComponentPreview>
+  <CommandDemo />
+</ComponentPreview>
+
+<include>../../../examples/command/command-demo.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@ajnacloud/ui/command";
+```
+
+### Basic usage
+
+```tsx
+<Command label="Project commands">
+  <CommandInput placeholder="Search commands…" />
+  <CommandList>
+    <CommandEmpty>No commands found.</CommandEmpty>
+    <CommandGroup heading="Projects">
+      <CommandItem value="new-project">New project</CommandItem>
+      <CommandItem value="open-project">Open project</CommandItem>
+    </CommandGroup>
+  </CommandList>
+</Command>
+```
+
+Command combines a searchable input with a keyboard-navigable list of actions. Use the inline menu directly, or place it inside CommandDialog for a command palette.
+
+CommandInput filters the list as you type. CommandEmpty appears when nothing matches, and disabled items cannot be activated. Give Command a `label` so the search input has an accessible name. Placeholder text provides a hint rather than replacing that name.
+
+### Parts
+
+```text
+Command
+├── CommandInput
+└── CommandList
+    ├── CommandEmpty
+    ├── CommandGroup
+    │   ├── CommandItem
+    │   └── CommandItem
+    ├── CommandSeparator
+    └── CommandGroup
+        └── CommandItem
+```
+
+CommandDialog wraps this structure when a modal palette is needed. Give it a useful title and description. Keep actions, routing, and selected application state in your own callbacks.
+
+## Examples
+
+### Basic
+
+A simple command menu in a dialog. CommandDialog owns the dialog and Command owns the search/list behavior; nest Command inside CommandDialog. Control visibility with `open` and `onOpenChange`. Selecting an item invokes its `onSelect` callback; close the dialog from that callback when the action is complete. Opening focuses the search input, and dismissing restores focus to the opener.
+
+<ComponentPreview>
+  <CommandBasic />
+</ComponentPreview>
+
+<include>../../../examples/command/command-basic.tsx</include>
+
+### Shortcuts
+
+CommandShortcut displays a hint. Register global shortcuts in your application; it does not create bindings.
+
+<ComponentPreview>
+  <CommandShortcuts />
+</ComponentPreview>
+
+<include>../../../examples/command/command-shortcuts.tsx</include>
+
+### Groups
+
+Group related commands with a heading, icons, and separators. Filtering hides groups with no matching items. Separators are hidden during search by default; set `alwaysRender` to keep one visible. Icons are decorative; the item text names the action.
+
+<ComponentPreview>
+  <CommandGroups />
+</ComponentPreview>
+
+<include>../../../examples/command/command-groups.tsx</include>
+
+### Scrollable
+
+The results list has a 300px maximum height and scrolls as the keyboard highlight moves. Override CommandList's className or style to change the limit. Set CommandDialog's `showCloseButton` to add a visible close control; it defaults to false. `title` and `description` name and describe the dialog for assistive technology, even though its header is visually hidden.
+
+<ComponentPreview>
+  <CommandScrollable />
+</ComponentPreview>
+
+<include>../../../examples/command/command-scrollable.tsx</include>
+
+### Controlled search, aliases, and checked items
+
+Control the search query with CommandInput's `value` and `onValueChange`. Command's own `value` and `onValueChange` control the highlighted item, not the search text. Supply a unique, stable `value` for each item and use `keywords` for aliases.
+
+`data-checked` controls the check indicator, independently of the keyboard/pointer highlight. Update it from application state. The indicator is suppressed when an item contains CommandShortcut.
+
+<ComponentPreview>
+  <CommandFiltering />
+</ComponentPreview>
+
+<include>../../../examples/command/command-filtering.tsx</include>
+
+## Behavior
+
+### Filtering and external results
+
+cmdk filters and ranks items automatically. A custom `filter(value, search, keywords)` returns a score from zero to one: zero hides an item, and higher scores rank it ahead of weaker matches. Set `shouldFilter={false}` on Command when an API or your application already filters and orders the results. Update the rendered items yourself and keep the input query controlled.
+
+`forceMount` keeps an item or group mounted through filtering. Group headings come from `heading`. Without an explicit item value, cmdk infers one from its text content; an explicit value is safer when labels or shortcut hints change.
+
+## Accessibility
+
+Up/Down move the active item and skip disabled commands; Enter activates it. Set `loop` on Command to wrap navigation at the ends. Home/End move to the first/last available item. Focus stays on the search input while `aria-activedescendant` identifies the highlighted option. CommandDialog traps modal focus, supports Escape and outside dismissal, and restores focus on close.
+
+Pass an accessible `label` to Command and translate the dialog title/description when needed. Search, check, and close icons are hidden from assistive technology. Shortcuts are display hints, so explain the action in the item text. A checked indicator represents application state; highlighting alone does not mean an application setting has changed.
+
+## API reference
+
+| Part             | Relevant props                                                       | Purpose                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Command          | `label`, `value`, `defaultValue`, `onValueChange`, `loop`            | Menu name and highlighted-item state.                                                                                            |
+| Command          | `filter`, `shouldFilter`, `disablePointerSelection`, `vimBindings`   | Matching, sorting, and interaction options forwarded to cmdk.                                                                    |
+| CommandDialog    | `open`, `defaultOpen`, `onOpenChange`, native Ajna Dialog root props | Modal visibility and lifecycle.                                                                                                  |
+| CommandDialog    | `title`, `description`, `showCloseButton`, `className`               | Accessible naming, optional close button, and content styling. Defaults: Command Palette, Search for a command to run..., false. |
+| CommandInput     | `value`, `onValueChange`, native input props                         | Search query, placeholder, and input attributes. Ref targets the input.                                                          |
+| CommandList      | Native cmdk List props                                               | Scrollable result list; ref targets its div.                                                                                     |
+| CommandEmpty     | Children and native cmdk Empty props                                 | Content shown when there are no matches.                                                                                         |
+| CommandGroup     | `heading`, `value`, `forceMount`                                     | Named collection of related commands.                                                                                            |
+| CommandItem      | `value`, `keywords`, `disabled`, `forceMount`, `onSelect`            | Searchable action; onSelect receives its string value.                                                                           |
+| CommandItem      | `data-checked`                                                       | Application-owned checked indicator.                                                                                             |
+| CommandSeparator | `alwaysRender`                                                       | Visual separation between groups.                                                                                                |
+| CommandShortcut  | Native span props                                                    | Display-only shortcut hint.                                                                                                      |
+
+Other cmdk primitive props are forwarded. See the [cmdk API documentation](https://github.com/dip/cmdk#parts-and-styling) for the underlying search and selection behavior.
+
+Each Command part accepts `className` and forwards its primitive ref. CommandDialog’s `className` targets its dialog content.
+
+CommandInput uses a full-width search row with a bottom divider and a 48px input. CommandDialog supplies zero-gap popup spacing. It inherits Dialog's enter and exit transitions and reduced-motion behavior. Keep the controlled CommandDialog mounted while `open` changes so its exit transition can finish; conditionally removing it when `open` becomes false cuts that transition off. For a palette near the top of the viewport, set `className="self-start sm:mt-24"` on CommandDialog; regular dialogs remain centered.

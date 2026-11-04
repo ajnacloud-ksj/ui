@@ -1,0 +1,82 @@
+---
+title: Collapsible
+description: Expand or collapse one section of content.
+---
+
+import { CollapsibleExample } from "@/examples/collapsible/collapsible-example";
+import { CollapsibleControlled } from "@/examples/collapsible/collapsible-controlled";
+
+<ComponentPreview>
+  <CollapsibleExample />
+</ComponentPreview>
+
+<include>../../../examples/collapsible/collapsible-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+  Button,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@ajnacloud/ui/collapsible";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Collapsible>
+  <CollapsibleTrigger render={<Button variant="secondary" />}>Project details</CollapsibleTrigger>
+  <CollapsibleContent>
+    <p style={{ margin: 0, paddingTop: 12 }}>Additional project settings.</p>
+  </CollapsibleContent>
+</Collapsible>
+```
+
+The trigger has no imposed button appearance; compose it with Button through `render`, or supply your own styles. Avoid nesting a button inside a trigger. Put content spacing on a child inside the panel so the panel can animate all the way to zero height.
+
+## Examples
+
+### Controlled state
+
+<ComponentPreview>
+  <CollapsibleControlled />
+</ComponentPreview>
+
+<include>../../../examples/collapsible/collapsible-controlled.tsx</include>
+
+Use `defaultOpen` for uncontrolled initial state. The default is closed. `onOpenChange` receives a boolean and Base UI event details. `disabled` on the root disables its trigger.
+
+## Behavior
+
+### State and mounting
+
+Enter or Space activates the focused trigger. Base UI manages `aria-expanded`, `aria-controls`, and panel visibility. Content supports `keepMounted` and `hiddenUntilFound`; hidden-until-found behavior depends on browser support. Closed panels are otherwise removed after their closing transition.
+
+## API reference
+
+### Parts
+
+| Part                 | Key props                                                    |
+| -------------------- | ------------------------------------------------------------ |
+| `Collapsible`        | `open`, `defaultOpen`, `onOpenChange`, `disabled`.           |
+| `CollapsibleTrigger` | Base UI trigger props, including `render` and button ref.    |
+| `CollapsibleContent` | Panel props, `keepMounted`, `hiddenUntilFound`, and div ref. |
+
+Root and content accept string or state-based `className`; the trigger preserves Base UI's className API too. All parts forward refs. Reduced motion removes the panel transition. For several coordinated sections, use [Accordion](/docs/components/accordion).

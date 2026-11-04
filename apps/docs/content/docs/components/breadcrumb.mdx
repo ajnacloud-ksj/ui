@@ -1,0 +1,127 @@
+---
+title: Breadcrumbs
+description: Show the hierarchy leading to the current page with navigable parent links.
+---
+
+import { BreadcrumbExample } from "@/examples/breadcrumb/breadcrumb-example";
+import { BreadcrumbCollapsed } from "@/examples/breadcrumb/breadcrumb-collapsed";
+import { BreadcrumbCustomSeparator } from "@/examples/breadcrumb/breadcrumb-custom-separator";
+import { BreadcrumbRouter } from "@/examples/breadcrumb/breadcrumb-router";
+
+<ComponentPreview>
+  <BreadcrumbExample />
+</ComponentPreview>
+
+<include>../../../examples/breadcrumb/breadcrumb-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@ajnacloud/ui/breadcrumb";
+```
+
+### Basic usage
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Website</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+### Parts
+
+| Part                  | Purpose                                    |
+| --------------------- | ------------------------------------------ |
+| `Breadcrumb`          | Navigation landmark containing the trail.  |
+| `BreadcrumbList`      | Ordered list of locations.                 |
+| `BreadcrumbItem`      | One location.                              |
+| `BreadcrumbLink`      | Link to a parent location.                 |
+| `BreadcrumbPage`      | Current location.                          |
+| `BreadcrumbSeparator` | Decorative divider between items.          |
+| `BreadcrumbEllipsis`  | Decorative marker for collapsed locations. |
+
+Place separators between items as direct children of BreadcrumbList.
+
+## Examples
+
+### Custom separator
+
+Replace the default chevron with text or an icon.
+
+<ComponentPreview>
+  <BreadcrumbCustomSeparator />
+</ComponentPreview>
+
+<include>../../../examples/breadcrumb/breadcrumb-custom-separator.tsx</include>
+
+### Collapsed paths
+
+Put intermediate locations in a [Dropdown Menu](/docs/components/dropdown-menu). BreadcrumbEllipsis needs a named trigger; it is not interactive by itself. Your application chooses which locations collapse.
+
+<ComponentPreview>
+  <BreadcrumbCollapsed />
+</ComponentPreview>
+
+<include>../../../examples/breadcrumb/breadcrumb-collapsed.tsx</include>
+
+### Router links
+
+Use `render` to compose a router link without nesting anchors. This example uses Next.js Link; other router links must forward their ref and anchor props.
+
+<ComponentPreview>
+  <BreadcrumbRouter />
+</ComponentPreview>
+
+<include>../../../examples/breadcrumb/breadcrumb-router.tsx</include>
+
+## Accessibility
+
+The navigation landmark defaults to the name “Breadcrumb”; override `aria-label` when needed. BreadcrumbPage sets `aria-current="page"`, and separators and ellipses are hidden from assistive technology.
+
+## API reference
+
+| Part                  | Native props / element | Additional behavior                                |
+| --------------------- | ---------------------- | -------------------------------------------------- |
+| `Breadcrumb`          | `nav`                  | Defaults to `aria-label="Breadcrumb"`.             |
+| `BreadcrumbList`      | `ol`                   | Wrapping row of locations.                         |
+| `BreadcrumbItem`      | `li`                   | Contains a link, current page, or menu trigger.    |
+| `BreadcrumbLink`      | `a`                    | Accepts `href` and a `render` element or callback. |
+| `BreadcrumbPage`      | `span`                 | Sets `aria-current="page"`.                        |
+| `BreadcrumbSeparator` | `li`                   | Children replace the chevron.                      |
+| `BreadcrumbEllipsis`  | `span`                 | Children replace the dots.                         |
+
+All parts accept children, `className`, `style`, and forwarded refs. BreadcrumbLink's ref follows its rendered element; other refs target the listed native elements.
+
+All seven parts and their prop types are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/breadcrumb`.

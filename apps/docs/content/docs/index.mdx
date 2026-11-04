@@ -1,0 +1,48 @@
+---
+title: Introduction
+description: React components and copyable blocks for application interfaces.
+---
+
+Ajna is a React UI library for building dashboards, admin tools, and other applications. It provides styled components through `@ajnacloud/ui`, with copyable blocks for page layouts and workflows.
+
+## Components and blocks
+
+**Components** are the reusable controls you import from the package: buttons, form fields, dialogs, navigation, tables, and more. They share a theme and can be composed into your own interfaces.
+
+**Blocks** combine those components into application layouts and flows, including an app shell, a login page, a collection page with table and grid views, and create/edit forms. Copy their source into your application, then connect it to your routing and data.
+
+When you need a custom component, Ajna also exposes unstyled Base UI parts through `@ajnacloud/ui/primitives`. The [primitives and utilities guide](/docs/primitives) covers those exports and the `cn` class-merging helper.
+
+## Built to compose
+
+Use individual parts when you need control over the structure. A Dialog has separate parts for its trigger, content, title, and description. Field groups controls with labels, help text, and validation messages without tying your forms to a particular form library.
+
+Common controls also have simpler APIs for repeated work. Select and Combobox accept arrays of options. FilterBar collects filter values, and Pagination reports page and page-size changes. Your application owns the data and what happens when those values change.
+
+Most interactive components build on Base UI for keyboard navigation, focus management, and accessibility semantics. Component guides cover the labels and composition each control needs.
+
+## Style it for your application
+
+Choose the setup that fits your project:
+
+- **Standalone CSS:** import the compiled stylesheet. Components work without Tailwind, including in applications using Tailwind v4.
+- **Tailwind v3.4:** use Ajna's preset and include the package in your content paths. Component utilities and your application styles are generated together.
+
+Both setups use the same theme variables and light/dark colors. Override `--ajna-*` tokens to change the theme or connect Ajna to an existing application palette. See [Theming](/docs/theming) for token formats, dark mode, and scoped themes.
+
+Block layouts use Tailwind utilities and need your application's Tailwind build. Each block includes the source files and styling setup you need.
+
+## Using the documentation
+
+Component pages include live previews, complete code examples, supported states, and an API reference. Usage examples show both package-root and individual component imports. The previews use the built Ajna package.
+
+Block pages include a working preview, a source file picker, and integration notes. Open a preview on its own to try the full layout, or switch its viewport to check the mobile version.
+
+Use **Copy page** to copy a guide as Markdown, including its code examples, or open it in an AI tool. The [Markdown index](/llms.txt) lists the guides and blocks; [the full reference](/llms-full.txt) combines their content.
+
+## Get started
+
+- [Installation](/docs/installation) — install the package and configure styles for your application.
+- [Components](/docs/components/button) — explore the controls and their APIs.
+- [Theming](/docs/theming) — apply your colors, type, and corner radius.
+- [Blocks](/blocks) — start from an application layout or workflow.

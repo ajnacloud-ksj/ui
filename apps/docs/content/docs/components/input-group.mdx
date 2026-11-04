@@ -1,0 +1,152 @@
+---
+title: Input Group
+description: Compose inputs and textareas with prefixes, suffixes, and actions.
+---
+
+import { InputGroupExample } from "@/examples/input-group/input-group-example";
+import { InputGroupActions } from "@/examples/input-group/input-group-actions";
+import { InputGroupComposer } from "@/examples/input-group/input-group-composer";
+import { InputGroupStates } from "@/examples/input-group/input-group-states";
+
+<ComponentPreview>
+  <InputGroupExample />
+</ComponentPreview>
+
+<include>../../../examples/input-group/input-group-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupInput,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupInput,
+} from "@ajnacloud/ui/input-group";
+```
+
+### Basic usage
+
+```tsx
+<InputGroup>
+  <InputGroupAddon>
+    <InputGroupText>https://</InputGroupText>
+  </InputGroupAddon>
+  <InputGroupInput aria-label="Website domain" placeholder="example.com" />
+</InputGroup>
+```
+
+## Examples
+
+### Prefixes and suffixes
+
+```tsx
+import { Field, FieldLabel, InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@ajnacloud/ui";
+
+<Field>
+  <FieldLabel htmlFor="website">Website</FieldLabel>
+  <InputGroup>
+    <InputGroupInput
+      id="website"
+      placeholder="example.com"
+      aria-describedby="website-prefix"
+    />
+    <InputGroupAddon>
+      <InputGroupText id="website-prefix">https://</InputGroupText>
+    </InputGroupAddon>
+  </InputGroup>
+</Field>
+```
+
+Use `InputGroupInput` or `InputGroupTextarea` inside the group so the outer border and focus ring surround the complete control. A plain Input keeps its own border and focus styles.
+
+Keep add-ons **after the control in the DOM**, including visually leading add-ons. Their `align` prop positions them visually without moving action buttons ahead of the control in keyboard navigation. Prefix and suffix text is not included in the submitted input value.
+
+| `align`        | Position               |
+| -------------- | ---------------------- |
+| `inline-start` | Leading edge; default. |
+| `inline-end`   | Trailing edge.         |
+| `block-start`  | Row above the control. |
+| `block-end`    | Row below the control. |
+
+Clicking noninteractive add-on content focuses the input or textarea. Clicking a button, link, or another control keeps that element's normal behavior. An add-on `onClick` handler can prevent the focus behavior with `event.preventDefault()`.
+
+### Actions
+
+<ComponentPreview>
+  <InputGroupActions />
+</ComponentPreview>
+
+<include>../../../examples/input-group/input-group-actions.tsx</include>
+
+`InputGroupButton` uses Button's variants and defaults to `variant="ghost"`, `size="xs"`, and `type="button"`. Use `type="submit"` explicitly to submit a form. The available sizes are `xs`, `sm`, `icon-xs`, and `icon-sm`; icon sizes require `aria-label` or `aria-labelledby`.
+
+For an icon-only action, pass your icon through Button's `icon` prop:
+
+```tsx
+import { InputGroupButton } from "@ajnacloud/ui";
+
+<InputGroupButton
+  size="icon-xs"
+  aria-label="Clear search"
+  icon={
+    <svg aria-hidden="true" viewBox="0 0 16 16">
+      <path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" />
+    </svg>
+  }
+/>
+```
+
+### Textarea and block add-ons
+
+<ComponentPreview>
+  <InputGroupComposer />
+</ComponentPreview>
+
+<include>../../../examples/input-group/input-group-composer.tsx</include>
+
+InputGroupTextarea accepts native textarea props and defaults to no manual resizing. Use `rows` or explicit dimensions; it does not grow automatically.
+
+### Invalid and disabled
+
+<ComponentPreview>
+  <InputGroupStates />
+</ComponentPreview>
+
+<include>../../../examples/input-group/input-group-states.tsx</include>
+
+Set invalid or disabled state on the actual control. The group derives its border, error ring, and disabled appearance from that control. Disable action buttons separately if they should also be unavailable. Read-only controls keep their native behavior.
+
+## Accessibility
+
+Field supplies the label and supporting text; Input Group only composes the control's visual surface. Decorative icons should use `aria-hidden="true"`. Associate meaningful prefix/suffix text with the control using `aria-describedby` when it helps explain the value. Do not make add-ons themselves keyboard stops.
+
+## API reference
+
+### Parts
+
+| Part                 | Props                                                        |
+| -------------------- | ------------------------------------------------------------ |
+| `InputGroup`         | Native `div` attributes, `className`, and ref.               |
+| `InputGroupAddon`    | Native `div` attributes; `align` defaults to `inline-start`. |
+| `InputGroupText`     | Native `span` attributes.                                    |
+| `InputGroupInput`    | Input's Base UI props, callbacks, and ref.                   |
+| `InputGroupTextarea` | Native textarea props and ref.                               |
+| `InputGroupButton`   | Button props, with the group's four size choices.            |
+
+Input supports state-based `className`; native parts accept strings.

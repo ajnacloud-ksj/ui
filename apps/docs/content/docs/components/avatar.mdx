@@ -1,0 +1,185 @@
+---
+title: Avatar
+description: Represent a person with an image, initials, or a fallback icon.
+---
+
+import { AvatarExample } from "@/examples/avatar/avatar-example";
+import { AvatarSizes } from "@/examples/avatar/avatar-sizes";
+import { AvatarFallbacks } from "@/examples/avatar/avatar-fallbacks";
+import { AvatarLoading } from "@/examples/avatar/avatar-loading";
+import { AvatarBadges } from "@/examples/avatar/avatar-badges";
+import { AvatarGroups } from "@/examples/avatar/avatar-groups";
+import { AvatarWithName } from "@/examples/avatar/avatar-with-name";
+import { AvatarCustomShape } from "@/examples/avatar/avatar-custom-shape";
+import { AvatarLazy } from "@/examples/avatar/avatar-lazy";
+
+<ComponentPreview>
+  <AvatarExample />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback } from "@ajnacloud/ui/avatar";
+```
+
+### Basic usage
+
+```tsx
+<Avatar role="img" aria-label="Alex Morgan">
+  <AvatarImage src="/avatars/alex.svg" alt="" />
+  <AvatarFallback>AM</AvatarFallback>
+</Avatar>
+```
+
+Use your own image URL. Set the size on Avatar; its image and fallback fill that space.
+
+### Parts
+
+| Part               | Purpose                                              |
+| ------------------ | ---------------------------------------------------- |
+| `Avatar`           | Container, size, and image-loading context.          |
+| `AvatarImage`      | Image, shown once loaded.                            |
+| `AvatarFallback`   | Initials or an icon when the image is unavailable.   |
+| `AvatarBadge`      | Status indicator at the bottom inline-end edge.      |
+| `AvatarGroup`      | Overlapping row of avatars.                          |
+| `AvatarGroupCount` | Additional-member count supplied by the application. |
+
+## Examples
+
+### Sizes
+
+<ComponentPreview>
+  <AvatarSizes />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-sizes.tsx</include>
+
+| Size   | Dimensions at a 16px root |
+| ------ | ------------------------- |
+| `sm`   | 24 × 24px                 |
+| `base` | 32 × 32px                 |
+| `lg`   | 40 × 40px                 |
+
+### Custom shape
+
+The image and fallback inherit the root's border radius.
+
+<ComponentPreview>
+  <AvatarCustomShape />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-custom-shape.tsx</include>
+
+### Fallbacks
+
+Provide initials or an icon as children. Initials are not generated automatically.
+
+<ComponentPreview>
+  <AvatarFallbacks />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-fallbacks.tsx</include>
+
+### Loading and errors
+
+Keep AvatarFallback mounted beside AvatarImage. It appears when the image is unavailable and disappears after the image loads. Use `delay` to avoid briefly showing a fallback during a fast load.
+
+<ComponentPreview>
+  <AvatarLoading />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-loading.tsx</include>
+
+### Lazy loading
+
+Use `keepMounted` with `loading="lazy"` to load through the rendered image instead of preloading. Custom images supplied through `render` must forward their ref and load/error events.
+
+<ComponentPreview>
+  <AvatarLazy />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-lazy.tsx</include>
+
+### Status badges
+
+AvatarBadge defaults to the success color. Include the status in text or the avatar's accessible name. Badge icons are hidden at `size="sm"`.
+
+<ComponentPreview>
+  <AvatarBadges />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-badges.tsx</include>
+
+### Groups
+
+Use matching sizes for the avatars and count. AvatarGroupCount displays its children; it does not calculate overflow or hide members.
+
+<ComponentPreview>
+  <AvatarGroups />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-groups.tsx</include>
+
+### Alongside a name
+
+Hide the avatar from assistive technology when adjacent text already identifies the person.
+
+<ComponentPreview>
+  <AvatarWithName />
+</ComponentPreview>
+
+<include>../../../examples/avatar/avatar-with-name.tsx</include>
+
+## Accessibility
+
+For a standalone avatar, give the root `role="img"` and a full accessible name, with `alt=""` on its image. This keeps one name across image and fallback states. Use a real button or link when the avatar performs an action.
+
+## API reference
+
+### Avatar
+
+| Prop        | Type                             | Default  | Description                         |
+| ----------- | -------------------------------- | -------- | ----------------------------------- |
+| `size`      | `"sm" \| "base" \| "lg"`         | `"base"` | Dimensions and fallback typography. |
+| `render`    | React element or render callback | —        | Composes the underlying element.    |
+| `className` | String or state callback         | —        | Additional styles.                  |
+
+Accepts Base UI Avatar root props and a ref to its default span.
+
+### AvatarImage
+
+| Prop                    | Type               | Default | Description                                                             |
+| ----------------------- | ------------------ | ------- | ----------------------------------------------------------------------- |
+| `src`                   | `string`           | —       | Image URL.                                                              |
+| `alt`                   | `string`           | —       | Image description; use an empty string when the root supplies the name. |
+| `keepMounted`           | `boolean`          | `false` | Loads through a mounted image instead of preloading.                    |
+| `onLoadingStatusChange` | `(status) => void` | —       | Receives `idle`, `loading`, `loaded`, or `error`.                       |
+
+Accepts native image props, `render`, a state-based `className`, and an `HTMLImageElement` ref.
+
+### AvatarFallback
+
+Accepts fallback children, an initial `delay` in milliseconds (default `0`), `render`, a state-based `className`, and a ref to its default span.
+
+### Other parts
+
+| Part               | Props                                                           | Ref               |
+| ------------------ | --------------------------------------------------------------- | ----------------- |
+| `AvatarBadge`      | Native span props and optional icon children.                   | `HTMLSpanElement` |
+| `AvatarGroup`      | Native div props.                                               | `HTMLDivElement`  |
+| `AvatarGroupCount` | Native span props, count children, and `size` (default `base`). | `HTMLSpanElement` |
+
+All parts accept `style` and `className`. The parts, their prop types, and `AvatarSize` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/avatar`.

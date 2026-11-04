@@ -1,0 +1,331 @@
+---
+title: Combobox
+description: Search and select values with a ready-to-use control or compose your own layout.
+---
+
+import { ComboboxBasic } from "@/examples/combobox/combobox-basic";
+import { ComboboxCustom } from "@/examples/combobox/combobox-custom";
+import { ComboboxMultiple } from "@/examples/combobox/combobox-multiple";
+import { ComboboxGroups } from "@/examples/combobox/combobox-groups";
+import { ComboboxRemote } from "@/examples/combobox/combobox-remote";
+import { ComboboxLoading } from "@/examples/combobox/combobox-loading";
+import { ComboboxFooter } from "@/examples/combobox/combobox-footer";
+import { ComboboxStates } from "@/examples/combobox/combobox-states";
+import { ComboboxForm } from "@/examples/combobox/combobox-form";
+import { ComboboxFocus } from "@/examples/combobox/combobox-focus";
+import { ComboboxManual } from "@/examples/combobox/combobox-manual";
+import { ComboboxManualMultiple } from "@/examples/combobox/combobox-manual-multiple";
+import { ComboboxManualGroups } from "@/examples/combobox/combobox-manual-groups";
+import { ComboboxPopup } from "@/examples/combobox/combobox-popup";
+
+<ComponentPreview>
+  <ComboboxBasic />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Combobox, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Combobox } from "@ajnacloud/ui/combobox";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="project">Project</FieldLabel>
+  <Combobox
+    id="project"
+    name="project"
+    placeholder="Choose a project"
+    options={[
+      { label: "Website redesign", value: "website" },
+      { label: "Customer portal", value: "portal" },
+    ]}
+  />
+</Field>
+```
+
+Combobox lets people search a list and choose one or more existing values. Pass an options array for the standard control, or compose the styled parts when you need a different layout.
+
+Options default to `{ label, value, disabled? }`. The selected value is a string or number, never the entire option object. Single selection uses `null` for an empty field; multiple selection uses an empty array. Give the input an accessible label with FieldLabel and a matching `id`, or use `aria-label` when a visible label is unsuitable.
+
+## Examples
+
+### Custom option data and rendering
+
+Use `getLabel` and `getValue` for custom records. Labels are strings, and values must be unique strings or finite numbers. Numeric zero is a valid selection.
+
+`renderOption` receives the original option and `{ selected, highlighted, disabled, inputValue }`. Customize row content while retaining the built-in option semantics, selection indicator, disabled behavior, and keyboard navigation. Avoid putting independent interactive controls inside an option. Use the footer for actions.
+
+`renderSelectedOption` customizes the individual selected label or pill content. Its context contains `value`, `label`, and `option`; the record can be undefined if a selected value has not been resolved. It does not replace the input, pill-removal control, or selection handling.
+
+<ComponentPreview>
+  <ComboboxCustom />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-custom.tsx</include>
+
+### Multiple selection and compact summaries
+
+Set `multiple` to select an array of values. The convenience control stays open after selection by default. Pills support keyboard navigation and removal, and selected options remain available in the dropdown for deselection.
+
+| Presentation               | Behavior                                                                                                                |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `selectionDisplay="pills"` | Removable pills, followed by an overflow count. This is the default.                                                    |
+| `selectionDisplay="names"` | Selected names separated by commas, followed by an overflow count. Remove values through the list or clear-all control. |
+| `selectionDisplay="count"` | A selection count; `maxVisibleSelections` does not apply.                                                               |
+
+`maxVisibleSelections` defaults to 3. Set it to 0 to show only overflow, or Infinity to display every pill/name. Hidden selections remain selected, submitted, announced through the input description, and available in the dropdown. Changing the presentation never changes the selected values.
+
+<ComponentPreview>
+  <ComboboxMultiple />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-multiple.tsx</include>
+
+### Groups and disabled options
+
+Use `groupBy(option)` for standard grouped navigation. Groups appear in first-appearance order, and each contains matching options in their original order. Customize heading content with `renderGroupLabel`.
+
+An option's `disabled` flag is recognized by default. Supply `isOptionDisabled` when availability comes from a different field or application rule. Disabled options remain visible but cannot be selected.
+
+<ComponentPreview>
+  <ComboboxGroups />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-groups.tsx</include>
+
+### Loading
+
+`isLoading` shows a Spinner and a polite status message without disabling the search input. Existing results remain available during refresh. With no options, loading replaces the empty-results message. Use `loadingContent` and `emptyContent` for custom content.
+
+<ComponentPreview>
+  <ComboboxLoading />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-loading.tsx</include>
+
+### Remote search and selected-record resolution
+
+Control search through `inputValue` and `onInputValueChange`. Set `filterOption={null}` when the server already filters or ranks results; otherwise the default matcher filters labels locally. A custom `filterOption(option, query)` can match additional fields for local datasets.
+
+The application owns requests, debouncing, failures, and stale-response handling. Replacing the results never removes selected values. Use `selectedOptions` to resolve labels for values absent from the current page of results, including initial edit-form values. These records do not become extra search results.
+
+The component remembers encountered records while they remain selected, but it cannot fetch a record it has never received. `getMissingLabel(value)` controls the fallback, which defaults to the value converted to a string. Current result records take precedence over supplied selected records when the same value has an updated label.
+
+`onValueChange` details include `selectedOptions`, the resolved selected records. That list may be incomplete while records are unavailable; the callback's first argument remains the authoritative selected value or values.
+
+<ComponentPreview>
+  <ComboboxRemote />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-remote.tsx</include>
+
+### Footer actions
+
+The footer is outside the scrolling list, so it stays visible while options scroll, load, or return no matches. Pass a React node or a function receiving `{ inputValue, value, selectedOptions, close }`. The value has the same single/multiple shape as the component.
+
+Use footer content for creation, retry, or result information. Keep these controls outside the listbox options. Creation and selecting a newly created record remain application-owned.
+
+<ComponentPreview>
+  <ComboboxFooter />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-footer.tsx</include>
+
+### Sizes, disabled, read-only, and invalid states
+
+Use `size="sm"` for a smaller control; `"base"` is the default. `disabled` prevents interaction, while `readOnly` preserves the value without allowing edits. Neither state shows convenience clear or pill-removal controls.
+
+Use `aria-invalid` and `aria-describedby` to associate an error with the input. FieldLabel, FieldDescription, and FieldError remain outside Combobox so forms can compose their own layout.
+
+<ComponentPreview>
+  <ComboboxStates />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-states.tsx</include>
+
+### Forms, validation, and reset
+
+`name` submits the selected value. Multiple selection submits one entry per value under the same name; read it with `FormData.getAll(name)`. Native form values are strings, even when application values are numeric. Use `form` to associate a control with a form elsewhere in the document.
+
+`required` validates selection, not search text. Typing a matching label without choosing it does not satisfy the field. Clearing yields null for a single selection or an empty array for multiple selection.
+
+Use `defaultValue` for uncontrolled selection. Native reset restores that initial selection. For controlled fields, the application resets `value` in its own reset handler. Query and popup state have their own controlled/uncontrolled pairs.
+
+<ComponentPreview>
+  <ComboboxForm />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-form.tsx</include>
+
+Form libraries can connect their value, blur handler, name, disabled state, and input ref directly. Selection changes use `onValueChange`; search changes use `onInputValueChange`. There is no selection-based `onChange` alias. Native input events remain available through `inputProps`.
+
+### Composable styled parts
+
+Use the parts when a layout requires more than the convenience props. Combobox.Root follows Base UI's `items` API; the configured Combobox uses `options`. The parts share the same theme, focus styling, and standalone CSS.
+
+#### Basic composition, auto-highlight, and input add-ons
+
+Combobox.Input includes an input group, editable input, and trigger. showClear adds the clear control; showTrigger defaults to true. Add InputGroupAddon children for leading icons or supplementary content. autoHighlight belongs on the manual Root.
+
+<ComponentPreview>
+  <ComboboxManual />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-manual.tsx</include>
+
+#### Manual multiple selection
+
+Compose InputGroup, Chips, Chip, and ChipsInput when you own selected-value presentation. Chip includes its remove control by default; set showRemove=false to supply your own ChipRemove, or removeLabel to customize its accessible name. Render chips in selected-value order because their keyboard and removal indices follow that order.
+
+useComboboxAnchor returns a div ref for anchoring the popup to the entire group instead of only the input. The convenience component does this automatically.
+
+<ComponentPreview>
+  <ComboboxManualMultiple />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-manual-multiple.tsx</include>
+
+#### Groups and collections
+
+For manual grouped data, List receives groups; Group supplies its items to Collection, which renders the filtered group members. GroupLabel names that group. Separator is a visual divider. Combobox.Label is a compatibility alias of GroupLabel; it is not a form label.
+
+<ComponentPreview>
+  <ComboboxManualGroups />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-manual-groups.tsx</include>
+
+#### Search inside the popup
+
+A trigger can display the selection while the search input lives inside Content. This layout is available through composition. Keep the trigger labeled and give the popup input a search hint. For custom object values on Root, use Base UI's itemToStringLabel and itemToStringValue to define display labels and form serialization.
+
+<ComponentPreview>
+  <ComboboxPopup />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-popup.tsx</include>
+
+## Behavior
+
+### Focus, blur, and input refs
+
+The forwarded ref is the editable HTMLInputElement. Use its native focus(), blur(), and select() methods; it supports focus options such as preventScroll. Its DOM value is displayed search text, not the selected values. Read application selection through value/onValueChange.
+
+Top-level onFocus/onBlur describe the entire field. Use inputProps.onFocus/onBlur when the raw input transition is needed. Popup controls are included in the field boundary even though their DOM is portaled.
+
+<ComponentPreview>
+  <ComboboxFocus />
+</ComponentPreview>
+
+<include>../../../examples/combobox/combobox-focus.tsx</include>
+
+### Selection and query behavior
+
+| Prop                  | Default                             | Behavior                                                                             |
+| --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
+| `closeOnSelect`       | true for single; false for multiple | Whether selecting an option closes the popup.                                        |
+| `clearSearchOnSelect` | true                                | Clears the current search after selection. Set false to keep picking from one query. |
+| `hideSelectedOptions` | false                               | Hides selected values from results without removing their selection.                 |
+| `isClearable`         | false                               | Shows clear-all only when a selection exists and the field can be edited.            |
+| `filterOption`        | Label matching                      | Custom local matching, or null to trust externally supplied results.                 |
+
+Value changes retain Base UI event details including reason, event, and cancel(). Canceling a value change prevents the selection update. Search and open callbacks receive their own event details and can cancel their respective requests.
+
+### Styling and popup placement
+
+className and style apply to the outer convenience wrapper. classNames accepts strings for control, input, selectedValues, pill, pillRemove, overflow, clear, trigger, popup, list, option, groupLabel, empty, status, and footer. Use state attributes such as data-highlighted, data-selected, data-disabled, and aria-invalid for state-dependent rules.
+
+popupProps accepts container, keepMounted, side, align, sideOffset, alignOffset, collisionBoundary, and collisionPadding. Positioning defaults to bottom/start with a 4px gap and collision handling. The popup follows the full control width, has a bounded height, and scrolls its list separately from the footer.
+
+The popup portals to `document.body`. Use a document theme or supply a themed portal container; see [Theming](/docs/theming).
+
+## Accessibility
+
+- Label the field visibly where possible. Placeholder text does not replace a label.
+- Use ArrowDown/ArrowUp to navigate options, Enter to select, and Escape to close. Preserve Base UI's handling of text composition and input editing.
+- Multiple-selection pills support directional navigation and Backspace/Delete removal. Hidden selections remain manageable through the popup.
+- When the popup is open, Tab moves from the input into enabled footer actions. Shift+Tab returns to the input; Tab after the last footer action continues to the next field. Footer actions belong outside the listbox; do not place buttons or links inside an option's custom content.
+- Top-level focus events include the portaled popup and avoid marking a field touched when focus moves between its own parts.
+- Loading stays searchable and has polite feedback. Disabled choices retain their unavailable state for assistive technology.
+- Required validation and form submission use selected values; search text is a separate state.
+- Reduced motion disables popup transitions and Spinner animation. Logical positioning and DirectionProvider support RTL layouts.
+
+Combobox selects existing values. Requests, record creation, bulk selection, and virtualized layouts remain application-owned or available through manual composition and the raw primitives.
+
+## API reference
+
+### Combobox
+
+| Props                                                       | Purpose                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| options                                                     | Required readonly array of available records.                                                     |
+| getLabel, getValue                                          | Optional accessors for the standard label/value shape; required as appropriate for custom shapes. |
+| isOptionDisabled                                            | Availability accessor; defaults to an option's disabled flag.                                     |
+| selectedOptions, getMissingLabel                            | Selected-record resolution and fallback text.                                                     |
+| multiple                                                    | false by default; changes the value shape to an array.                                            |
+| value, defaultValue, onValueChange                          | Controlled or initial selection and its change callback.                                          |
+| inputValue, defaultInputValue, onInputValueChange           | Controlled or initial search text and its change callback.                                        |
+| open, defaultOpen, onOpenChange                             | Controlled or initial popup visibility and its change callback.                                   |
+| filterOption                                                | Local matcher or null for external filtering.                                                     |
+| closeOnSelect, clearSearchOnSelect, hideSelectedOptions     | Selection/query interaction settings.                                                             |
+| selectionDisplay, maxVisibleSelections                      | Pills/names/count and visible-selection limit.                                                    |
+| renderOption                                                | Original option plus selected/highlighted/disabled/inputValue state.                              |
+| renderSelectedOption                                        | Individual selected content; receives value, option, label.                                       |
+| groupBy, renderGroupLabel                                   | Grouping and group-heading content.                                                               |
+| footer                                                      | Content or a function receiving inputValue, value, selectedOptions, close.                        |
+| isLoading, loadingContent, emptyContent                     | Loading and empty-results presentation.                                                           |
+| isClearable                                                 | Conditional clear-all action.                                                                     |
+| messages                                                    | Partial clear/remove/selectedCount/overflowCount messages.                                        |
+| id, name, form, required, disabled, readOnly                | Form association, validation, and editability.                                                    |
+| aria-label, aria-labelledby, aria-describedby, aria-invalid | Accessible names, descriptions, and errors.                                                       |
+| ref, onFocus, onBlur                                        | Native input ref and whole-field focus events.                                                    |
+| inputProps                                                  | Additional native input props/events; selection/query ownership cannot be overridden there.       |
+| size                                                        | sm or base; base is the default.                                                                  |
+| className, style, classNames, popupProps                    | Outer, internal, and popup presentation.                                                          |
+
+The default messages are `clear: "Clear selection"`, `remove(label): "Remove {label}"`, `selectedCount(count): "{count} selected"`, and `overflowCount(count): "+{count}"`. All content callbacks return React nodes except accessors, matchers, and message formatters, which return their documented primitive types.
+
+### Styled parts
+
+Each DOM part forwards its native ref and supports the corresponding Base UI props, including render composition and state-based className functions where provided by Base UI.
+
+Keep `Empty` and `Status` mounted while the popup is mounted so screen readers can announce content changes. Update their children instead of hiding or removing the live regions. They occupy no space when they have no content.
+
+| Part                     | Purpose                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Root                     | Manual selection, query, popup, filtering, and form state.                                              |
+| Input                    | Grouped search input with optional trigger/clear and add-on children.                                   |
+| InputGroup               | Full control boundary and anchor, shared with Ajna InputGroup styling.                                  |
+| ChipsInput               | Bare editable input for custom grouped layouts.                                                         |
+| Trigger                  | Toggles the popup; includes the decorative chevron.                                                     |
+| Clear                    | Clears selection/search with Base UI semantics.                                                         |
+| Value                    | Renders the manual Root's selected value.                                                               |
+| Content                  | Portal, positioner, and popup; accepts placement, container, mounting, and popup props.                 |
+| List                     | Scrollable listbox; supports data-rendering children.                                                   |
+| Item                     | Selectable row with default check indicator; showIndicator=false supports manual indicator composition. |
+| ItemIndicator            | Selected-state indicator.                                                                               |
+| Empty                    | Empty-results content tied to filtered items.                                                           |
+| Status                   | Polite loading/status region.                                                                           |
+| Group, GroupLabel, Label | Group container and heading; Label aliases GroupLabel.                                                  |
+| Collection               | Filtered items within a manual group.                                                                   |
+| Separator                | Visual group divider.                                                                                   |
+| Chips                    | Selection-chip container and keyboard registration.                                                     |
+| Chip                     | Individual selection chip, optionally including its removal control.                                    |
+| ChipRemove               | Removes its associated chip.                                                                            |
+
+The parts have named exports such as ComboboxRoot, ComboboxInput, ComboboxChipsInput, ComboboxContent, and ComboboxChip. Public types include ComboboxProps, ComboboxOption, ComboboxValue (string or number), selection/render/footer context types, class/message types, event detail types, and each part's props. Use import type for the scalar ComboboxValue; its runtime export is the manual Value part.

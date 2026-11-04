@@ -1,0 +1,18 @@
+@theme inline {
+  --color-ajna-background: hsl(var(--ajna-background));
+  --color-ajna-foreground: hsl(var(--ajna-foreground));
+  --color-ajna-card: hsl(var(--ajna-card));
+  --color-ajna-card-foreground: hsl(var(--ajna-card-foreground));
+  --color-ajna-primary: hsl(var(--ajna-primary));
+  --color-ajna-primary-foreground: hsl(var(--ajna-primary-foreground));
+  --color-ajna-muted: hsl(var(--ajna-muted));
+  --color-ajna-muted-foreground: hsl(var(--ajna-muted-foreground));
+  --color-ajna-border: hsl(var(--ajna-border));
+  --color-ajna-ring: hsl(var(--ajna-ring));
+  --color-ajna-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-ajna-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-ajna-success: hsl(var(--ajna-success));
+  --color-ajna-brand-navy: hsl(var(--ajna-brand-navy));
+  --color-ajna-brand-blue: hsl(var(--ajna-brand-blue));
+  --color-ajna-brand-light-blue: hsl(var(--ajna-brand-light-blue));
+}

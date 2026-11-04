@@ -1,0 +1,100 @@
+---
+title: Menubar
+description: Keep application commands available in a row of menus, with submenus, shortcuts, and selection controls.
+---
+
+import { ComponentPreview } from "@/components/component-preview";
+import { MenubarBasic } from "@/examples/menubar/menubar-basic";
+import { MenubarSelections } from "@/examples/menubar/menubar-selections";
+
+<ComponentPreview>
+  <MenubarBasic />
+</ComponentPreview>
+
+<include>../../../examples/menubar/menubar-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Menubar } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Menubar } from "@ajnacloud/ui/menubar";
+```
+
+### Basic usage
+
+```tsx
+<Menubar aria-label="Document editor">
+  <Menubar.Menu>
+    <Menubar.Trigger>File</Menubar.Trigger>
+    <Menubar.Content>
+      <Menubar.Item>New document</Menubar.Item>
+      <Menubar.Item>Save</Menubar.Item>
+      <Menubar.Separator />
+      <Menubar.Item disabled>Print</Menubar.Item>
+    </Menubar.Content>
+  </Menubar.Menu>
+</Menubar>
+```
+
+Use Menubar for application commands such as File, Edit, and View. For website links and larger navigation panels, use [Navigation Menu](/docs/components/navigation-menu). A shortcut printed inside a menu item is a hint; your application registers the corresponding keyboard shortcut.
+
+Menubar is included in `@ajnacloud/ui`. Complete the [installation setup](/docs/installation) using either standalone CSS or the Tailwind 3 preset. Import from the package root or `@ajnacloud/ui/menubar`.
+
+Each `Menubar.Menu` owns a trigger and content. Use `Item` for actions and `LinkItem` for navigation. Place a `Sub` inside the content when a command needs a nested menu. Disabled items remain visible and cannot be activated.
+
+## Examples
+
+### Checkboxes and radio items
+
+Checkbox items toggle independent preferences. Radio items belong inside a `RadioGroup` and choose one value. Use controlled state as below, or `defaultChecked` and `defaultValue` for uncontrolled preferences. Set `closeOnClick={false}` on checkbox items when users should be able to change several preferences without reopening the menu.
+
+<ComponentPreview>
+  <MenubarSelections />
+</ComponentPreview>
+
+<include>../../../examples/menubar/menubar-selections.tsx</include>
+
+## Behavior
+
+### Controlling menus and positioning
+
+`Menu` accepts Base UI's `open`, `defaultOpen`, `onOpenChange`, and `onOpenChangeComplete`. Each menu has independent state. The bar manages movement between triggers. `Menubar` accepts `orientation="vertical"`, `loopFocus={false}`, and `disabled` when the layout calls for them.
+
+`Content` defaults to `side="bottom"`, `align="start"`, `sideOffset={8}`, and `alignOffset={-4}`. It handles viewport collisions and portals to `document.body`. Change `container` for a theme-scoped portal; `keepMounted` retains closed content. `SubContent` uses the same positioning controls and defaults to the inline end.
+
+## Accessibility
+
+Give the bar an `aria-label` when its purpose is not obvious. Tab enters or leaves the bar; left and right arrows move between top-level triggers. Down Arrow opens a menu, up and down arrows move through its items, and Escape closes it and returns focus to the trigger. Submenus keep Base UI's directional keyboard behavior, typeahead, and focus management. Menus contain commands and menu choices; place text inputs and other form controls in a popover or dialog instead.
+
+## API reference
+
+### Public parts
+
+The compound and named APIs expose the same components: `Menubar.Trigger` and `MenubarTrigger`, for example.
+
+| Part                              | Purpose                                                                             |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| `Menubar` / `Root`                | The labeled, keyboard-navigable command bar. Forwards a div ref.                    |
+| `Menu`                            | State owner for one top-level menu.                                                 |
+| `Trigger`                         | The button that opens a menu. Supports Base UI `render`, disabled state, and a ref. |
+| `Content`                         | Portal, collision-aware positioner, and styled popup. Forwards a popup ref.         |
+| `Group`, `Label`                  | Group related commands under an accessible label. `Label` supports `inset`.         |
+| `Item`                            | An action. Supports `variant="destructive"`, `inset`, and disabled state.           |
+| `LinkItem`                        | An anchor with menu behavior. Accepts `href` or a router link through `render`.     |
+| `CheckboxItem`                    | A checked preference with `checked` and `onCheckedChange`.                          |
+| `RadioGroup`, `RadioItem`         | A single choice with `value` and `onValueChange` on the group.                      |
+| `Separator`                       | Separate groups visually and semantically.                                          |
+| `Shortcut`                        | A decorative shortcut hint; register the shortcut in application code.              |
+| `Sub`, `SubTrigger`, `SubContent` | State, trigger, and popup for a nested menu.                                        |
+| `Portal`                          | Base UI portal for custom composition. `Content` already includes one.              |
+
+Each named part has a corresponding `Menubar…Props` type. Styled menu rows are shared with [Dropdown Menu](/docs/components/dropdown-menu), including state-aware `className` callbacks and `render` support. Use `className` for local customization and the existing Ajna color tokens for theming.

@@ -1,0 +1,212 @@
+---
+title: Slider
+description: Choose a number or a range by dragging a thumb or using the keyboard.
+---
+
+import { SliderExample } from "@/examples/slider/slider-example";
+import { SliderControlled } from "@/examples/slider/slider-controlled";
+import { SliderRange } from "@/examples/slider/slider-range";
+import { SliderSteps } from "@/examples/slider/slider-steps";
+import { SliderVertical } from "@/examples/slider/slider-vertical";
+import { SliderDisabled } from "@/examples/slider/slider-disabled";
+import { SliderFieldExample } from "@/examples/slider/slider-field-example";
+import { SliderForm } from "@/examples/slider/slider-form";
+import { SliderValidation } from "@/examples/slider/slider-validation";
+
+<ComponentPreview>
+  <SliderExample />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Slider, SliderLabel, SliderValue } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Slider, SliderLabel, SliderValue } from "@ajnacloud/ui/slider";
+```
+
+### Basic usage
+
+```tsx
+<Slider defaultValue={50} min={0} max={100}>
+  <SliderLabel>Volume</SliderLabel>
+  <SliderValue />
+</Slider>
+```
+
+Use Slider for a value within a known range, such as volume, playback speed, or a price filter. It works with the pointer, touch, and keyboard. Use an Input when entering an exact number is more practical than dragging, and [Progress](/docs/components/progress) when displaying task completion rather than accepting input.
+
+Slider includes its control, track, filled range, and thumbs automatically. One numeric value creates one thumb; an array creates one thumb per entry. Optional children are placed before the control, which is useful for SliderLabel and SliderValue.
+
+## Examples
+
+### Labels and controlled state
+
+<ComponentPreview>
+  <SliderControlled />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-controlled.tsx</include>
+
+Use `value` and `onValueChange` for application-owned state, or `defaultValue` for an uncontrolled slider. If neither is supplied, the slider starts at `min` with one thumb. The default range is 0–100.
+
+SliderLabel names the slider and its default thumb. Clicking the label focuses a single-thumb slider. SliderValue displays the current value and supports a render function for custom text. A label on a range names the overall question; give its individual thumbs distinct names as shown below.
+
+`onValueChange` fires as the user changes a value. `onValueCommitted` fires when an interaction commits a changed value, such as a keyboard step or releasing a drag. Keep the display responsive with the first callback and use the committed callback for work that should wait until an interaction finishes.
+
+A scalar value produces a numeric callback argument. An array value produces an array argument. Slider preserves Base UI's generic typing for those two cases.
+
+### Range sliders
+
+<ComponentPreview>
+  <SliderRange />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-range.tsx</include>
+
+Supply a nonempty array for multiple thumbs. Use `thumbProps.getAriaLabel` to distinguish the lower and upper bounds, rather than giving both the same name. `format` and `locale` control number formatting for the displayed and default spoken values; this example formats a dollar budget.
+
+`minStepsBetweenValues` specifies the number of steps that must remain between neighboring values. With `step={1}`, five steps means five units. With `step={5}`, the same setting means 25 units.
+
+Pointer collisions are controlled by `thumbCollisionBehavior`: `push` is the Base UI default, `swap` allows thumbs to exchange places, and `none` prevents them from crossing. Keyboard Home/End respect neighboring values and the minimum separation. Keep the ordering and bounds consistent with your application's data.
+
+### Bounds, steps, and meaningful value text
+
+<ComponentPreview>
+  <SliderSteps />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-steps.tsx</include>
+
+`min`, `max`, and `step` define valid values. The minimum is the origin for step increments, and `(max - min)` should be evenly divisible by the step. Decimal steps are supported. `largeStep` controls Page Up/Page Down and Shift+Arrow changes; it defaults to 10 units, independently of `step`.
+
+Use `thumbProps.getAriaValueText` when the bare number needs units or context. Changing SliderValue's visible text does not change the thumb's spoken value automatically. The example exposes “1.25 times normal speed” rather than an unexplained decimal.
+
+### Vertical sliders
+
+<ComponentPreview>
+  <SliderVertical />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-vertical.tsx</include>
+
+Set `orientation="vertical"` and give the containing layout an explicit height. The default minimum vertical height is 160px; the example uses 180px. Vertical sliders fill upward from the minimum and expose `aria-orientation="vertical"` on their inputs.
+
+Each control in a mixer still needs its own accessible name. Grouping them visually or naming the surrounding mixer does not replace those names. Use Arrow Up/Down to adjust a vertical control, and preserve the same bounds and step conventions as a horizontal slider.
+
+### Disabled state
+
+<ComponentPreview>
+  <SliderDisabled />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-disabled.tsx</include>
+
+`disabled` stops pointer and keyboard changes, removes the thumb inputs from normal tab navigation, and applies disabled styling. Disabled hidden range inputs do not contribute values to FormData. To disable only one thumb, supply `disabled` through its thumbProps; make sure the remaining interaction still makes sense.
+
+### Field labels and descriptions
+
+<ComponentPreview>
+  <SliderFieldExample />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-field-example.tsx</include>
+
+Use Field for the surrounding description and layout, and put SliderLabel inside Slider. It provides the label association and single-thumb click-to-focus behavior. Pass `aria-describedby` on Slider to connect help text to its thumb inputs.
+
+Do not point a native label's `htmlFor` at Slider's outer `id`: that ID identifies a div, not the nested range input. For an external text label, use `aria-labelledby` on Slider instead; clicking external text does not automatically focus the input in that composition.
+
+Field's presentation attributes do not perform validation. For Base UI's validation context, compose the unstyled Field family from `/primitives/field` around the control; Ajna's styled Field remains a layout component.
+
+### Validation
+
+<ComponentPreview>
+  <SliderValidation />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-validation.tsx</include>
+
+The example starts below an allowed contribution of 50. Move the thumb to 50 or more to clear the error. Base UI's Field context connects the invalid state to the actual range input and supplies the thumb/label state used for error styling. Ajna's Field provides layout and the error message remains application-owned.
+
+Setting `aria-invalid` only on Slider's outer div does not mark the nested range input invalid. Use the validation context when that input-level state is needed, and connect FieldError through `aria-describedby`. For range sliders, keep the overall group error separate from any thumb-specific descriptions you supply.
+
+### Forms and resetting controlled values
+
+<ComponentPreview>
+  <SliderForm />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-form.tsx</include>
+
+`name` adds native range inputs to form submission. A single-value slider produces one value. A range uses the same name for each thumb, so read it with `FormData.getAll(name)` instead of `get(name)`.
+
+This example handles form reset explicitly because the range is controlled. Keep controlled state in sync when resetting a form. `form` can associate the inputs with a form elsewhere in the document. Use an explicit `type="submit"` on Button for submission; its default is `button`.
+
+## Behavior
+
+### Thumb customization
+
+`thumbProps` accepts a shared props object or a function of the thumb index:
+
+```tsx
+import { Slider } from "@ajnacloud/ui";
+
+<Slider
+  defaultValue={[20, 80]}
+  thumbProps={(index) => ({
+    "aria-label": index === 0 ? "Minimum price" : "Maximum price",
+    getAriaValueText: (_, value) => `${value} dollars`,
+    className: "price-thumb",
+  })}
+/>
+```
+
+Shared `getAriaLabel(index)` is convenient for names; the function form also allows different refs, classes, or disabled states. `inputRef` targets a thumb's nested range input. Native focus/blur/key handlers supported by Base UI Thumb are forwarded there. The index and thumb count are managed by Slider, including in server HTML.
+
+The root's `aria-label` is used as a default name for its thumbs; explicit thumb labels override it. Root `aria-describedby` is forwarded as a default description, and per-thumb descriptions can override it. Preserve those associations when supplying custom thumb props.
+
+### Appearance and focus
+
+The track is 6px high; thumbs are 16px circles with a visible focus ring. `className` styles the outer layout, while `thumbProps.className` styles thumbs. Both accept state-based callbacks. Supply application-generated utilities in native Tailwind mode, or your own stylesheet classes/inline styles in standalone mode.
+
+Thumbs default to `thumbAlignment="edge"`, keeping their outer edges inside the control at the limits. Base UI measures edge-aligned thumbs and handles their server-rendered positioning. The alternative `center` alignment centers the thumb on each endpoint. Do not add independent CSS transforms to position thumbs: Base UI owns their positioning.
+
+Avoid placing controls in a container that clips their focus ring. Reduced motion removes thumb focus-style transitions; dragging and keyboard changes stay immediate rather than animating the selected value behind the pointer.
+
+## Accessibility
+
+| Key                 | Behavior                                                                 |
+| ------------------- | ------------------------------------------------------------------------ |
+| Tab / Shift+Tab     | Visits enabled thumb inputs in order.                                    |
+| Arrow Right / Up    | Increases by a step in LTR; horizontal Right decreases in RTL.           |
+| Arrow Left / Down   | Decreases by a step in LTR; horizontal Left increases in RTL.            |
+| Shift+Arrow         | Uses `largeStep`.                                                        |
+| Page Up / Page Down | Increases/decreases by `largeStep`.                                      |
+| Home / End          | Moves to the allowed minimum/maximum, accounting for neighboring thumbs. |
+
+Each thumb contains an accessible native range input with its value, bounds, and orientation. Keep distinct names for range bounds and useful value text for units. SliderValue renders an output with live announcements off by default to avoid announcing every drag update twice. Sliders should not be the only way to enter a value when precise entry is important; pair them with an appropriate numeric input in your application.
+
+## API reference
+
+| Part          | Props / purpose                                              | Default                              |
+| ------------- | ------------------------------------------------------------ | ------------------------------------ |
+| `Slider`      | `value`, `defaultValue`, `onValueChange`, `onValueCommitted` | Uncontrolled value starts at min     |
+| `Slider`      | `min`, `max`, `step`, `largeStep`                            | 0, 100, 1, 10                        |
+| `Slider`      | `orientation`, `disabled`, `thumbAlignment`                  | `horizontal`, false, `edge`          |
+| `Slider`      | `minStepsBetweenValues`, `thumbCollisionBehavior`            | 0, `push`                            |
+| `Slider`      | `name`, `form`, `format`, `locale`                           | Base UI defaults                     |
+| `Slider`      | `thumbProps` object or `(index) => props`, `children`        | Automatic control, track, and thumbs |
+| `SliderLabel` | Names the group/thumbs and focuses a single-thumb slider     | Div; ID managed by Base UI           |
+| `SliderValue` | Optional `(formattedValues, values) => ReactNode` children   | Output joining formatted values      |
+
+Slider and SliderLabel forward div refs; SliderValue forwards an output ref. Root callbacks preserve number-versus-array typing; read-only arrays are accepted too. Root and thumb `className` can receive Base UI state. SliderLabel does not accept a custom ID; use its automatic association or `aria-labelledby` for an external label. Use `/primitives/slider` for lower-level control, track, indicator, and thumb composition.

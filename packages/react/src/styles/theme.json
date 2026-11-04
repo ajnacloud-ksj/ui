@@ -1,0 +1,54 @@
+{
+  "colors": {
+    "brand-navy": ["223 62.5% 18.8235%", "223 62.5% 18.8235%"],
+    "brand-orange": ["27.7358 100% 58.4314%", "27.7358 100% 58.4314%"],
+    "brand-blue": ["212.4528 88.8268% 64.902%", "212.4528 88.8268% 64.902%"],
+    "brand-light-blue": ["210 47.619% 91.7647%", "210 47.619% 91.7647%"],
+    "brand-gray": ["0 0% 43.5294%", "0 0% 43.5294%"],
+    "background": ["0 0% 97.1%", "0 0% 7.04%"],
+    "foreground": ["0 0% 6%", "0 0% 92%"],
+    "card": ["0 0% 100%", "0 0% 9.8%"],
+    "card-foreground": ["0 0% 6%", "0 0% 98%"],
+    "popover": ["0 0% 100%", "0 0% 14%"],
+    "popover-foreground": ["0 0% 6%", "0 0% 86.9%"],
+    "primary": ["221 83% 53%", "221 83% 53%"],
+    "primary-foreground": ["0 0% 100%", "0 0% 100%"],
+    "secondary": ["0 0% 90.6%", "0 0% 12.9%"],
+    "secondary-foreground": ["0 0% 9.8%", "0 0% 92%"],
+    "muted": ["0 0% 92.4%", "0 0% 12.9%"],
+    "muted-foreground": ["0 0% 37.4%", "0 0% 57.408%"],
+    "accent": ["0 0% 93.5%", "0 0% 17.198%"],
+    "accent-foreground": ["0 0% 9%", "0 0% 90%"],
+    "destructive": ["0 72% 45%", "0 72% 51%"],
+    "destructive-text": ["0 72% 45%", "0 91% 71%"],
+    "destructive-foreground": ["0 0% 100%", "0 0% 100%"],
+    "border": ["0 0% 87.2%", "0 0% 20%"],
+    "input": ["0 0% 87.2%", "0 0% 20%"],
+    "ring": ["221 83% 53%", "217 91% 67%"],
+    "backdrop": ["0 0% 0% / 0.2", "0 0% 0% / 0.4"],
+    "destructive-tint": ["0 86% 97%", "0 35% 14%"],
+    "info": ["221 83% 35%", "213 94% 78%"],
+    "info-tint": ["214 100% 96%", "222 60% 14%"],
+    "success": ["142 70% 25%", "142 65% 70%"],
+    "success-tint": ["138 76% 95%", "146 45% 12%"],
+    "warning": ["32 90% 30%", "43 74% 70%"],
+    "warning-tint": ["48 96% 95%", "30 38% 13%"]
+  },
+  "radius": "0.5rem",
+  "sidebarColors": {
+    "sidebar": ["0 0% 8.5%", "var(--ajna-background)"],
+    "sidebar-foreground": ["0 0% 88.5%", "var(--ajna-foreground)"],
+    "sidebar-primary": ["0 0% 92%", "var(--ajna-primary)"],
+    "sidebar-primary-foreground": [
+      "0 0% 10%",
+      "var(--ajna-primary-foreground)"
+    ],
+    "sidebar-accent": ["0 0% 15.9%", "var(--ajna-accent)"],
+    "sidebar-accent-foreground": [
+      "0 0% 92.9%",
+      "var(--ajna-accent-foreground)"
+    ],
+    "sidebar-border": ["0 0% 20%", "var(--ajna-border)"],
+    "sidebar-ring": ["var(--ajna-ring)", "var(--ajna-ring)"]
+  }
+}

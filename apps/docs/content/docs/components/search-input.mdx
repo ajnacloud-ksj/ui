@@ -1,0 +1,127 @@
+---
+title: Search Input
+description: Enter a search query with a search icon, optional loading state, and a clear control.
+---
+
+import { SearchInputExample } from "@/examples/search-input/search-input-example";
+import { SearchInputForm } from "@/examples/search-input/search-input-form";
+import { SearchInputDebounced } from "@/examples/search-input/search-input-debounced";
+import { SearchInputLoading } from "@/examples/search-input/search-input-loading";
+import { SearchInputStates } from "@/examples/search-input/search-input-states";
+
+<ComponentPreview>
+  <SearchInputExample />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { SearchInput, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { SearchInput } from "@ajnacloud/ui/search-input";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="project-search">Search projects</FieldLabel>
+  <SearchInput
+    id="project-search"
+    name="search"
+    placeholder="Search projects…"
+  />
+</Field>
+```
+
+SearchInput combines InputGroup's border, focus treatment, and input with a leading search icon and trailing clear button. It renders a native search input. Your application owns filtering, requests, and navigation; the example filters a small local list.
+
+Use a visible FieldLabel or an accessible name. A placeholder is a hint, not a label. The forwarded ref targets the actual HTMLInputElement, and ordinary input attributes such as id, name, autoComplete, required, and aria-describedby reach that input.
+
+## Examples
+
+### Search forms and reset
+
+Set `name` for FormData and use a form for Enter submission. Native reset restores `defaultValue` for uncontrolled inputs; reset controlled values in the form’s `onReset` handler.
+
+<ComponentPreview>
+  <SearchInputForm />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-form.tsx</include>
+
+### Debounce the operation
+
+Keep the query immediate and debounce the operation that uses it. Cancel or ignore outdated responses when fetching remote results.
+
+<ComponentPreview>
+  <SearchInputDebounced />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-debounced.tsx</include>
+
+### Loading
+
+`loading` replaces the search icon with Spinner while keeping the input and clear control usable. Use `aria-busy` and a status message on the results region for request feedback.
+
+<ComponentPreview>
+  <SearchInputLoading />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-loading.tsx</include>
+
+### Disabled, read-only, and labels
+
+<ComponentPreview>
+  <SearchInputStates />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-states.tsx</include>
+
+SearchInput preserves the input's disabled and readOnly behaviour. Label and describe the query using Field's normal pattern. For errors, pass aria-invalid to the input and reference an appropriate FieldError through aria-describedby.
+
+Use `icon` for a custom decorative React element. `className` and style target the actual input; containerProps supplies InputGroup props, including a container className or style for width and border customisation. Group focus and invalid styling come from the existing InputGroup component. Reduced motion also follows InputGroup and Spinner.
+
+## Behavior
+
+### Controlled and uncontrolled queries
+
+Pass a string value and onValueChange to control the query. Updates happen immediately with each edit. The callback keeps Base UI's `(value, eventDetails)` signature. Native `onChange` remains a DOM change event; it is not an alias taking a string.
+
+For uncontrolled usage, omit value and use defaultValue. Empty defaults to an empty input. Keep the same mode throughout the component's lifetime, as with a normal React input. Changes to a controlled value from elsewhere in the application are reflected in both the text and clear-button visibility.
+
+### Clearing and keyboard behaviour
+
+The clear button appears only for a nonempty, editable query. Its default accessible label is “Clear search”; clearLabel can provide a translated or more specific label. Clearing emits one value update with an empty string, calls optional onClear, and returns focus to the input. It does not submit a surrounding form.
+
+Escape uses the same clear path when the query is nonempty and clearable is enabled. A caller's onKeyDown runs first and can prevent that behaviour. Escape during text composition is left to the input method. Empty queries do not consume Escape, allowing an enclosing overlay to handle it.
+
+`clearable={false}` removes Ajna's clear button and Escape shortcut. Native search behaviours can still depend on the browser. Disabled and read-only inputs do not expose the custom clear control. Native WebKit cancel-button styling is suppressed so it does not duplicate Ajna's button.
+
+## API reference
+
+| Prop                    | Purpose                                        | Default        |
+| ----------------------- | ---------------------------------------------- | -------------- |
+| `value`, `defaultValue` | Controlled or initial string query             | Empty          |
+| `onValueChange`         | String value and Base UI event details         | —              |
+| `onChange`              | Native input change event                      | —              |
+| `clearable`             | Enable Ajna's clear button and Escape shortcut | true           |
+| `clearLabel`            | Accessible clear-button name                   | Clear search   |
+| `onClear`               | Notification that clear was requested          | —              |
+| `loading`               | Replace the icon with Spinner                  | false          |
+| `icon`                  | Custom decorative leading content              | Search icon    |
+| `containerProps`        | Props for the InputGroup wrapper               | —              |
+| Other props             | Native/Base UI input attributes and handlers   | Input defaults |
+
+SearchInput owns type search and its composition; it has no render prop for replacing the actual input. The main ref targets that input. The component does not debounce, fetch, own result data, or synchronise a URL.

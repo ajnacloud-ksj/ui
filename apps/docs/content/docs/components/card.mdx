@@ -1,0 +1,141 @@
+---
+title: Card
+description: Group related information and actions in a bordered container.
+---
+
+import { CardExample } from "@/examples/card/card-example";
+import { CardSpacing } from "@/examples/card/card-spacing";
+import { CardForm } from "@/examples/card/card-form";
+import { CardCompact } from "@/examples/card/card-compact";
+import { CardImage } from "@/examples/card/card-image";
+
+<ComponentPreview>
+  <CardExample />
+</ComponentPreview>
+
+<include>../../../examples/card/card-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@ajnacloud/ui/card";
+```
+
+### Basic usage
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle render={<h3>Website redesign</h3>} />
+    <CardDescription>Design and development</CardDescription>
+  </CardHeader>
+  <CardContent>The next review is on Friday.</CardContent>
+  <CardFooter>
+    <a href="/projects/website">View project</a>
+  </CardFooter>
+</Card>
+```
+
+### Parts
+
+| Part              | Purpose                                                   |
+| ----------------- | --------------------------------------------------------- |
+| `Card`            | Surface and spacing between sections.                     |
+| `CardHeader`      | Layout for the title, description, and optional action.   |
+| `CardTitle`       | Title text; use `render` to give it a heading element.    |
+| `CardDescription` | Supporting content below the title.                       |
+| `CardAction`      | Badge, link, or control beside the title and description. |
+| `CardContent`     | Main content with shared horizontal padding.              |
+| `CardFooter`      | Row of actions or secondary information.                  |
+
+Use only the parts you need; a header and footer are optional.
+
+## Examples
+
+### Shared spacing
+
+Cards use 16px section spacing and insets by default. Set `--ajna-card-spacing` on the card to change the outer spacing, section gaps, and header/content/footer insets together.
+
+<ComponentPreview>
+  <CardSpacing />
+</ComponentPreview>
+
+<include>../../../examples/card/card-spacing.tsx</include>
+
+### Compact size and a footer divider
+
+`size="sm"` reduces section spacing and insets from 16px to 12px. Header, content, and footer share `--ajna-card-spacing`. Footers have a top divider and a tinted background.
+
+<ComponentPreview>
+  <CardCompact />
+</ComponentPreview>
+
+<include>../../../examples/card/card-compact.tsx</include>
+
+### Form
+
+Wrap the controls and submit button in a real form. Use `render={<section />}` and `aria-labelledby` for a named section.
+
+<ComponentPreview>
+  <CardForm />
+</ComponentPreview>
+
+<include>../../../examples/card/card-form.tsx</include>
+
+### Image
+
+Place edge-to-edge media directly inside Card. Remove the top padding and clip overflow to keep the image inside its rounded boundary.
+
+<ComponentPreview>
+  <CardImage />
+</ComponentPreview>
+
+<include>../../../examples/card/card-image.tsx</include>
+
+## Accessibility
+
+Card and CardTitle render `div` elements by default. Render the title as an appropriate heading, and keep links and buttons as explicit controls when a card contains other interactive content.
+
+## API reference
+
+### Card
+
+| Prop     | Type                             | Default  | Description                       |
+| -------- | -------------------------------- | -------- | --------------------------------- |
+| `size`   | `"base" \| "sm"`                 | `"base"` | Section spacing and padding.      |
+| `render` | React element or render callback | —        | Replaces the default `div`.       |
+| `ref`    | `Ref<HTMLElement>`               | —        | Ref to the rendered root element. |
+
+### CardTitle
+
+Accepts native `div` props, a `render` element or callback, and a ref to the rendered element.
+
+### Other parts
+
+CardHeader, CardDescription, CardAction, CardContent, and CardFooter accept native `div` props and `HTMLDivElement` refs. All parts accept children, `className`, and `style`.
+
+All seven parts, their prop types, and `CardSize` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/card`.

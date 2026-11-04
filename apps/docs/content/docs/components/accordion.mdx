@@ -1,0 +1,92 @@
+---
+title: Accordion
+description: Expand and collapse related sections of content.
+---
+
+import { AccordionExample } from "@/examples/accordion/accordion-example";
+import { AccordionMultipleExample } from "@/examples/accordion/accordion-multiple-example";
+import { AccordionControlled } from "@/examples/accordion/accordion-controlled";
+
+<ComponentPreview>
+  <AccordionExample />
+</ComponentPreview>
+
+<include>../../../examples/accordion/accordion-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@ajnacloud/ui/accordion";
+```
+
+### Basic usage
+
+```tsx
+<Accordion defaultValue={["details"]}>
+  <AccordionItem value="details">
+    <AccordionTrigger>Project details</AccordionTrigger>
+    <AccordionContent>
+      Review the project scope and milestones.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+Give items stable, unique values when controlling them or setting initial state. Single expansion is the default: opening a section closes the previous section, and the open section can be collapsed.
+
+## Examples
+
+### Multiple expansion
+
+<ComponentPreview>
+  <AccordionMultipleExample />
+</ComponentPreview>
+
+<include>../../../examples/accordion/accordion-multiple-example.tsx</include>
+
+Base UI always uses an array for `value` and `defaultValue`, including single expansion. Set `multiple` to allow several sections to stay open. Radix's `type="single"`, `type="multiple"`, and `collapsible` props are not this component's API.
+
+### Controlled state
+
+<ComponentPreview>
+  <AccordionControlled />
+</ComponentPreview>
+
+<include>../../../examples/accordion/accordion-controlled.tsx</include>
+
+`onValueChange` receives the next array and Base UI event details. `disabled` on the root disables every item; `disabled` on an item disables that section.
+
+## Accessibility
+
+AccordionTrigger includes an `h3` heading. Compose a different heading level through the unstyled parts when needed. Arrow Up/Down and Home/End move between triggers; Enter or Space toggles a section. Reduced motion removes panel transitions. `keepMounted` retains closed content; `hiddenUntilFound` enables browser find-in-page where supported.
+
+## API reference
+
+| Part               | Key props                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| `Accordion`        | `value`, `defaultValue`, `onValueChange`, `multiple`, `disabled`, `keepMounted`, `hiddenUntilFound`. |
+| `AccordionItem`    | `value`, `disabled`, `onOpenChange`.                                                                 |
+| `AccordionTrigger` | Native/Base UI button props, `render`, and ref; includes its heading.                                |
+| `AccordionContent` | Base UI panel props and ref.                                                                         |
+
+All parts preserve state-based class names and refs. Content's `className` applies to the outer panel; default content spacing is on an inner element. For advanced heading structures, raw Base UI parts are available from `/primitives/accordion`. For one independent disclosure, use [Collapsible](/docs/components/collapsible).

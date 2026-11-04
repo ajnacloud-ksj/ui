@@ -1,0 +1,204 @@
+---
+title: Action Bar
+description: Show bulk actions for selected items in a floating toolbar.
+---
+
+import { ActionBarExample } from "@/examples/action-bar/action-bar-example";
+import { ActionBarPosition } from "@/examples/action-bar/action-bar-position";
+import { ActionBarAsync } from "@/examples/action-bar/action-bar-async";
+import { ActionBarMenu } from "@/examples/action-bar/action-bar-menu";
+
+<ComponentPreview>
+  <ActionBarExample />
+</ComponentPreview>
+
+<include>../../../examples/action-bar/action-bar-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  ActionBar,
+  ActionBarSelection,
+  ActionBarSeparator,
+  ActionBarGroup,
+  ActionBarItem,
+  ActionBarClose,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  ActionBar,
+  ActionBarSelection,
+  ActionBarSeparator,
+  ActionBarGroup,
+  ActionBarItem,
+  ActionBarClose,
+} from "@ajnacloud/ui/action-bar";
+```
+
+### Basic usage
+
+```tsx
+<ActionBar defaultOpen aria-label="Selection actions">
+  <ActionBarSelection>3 selected</ActionBarSelection>
+  <ActionBarSeparator />
+  <ActionBarGroup aria-label="Document actions">
+    <ActionBarItem>Archive</ActionBarItem>
+    <ActionBarItem>Delete</ActionBarItem>
+  </ActionBarGroup>
+  <ActionBarClose aria-label="Clear selection" />
+</ActionBar>
+```
+
+### Parts
+
+| Part               | Purpose                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| ActionBar          | Controls visibility, portal placement, position, orientation, and dismissal. Renders the outer toolbar.      |
+| ActionBarSelection | Announces selection information supplied as children, such as “3 selected”.                                  |
+| ActionBarGroup     | Groups related items into one keyboard tab stop with arrow-key navigation.                                   |
+| ActionBarItem      | Runs an action, or composes with another control through render.                                             |
+| ActionBarSeparator | Separates related sections; defaults to the opposite of the bar's orientation.                               |
+| ActionBarClose     | Requests dismissal with onOpenChange(false). Defaults to an X icon and “Dismiss action bar” accessible name. |
+
+Keep labels and counts in ActionBarSelection, related actions in ActionBarGroup, and ActionBarClose outside the group. Multiple groups each have their own tab stop. An ActionBarItem outside a group behaves as a normal button with its own tab stop.
+
+The application owns selection. Derive open from selected IDs or rows and clear them in onOpenChange when open becomes false. ActionBarSelection displays its children; it does not discover selected records. There is no dependency on a particular table or selection library.
+
+ActionBarItem calls onClick first and then onSelect unless the click was prevented. Selecting an item does not automatically close the bar. Clear selection or change open after the operation succeeds. Actions use type button, so they do not accidentally submit an enclosing form.
+
+Use defaultOpen for an uncontrolled bar. Its close button and Escape update its internal visibility. With open, the owner must respond to onOpenChange; the component does not override a controlled value.
+
+## Examples
+
+### Position and orientation
+
+<ComponentPreview>
+  <ActionBarPosition />
+</ComponentPreview>
+
+<include>../../../examples/action-bar/action-bar-position.tsx</include>
+
+By default, the bar is fixed at the bottom center of the viewport. side accepts top or bottom; sideOffset adds distance from that edge and respects its safe-area inset. align accepts start, center, or end.
+
+For center alignment, alignOffset shifts horizontally to the right when positive and left when negative. For start/end alignment, it adds to a 16px inset from the corresponding logical edge. Start and end follow dir. Avoid offsets that push actions outside the available viewport.
+
+orientation changes both the bar layout and group navigation. Horizontal groups use Left/Right; vertical groups use Up/Down. dir defaults to the surrounding Base UI DirectionProvider's direction and can be overridden on the bar. In RTL horizontal groups, Left moves forward and Right moves backward.
+
+`portalContainer` chooses the DOM destination; it does not change fixed positioning. Set `position="absolute"` when anchoring inside a container, and account for clipping or transformed ancestors.
+
+The bar has a maximum width with viewport edge space. Long action groups can scroll horizontally. Keep selection text concise and use a menu for less common actions when space is limited. className and style target the outer bar; they can customize width, placement, and appearance.
+
+### Loading and disabled actions
+
+<ComponentPreview>
+  <ActionBarAsync />
+</ComponentPreview>
+
+<include>../../../examples/action-bar/action-bar-async.tsx</include>
+
+loading on ActionBarItem renders Spinner, sets aria-busy, and prevents activation. disabled prevents activation without showing a spinner. Disabled and loading items remain reachable by arrow keys by default, so their labels can still be discovered; set focusableWhenDisabled false to skip them. A disabled ActionBarGroup disables its items.
+
+To keep a pending operation visible, disable ActionBarClose and cancel onEscapeKeyDown with event.preventDefault(), as above. Disabling the close button alone does not cancel Escape. The operation's cancellation and request lifetime remain application concerns.
+
+### Icons and menus
+
+<ComponentPreview>
+  <ActionBarMenu />
+</ComponentPreview>
+
+<include>../../../examples/action-bar/action-bar-menu.tsx</include>
+
+The icon slot accepts a React element from any icon library and hides it from assistive technology. Use children for a visible label. For icon-only items, supply aria-label or aria-labelledby; square and circle shapes do not infer a name from the icon.
+
+Compose an ActionBarItem with DropdownMenu.Trigger through render to keep the trigger in the group's arrow navigation. Escape closes the menu first; a subsequent Escape can dismiss the bar. The menu example updates a local status message to demonstrate the callbacks rather than modifying external files.
+
+When supplying your own render element, preserve its semantics and ref. For an anchor, use nativeButton false and supply a meaningful href. Loading controls should describe the action rather than replacing their accessible label with an unlabeled spinner.
+
+## Accessibility
+
+Give the bar an accessible name with aria-label or aria-labelledby. The default is “Selection actions”. Name multiple groups when it helps distinguish their actions.
+
+Opening the bar does not move focus, trap focus, or block the rest of the page. Users can keep selecting records. Tab enters the action groups and close button. Clicking outside does not dismiss the bar.
+
+Escape is handled in the portal container's document while the bar is open. Already-prevented Escape events and composition events are ignored. onEscapeKeyDown can cancel dismissal. Components such as DropdownMenu can consume Escape for their own dismissal first.
+
+When the bar owns focus as it closes, it restores focus to the element that was focused when the bar opened, if that element is still connected. Focus already moved elsewhere is preserved. If an operation removes that element, move focus to a suitable remaining control yourself; the first example focuses Reset documents after archiving.
+
+ActionBarSelection is a polite, atomic status region for selection updates. Give it meaningful text rather than a bare number. Button focus styles remain visible. The bar fades in and respects reduced-motion preferences; closing removes it immediately.
+
+| Key             | Behavior                                                                         |
+| --------------- | -------------------------------------------------------------------------------- |
+| Tab / Shift+Tab | Move between groups, ungrouped items, the close button, and other page controls. |
+| Left / Right    | Move between items in a horizontal group; direction follows dir.                 |
+| Up / Down       | Move between items in a vertical group.                                          |
+| Home / End      | Focus the first/last available item in the focused group.                        |
+| Enter / Space   | Activate a button item or close button.                                          |
+| Escape          | Request dismissal unless another component or handler consumes it.               |
+
+loop defaults to true. Set it to false to stop arrow-key navigation at the first and last items. Disabled items are available for focus unless focusableWhenDisabled is false.
+
+## API reference
+
+### ActionBar
+
+| Prop            | Type                                  | Default       | Purpose                                                      |
+| --------------- | ------------------------------------- | ------------- | ------------------------------------------------------------ |
+| open            | boolean                               | —             | Controlled visibility.                                       |
+| defaultOpen     | boolean                               | false         | Initial uncontrolled visibility.                             |
+| onOpenChange    | (open: boolean) => void               | —             | Called when close or Escape requests dismissal.              |
+| side            | top / bottom                          | bottom        | Viewport edge.                                               |
+| sideOffset      | number                                | 16            | Distance from that edge in pixels, plus the safe-area inset. |
+| align           | start / center / end                  | center        | Horizontal alignment.                                        |
+| alignOffset     | number                                | 0             | Horizontal offset, in pixels, as described above.            |
+| orientation     | horizontal / vertical                 | horizontal    | Layout and group arrow-key axis.                             |
+| loop            | boolean                               | true          | Wrap group arrow-key navigation.                             |
+| dir             | ltr / rtl                             | Inherited     | Reading and navigation direction.                            |
+| portalContainer | HTMLElement / DocumentFragment / null | document.body | Portal destination; null uses the default.                   |
+| onEscapeKeyDown | (event: KeyboardEvent) => void        | —             | Handle or prevent Escape dismissal.                          |
+| render          | ReactElement / render function        | div           | Compose or replace the root element.                         |
+| ref             | `Ref<HTMLDivElement>`                 | —             | Ref to the visible toolbar element.                          |
+
+Native div props are forwarded. The root exposes data-open, data-side, data-align, and data-orientation. It renders no DOM during server rendering or while closed and does not reserve layout space.
+
+### ActionBarSelection
+
+Accepts native div props, render, children, and a div ref. Defaults to role status with aria-atomic true. Provide the formatted selection text as children; there is no count prop.
+
+### ActionBarGroup
+
+Accepts Base UI Toolbar root props such as disabled, render, className (including a state callback), and a div ref. Orientation and looping come from ActionBar. It renders a group, with data-orientation and Base UI focus management. onKeyDown can prevent the additional Home/End behavior.
+
+### ActionBarItem
+
+| Prop                  | Type                           | Default | Purpose                                     |
+| --------------------- | ------------------------------ | ------- | ------------------------------------------- |
+| variant               | ButtonVariant                  | ghost   | Shared Button appearance.                   |
+| size                  | ButtonSize                     | sm      | Shared Button size.                         |
+| shape                 | ButtonShape                    | base    | Base, square, or circle proportions.        |
+| icon                  | ReactNode                      | —       | Decorative leading icon.                    |
+| loading               | boolean                        | false   | Spinner, aria-busy, and blocked activation. |
+| disabled              | boolean                        | false   | Block activation.                           |
+| focusableWhenDisabled | boolean                        | true    | Keep disabled items in keyboard navigation. |
+| onSelect              | (event: MouseEvent) => void    | —       | Action callback after an unprevented click. |
+| render                | ReactElement / render function | button  | Compose with another control.               |
+| nativeButton          | boolean                        | true    | Set false for a non-button render element.  |
+| ref                   | `Ref<HTMLButtonElement>`       | —       | Ref to the native button.                   |
+
+Other Base UI Button props, including onClick, className callbacks, and native button attributes, are supported. The component owns type button. A className callback receives the disabled state. Inside a group, the item also participates in Base UI Toolbar navigation. For a custom render element, use the render callback's ref for that element when needed.
+
+### ActionBarClose
+
+Accepts normal Button event, disabled, className, style, accessible name, children, and button ref props. Its appearance is a small square ghost button. Defaults to an X icon and aria-label “Dismiss action bar”. onClick can prevent dismissal. It does not clear application data itself.
+
+### ActionBarSeparator
+
+Accepts Separator props, including orientation, className callbacks, render, and a div ref. Orientation defaults to vertical in a horizontal bar and horizontal in a vertical bar. It remains a semantic separator; pass role presentation and aria-hidden true if it should be purely decorative.

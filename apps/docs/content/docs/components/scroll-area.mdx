@@ -1,0 +1,122 @@
+---
+title: Scroll Area
+description: Scroll bounded content with native scrolling, custom scrollbars, and fades at overflowing edges.
+---
+
+import { ComponentPreview } from "@/components/component-preview";
+import { ScrollAreaVertical } from "@/examples/scroll-area/scroll-area-vertical";
+import { ScrollAreaHorizontal } from "@/examples/scroll-area/scroll-area-horizontal";
+import { ScrollAreaBoth } from "@/examples/scroll-area/scroll-area-both";
+import { ScrollAreaNoFade } from "@/examples/scroll-area/scroll-area-no-fade";
+import { ScrollAreaProgrammatic } from "@/examples/scroll-area/scroll-area-programmatic";
+
+<ComponentPreview>
+  <ScrollAreaVertical />
+</ComponentPreview>
+
+<include>../../../examples/scroll-area/scroll-area-vertical.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { ScrollArea } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { ScrollArea } from "@ajnacloud/ui/scroll-area";
+```
+
+### Basic usage
+
+```tsx
+<ScrollArea
+  style={{ height: 240 }}
+  viewportProps={{ "aria-label": "Project list" }}
+>
+  <ul>
+    {Array.from({ length: 30 }, (_, index) => (
+      <li key={index}>Project {index + 1}</li>
+    ))}
+  </ul>
+</ScrollArea>
+```
+
+Scroll Area keeps native touch, trackpad, wheel, and keyboard scrolling while styling its scrollbars consistently. Overflowing edges fade by default. The fade grows as content moves away from an edge and disappears when that edge is reached.
+
+Give the root a bounded height. The viewport fills it; content remains at its natural height. The vertical scrollbar appears on hover or while scrolling when content overflows. Use `viewportProps` to label the scrollable region.
+
+## Examples
+
+### Horizontal scrolling
+
+Set `orientation="horizontal"` and keep the inner layout wider than the viewport. This chooses the custom scrollbar; native scrolling still follows whichever axes actually overflow. Use `w-max`, a fixed content width, or non-shrinking children to create horizontal overflow.
+
+<ComponentPreview>
+  <ScrollAreaHorizontal />
+</ComponentPreview>
+
+<include>../../../examples/scroll-area/scroll-area-horizontal.tsx</include>
+
+### Both directions
+
+`orientation="both"` includes a scrollbar for each axis and a corner where they meet. Each track only appears when its axis overflows. The fade follows all four edges independently.
+
+<ComponentPreview>
+  <ScrollAreaBoth />
+</ComponentPreview>
+
+<include>../../../examples/scroll-area/scroll-area-both.tsx</include>
+
+### Disable fades
+
+Use `fade={false}` when content needs to remain fully visible up to the viewport boundary. Fades change appearance only; they do not remove content, intercept input, or change scroll behavior. The mask is applied to the content viewport, keeping the scrollbars outside the fade.
+
+<ComponentPreview>
+  <ScrollAreaNoFade />
+</ComponentPreview>
+
+<include>../../../examples/scroll-area/scroll-area-no-fade.tsx</include>
+
+### Access the scroll viewport
+
+The root ref targets the outer container. Pass `viewportProps.ref` to read `scrollTop`, call `scrollTo`, or observe native scroll events on the actual scrolling element. Choose reduced-motion behavior explicitly when adding animated programmatic scrolling.
+
+<ComponentPreview>
+  <ScrollAreaProgrammatic />
+</ComponentPreview>
+
+<include>../../../examples/scroll-area/scroll-area-programmatic.tsx</include>
+
+## Behavior
+
+### Sizing and layout
+
+The root needs a bounded dimension in every direction you intend to scroll. In a flex or grid layout, add `min-h-0` or `min-w-0` to the relevant ancestors so they can shrink. Avoid applying scroll padding to the viewport's outer container; put padding on the content as the examples do.
+
+Use a semantic list, table, or article inside the area when appropriate. Scroll Area does not virtualize content; large datasets still need application-level rendering or virtualization.
+
+## Accessibility
+
+When an area can scroll, Base UI makes its viewport keyboard focusable. Give meaningful regions an accessible name with `viewportProps={{ role: "region", "aria-label": "Activity" }}`. Arrow keys, Page Up/Down, Home, and End retain native browser behavior while the viewport is focused. Decorative tracks stay out of the accessibility tree. Focus remains visible around the root, outside the faded content; transitions respect reduced motion.
+
+## API reference
+
+| Prop or export                      | Purpose                                                                                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ScrollArea`                        | Root, viewport, measured content, scrollbars, and corner. Forwards a div ref to the root.                                                                                         |
+| `orientation`                       | `"vertical"` by default; `"horizontal"` or `"both"` selects the custom scrollbars.                                                                                                |
+| `fade`                              | `true` by default. Enables masks that follow the actual overflow distances.                                                                                                       |
+| `viewportProps`                     | Native viewport attributes and events, `ref`, `className`, `style`, `render`, and accessible region labeling.                                                                     |
+| Root native props                   | `className`, `style`, `render`, `overflowEdgeThreshold`, and native div attributes.                                                                                               |
+| `ScrollBar`                         | A styled Base UI scrollbar with a thumb. Exposed for custom compositions using the raw Scroll Area primitives. Accepts `orientation`, `keepMounted`, native props, and a div ref. |
+| `ScrollAreaProps`, `ScrollBarProps` | Exported prop types.                                                                                                                                                              |
+
+`ScrollArea` already renders the selected scrollbars; do not add `ScrollBar` among its content. To replace its structure, use the raw [primitives](/docs/primitives) together with `ScrollBar`. State-aware `className` callbacks are supported on the root, viewport, and scrollbar.
+
+The fades use Base UI's `--scroll-area-overflow-*` measurements directly on the viewport. The maximum fade is 40px and shrinks near the edge. They do not require a background color token. All other styling uses existing Ajna border, background, foreground, and focus tokens.

@@ -1,0 +1,83 @@
+---
+title: Separator
+description: A horizontal or vertical divider between related content.
+---
+
+import { SeparatorExample } from "@/examples/separator/separator-example";
+import { SeparatorVertical } from "@/examples/separator/separator-vertical";
+import { SeparatorList } from "@/examples/separator/separator-list";
+
+<ComponentPreview>
+  <SeparatorExample />
+</ComponentPreview>
+
+<include>../../../examples/separator/separator-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Separator } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Separator } from "@ajnacloud/ui/separator";
+```
+
+### Basic usage
+
+```tsx
+<Separator />
+```
+
+The default is a horizontal, 1px-high divider that fills its container's width.
+
+## Examples
+
+### Vertical
+
+Set `orientation="vertical"` inside a row with a defined height, or give the separator its own height.
+
+<ComponentPreview>
+  <SeparatorVertical />
+</ComponentPreview>
+
+<include>../../../examples/separator/separator-vertical.tsx</include>
+
+### Between sections
+
+<ComponentPreview>
+  <SeparatorList />
+</ComponentPreview>
+
+<include>../../../examples/separator/separator-list.tsx</include>
+
+### Decorative divider
+
+Use presentation semantics when the line does not represent a meaningful content boundary.
+
+```tsx
+import { Separator } from "@ajnacloud/ui";
+
+export function DecorativeDivider() {
+  return <Separator role="presentation" aria-hidden="true" />;
+}
+```
+
+## API reference
+
+| Prop          | Type                             | Default        | Description                               |
+| ------------- | -------------------------------- | -------------- | ----------------------------------------- |
+| `orientation` | `"horizontal" \| "vertical"`     | `"horizontal"` | Divider direction and `aria-orientation`. |
+| `render`      | React element or render callback | —              | Replaces the default `div`.               |
+| `className`   | String or state callback         | —              | Additional styles.                        |
+| `ref`         | `Ref<HTMLDivElement>`            | —              | Ref to the underlying element.            |
+
+Renders with `role="separator"` by default. Accepts native element and ARIA props; there is no `decorative` prop.
+
+`SeparatorProps` and `SeparatorOrientation` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/separator`.

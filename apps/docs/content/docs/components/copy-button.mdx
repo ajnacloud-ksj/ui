@@ -1,0 +1,123 @@
+---
+title: Copy Button
+description: Copy text to the clipboard with pending, success, and error feedback.
+---
+
+import { CopyButtonExample } from "@/examples/copy-button/copy-button-example";
+import { CopyButtonVariants } from "@/examples/copy-button/copy-button-variants";
+import { CopyButtonInputGroup } from "@/examples/copy-button/copy-button-input-group";
+import { CopyButtonFeedback } from "@/examples/copy-button/copy-button-feedback";
+import { CopyButtonTooltip } from "@/examples/copy-button/copy-button-tooltip";
+
+<ComponentPreview>
+  <CopyButtonExample />
+</ComponentPreview>
+
+<include>../../../examples/copy-button/copy-button-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { CopyButton } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { CopyButton } from "@ajnacloud/ui/copy-button";
+```
+
+### Basic usage
+
+```tsx
+<CopyButton
+  value="npm install @ajnacloud/ui"
+  copyLabel="Copy installation command"
+/>
+```
+
+CopyButton copies the exact string in value when activated. It starts with a copy icon, shows a spinner while the browser writes to the clipboard, and changes to a checkmark only after the write succeeds. Success feedback resets after 1.5 seconds by default.
+
+## Examples
+
+### Labels, variants, and sizes
+
+<ComponentPreview>
+  <CopyButtonVariants />
+</ComponentPreview>
+
+<include>../../../examples/copy-button/copy-button-variants.tsx</include>
+
+Without children, CopyButton is a square icon button. Its accessible name defaults to “Copy to clipboard”; use copyLabel to describe the specific value, such as “Copy invitation link”. With children, it uses a normal button shape and the children provide its visible label. The label changes to copiedLabel on success or errorLabel on failure, then returns when feedback resets.
+
+CopyButton supports Button's variants (primary, secondary, ghost, destructive, secondary-destructive, outline), sizes (xs, sm, base, lg), and shapes (base, square, circle). Its defaults are ghost and base size. disabled prevents copying. className, style, native button attributes, and a forwarded button ref remain available.
+
+The button is always type button, so copying within a form does not submit it. Pending writes set aria-disabled and aria-busy and block repeated activation. The button remains focused and in the tab order while the write is pending. An explicitly disabled button uses the normal native disabled behavior.
+
+### Beside a read-only input
+
+<ComponentPreview>
+  <CopyButtonInputGroup />
+</ComponentPreview>
+
+<include>../../../examples/copy-button/copy-button-input-group.tsx</include>
+
+Pass the same value to the read-only input and CopyButton. The button copies value rather than reading another element's DOM contents. For editable values, keep them in state and pass the current string to both controls. An empty string is a valid clipboard value.
+
+### Success, errors, and feedback duration
+
+<ComponentPreview>
+  <CopyButtonFeedback />
+</ComponentPreview>
+
+<include>../../../examples/copy-button/copy-button-feedback.tsx</include>
+
+onCopySuccess receives the copied string after the clipboard write resolves. onCopyError receives an Error if clipboard access is missing or the browser rejects the write. The normal DOM onCopy handler remains available; it is not the callback for a successful clipboard write.
+
+A failed write shows a warning icon, announces errorLabel, and displays errorLabel when the button has children. It never shows success. The button remains available to retry. Use onCopyError for a persistent explanation or a manual-copy alternative. CopyButton does not create a toast automatically.
+
+resetDelay controls how long success and error feedback remain, in milliseconds. Changing value hides feedback for the previous value; a copy already in progress still writes the string captured when it was activated. onClick runs before copying and can cancel it with event.preventDefault().
+
+Copying uses the [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText), requiring HTTPS or localhost. Rejected writes reach `onCopyError`.
+
+### Optional tooltip
+
+<ComponentPreview>
+  <CopyButtonTooltip />
+</ComponentPreview>
+
+<include>../../../examples/copy-button/copy-button-tooltip.tsx</include>
+
+Compose with Tooltip when an icon needs a visible explanation on hover and focus. CopyButton itself does not require Tooltip.Provider. The tooltip describes the action; CopyButton announces the result separately.
+
+## Accessibility
+
+- The native button supports Tab, Enter, and Space and retains Button's visible focus indicator.
+- Icon-only buttons have a default accessible name. Set copyLabel or aria-label for a more specific name; aria-labelledby is also supported.
+- Copy, check, warning, and spinner icons are decorative. A polite status region announces success or failure without moving focus.
+- Labels and messages are customizable through children, copyLabel, copiedLabel, and errorLabel. Use these for translations.
+- The component inherits Button and Spinner's reduced-motion behavior.
+
+## API reference
+
+| Prop          | Type                     | Default                                 | Purpose                                                                  |
+| ------------- | ------------------------ | --------------------------------------- | ------------------------------------------------------------------------ |
+| value         | string                   | Required                                | Exact plain text copied on activation.                                   |
+| children      | ReactNode                | —                                       | Optional visible idle label; omit for an icon button.                    |
+| variant       | ButtonVariant            | ghost                                   | Button appearance.                                                       |
+| size          | ButtonSize               | base                                    | Button height and spacing.                                               |
+| shape         | ButtonShape              | square without children; base otherwise | Button outline and proportions.                                          |
+| copyLabel     | string                   | Copy to clipboard                       | Default accessible name for icon-only usage.                             |
+| copiedLabel   | string                   | Copied                                  | Announced success message and visible success label when children exist. |
+| errorLabel    | string                   | Could not copy                          | Announced failure message and visible failure label when children exist. |
+| resetDelay    | number                   | 1500                                    | Duration of success/error feedback in milliseconds.                      |
+| onCopySuccess | (value: string) => void  | —                                       | Called after a successful write.                                         |
+| onCopyError   | (error: Error) => void   | —                                       | Called when clipboard access fails.                                      |
+| disabled      | boolean                  | false                                   | Prevents activation.                                                     |
+| ref           | `Ref<HTMLButtonElement>` | —                                       | Ref to the native button.                                                |
+
+CopyButton owns its icon, loading state, and type. It exposes data-copy-state as idle, pending, copied, or error on its button. Other native button props are forwarded. For the shared styling API, see [Button](/docs/components/button).

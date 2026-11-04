@@ -1,0 +1,170 @@
+---
+title: Input OTP
+description: Enter verification codes through one accessible input with configurable visual slots and paste support.
+---
+
+import { ComponentPreview } from "@/components/component-preview";
+import { InputOTPBasic } from "@/examples/input-otp/input-otpbasic";
+import { InputOTPControlled } from "@/examples/input-otp/input-otpcontrolled";
+import { InputOTPFourDigits } from "@/examples/input-otp/input-otpfour-digits";
+import { InputOTPAlphanumeric } from "@/examples/input-otp/input-otpalphanumeric";
+import { InputOTPStates } from "@/examples/input-otp/input-otpstates";
+import { InputOTPForm } from "@/examples/input-otp/input-otpform";
+
+<ComponentPreview>
+  <InputOTPBasic />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpbasic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+  Field,
+  FieldLabel,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from "@ajnacloud/ui/input-otp";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="verification-code">Verification code</FieldLabel>
+  <InputOTP id="verification-code" name="code" maxLength={6}>
+    <InputOTPGroup>
+      <InputOTPSlot index={0} />
+      <InputOTPSlot index={1} />
+      <InputOTPSlot index={2} />
+    </InputOTPGroup>
+    <InputOTPSeparator />
+    <InputOTPGroup>
+      <InputOTPSlot index={3} />
+      <InputOTPSlot index={4} />
+      <InputOTPSlot index={5} />
+    </InputOTPGroup>
+  </InputOTP>
+</Field>
+```
+
+Input OTP displays a verification code as separate slots while keeping one real input for typing, selection, autofill, pasting, and form submission. Compose any number of slots, optionally separated into groups.
+
+Set `maxLength` on the input and give each slot a unique, zero-based `index`. Indices continue across groups. Use `pattern={REGEXP_ONLY_DIGITS}` to reject non-numeric input. The separator is visual and is not part of the submitted value.
+
+`autoComplete` defaults to `"one-time-code"` and `inputMode` defaults to `"numeric"`. Mobile keyboards and autofill remain browser-controlled. `maxLength` limits the number of characters; it does not validate a code against your server.
+
+## Examples
+
+### Controlled value
+
+Use `value` and `onChange` to control the code. The callback receives a **string**, not a DOM event. `onFocus` and `onBlur` remain ordinary native input events, and the forwarded ref points to the real input for form-library focus management.
+
+<ComponentPreview>
+  <InputOTPControlled />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpcontrolled.tsx</include>
+
+Omit `value` for uncontrolled entry. `onComplete(code)` fires when the code reaches its configured length.
+
+### Four-digit PIN
+
+Change `maxLength` and render the corresponding number of slots. Keep each slot index within the configured length.
+
+<ComponentPreview>
+  <InputOTPFourDigits />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpfour-digits.tsx</include>
+
+### Alphanumeric codes and paste cleanup
+
+Use `REGEXP_ONLY_CHARS` for letters, `REGEXP_ONLY_DIGITS_AND_CHARS` for letters and digits, or a custom anchored regular-expression string. Change `inputMode` to `"text"` for alphanumeric codes. `pasteTransformer` normalizes clipboard text before pattern validation and insertion; it does not modify ordinary keystrokes.
+
+<ComponentPreview>
+  <InputOTPAlphanumeric />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpalphanumeric.tsx</include>
+
+Pattern matching checks the candidate value, so include anchors and allow every valid intermediate entry. A digits-only pattern accepts ASCII digits; it does not convert other numeral systems automatically.
+
+### Invalid and disabled states
+
+Apply `aria-invalid` to the real input for accessible error semantics; its slots pick up the error appearance automatically. Link an error message with `aria-describedby`. A slot also accepts `aria-invalid` for individual styling. `disabled` prevents interaction and excludes the input from native form submission.
+
+<ComponentPreview>
+  <InputOTPStates />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpstates.tsx</include>
+
+### Form composition
+
+Connect FieldLabel to the input’s `id`. `name` submits one string, regardless of the number of visual groups.
+
+<ComponentPreview>
+  <InputOTPForm />
+</ComponentPreview>
+
+<include>../../../examples/input-otp/input-otpform.tsx</include>
+
+For a form library, pass its string value and setter to `value` / `onChange`, then forward `name`, `onBlur`, and `ref`. The required indicator is visual; set `required` on the input too. Validate length and server responses in the form's existing validation flow.
+
+## Accessibility
+
+Provide a visible label, useful instructions, and an error description when needed. Pasting, selection, Backspace, arrow keys, and autofill use one native text field. Avoid adding tab stops or labels to individual slots. Never announce the entire code after every keystroke through an additional live region; the input already exposes its current value.
+
+## API reference
+
+### Public parts
+
+| Export                         | Purpose                                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `InputOTP`                     | The real input and its presentation container. Requires `maxLength` and either children or an `input-otp` render callback. Forwards an input ref. |
+| `InputOTPGroup`                | Groups adjacent slots with joined borders. Accepts div attributes, classes, and a ref.                                                            |
+| `InputOTPSlot`                 | Renders the character at `index`, its placeholder, active outline, and caret. Accepts div attributes, classes, and a ref.                         |
+| `InputOTPSeparator`            | A decorative dash between groups. Accepts custom children, div attributes, classes, and a ref.                                                    |
+| `REGEXP_ONLY_DIGITS`           | Pattern for ASCII digits.                                                                                                                         |
+| `REGEXP_ONLY_CHARS`            | Pattern for ASCII letters.                                                                                                                        |
+| `REGEXP_ONLY_DIGITS_AND_CHARS` | Pattern for ASCII letters and digits.                                                                                                             |
+
+Each component has a corresponding `…Props` type. The slots and separators are presentation only; assistive technology interacts with the single input rather than repeated characters.
+
+### Input controls and customization
+
+| Prop                                             | Purpose                                                                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `value`, `onChange`                              | Controlled string value and string callback.                                                                 |
+| `onComplete`                                     | Callback when entry reaches `maxLength`.                                                                     |
+| `pattern`, `inputMode`                           | Accepted characters and mobile keyboard hint.                                                                |
+| `pasteTransformer`                               | Transform pasted text before insertion.                                                                      |
+| `id`, `name`, `required`, `disabled`, `readOnly` | Native labeling, form, and interaction controls.                                                             |
+| `onFocus`, `onBlur`, `ref`                       | Native focus hooks and access to the input.                                                                  |
+| `placeholder`                                    | Per-slot placeholder characters for an empty value.                                                          |
+| `className`                                      | Classes on the real input.                                                                                   |
+| `containerClassName`                             | Classes on the outer presentation container.                                                                 |
+| `pushPasswordManagerStrategy`                    | `"increase-width"` by default, or `"none"` to disable the dependency's password-manager badge accommodation. |
+| `noScriptCSSFallback`                            | The dependency's no-JavaScript fallback CSS, or `null` to disable it.                                        |
+
+Style visible boxes through `InputOTPSlot.className`, not the transparent real input. Its active and invalid styles use the existing Ajna input, ring, background, and destructive tokens. The caret's animation stops under reduced motion. Keep focus and error styles visible when overriding classes.

@@ -1,0 +1,22 @@
+export { Table } from "./table.js";
+export type {
+  TableProps,
+  TableLayout,
+  TableRowVariant,
+  TableHeaderVariant,
+  TableStickyColumn,
+  TableSortDirection,
+  TableHeaderProps,
+  TableHeadProps,
+  TableCellProps,
+  TableRowProps,
+  TableBodyProps,
+  TableFooterProps,
+  TableCaptionProps,
+  TableEmptyRowProps,
+  TableResizeHandleProps,
+  TableSelectionProps,
+  TableCheckHeadProps,
+  TableCheckCellProps,
+  TableSortHeadProps,
+} from "./table.js";

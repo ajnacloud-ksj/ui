@@ -1,0 +1,266 @@
+---
+title: Table
+description: Display tabular information with striped rows, selection, sticky columns, and optional sorting controls.
+---
+
+import { TableExample } from "@/examples/table/table-example";
+import { TableSelectionExample } from "@/examples/table/table-selection-example";
+import { TableSortingExample } from "@/examples/table/table-sorting-example";
+import { TableFixedExample } from "@/examples/table/table-fixed-example";
+import { TableStickyExample } from "@/examples/table/table-sticky-example";
+import { TableResizeExample } from "@/examples/table/table-resize-example";
+import { TableEmptyExample } from "@/examples/table/table-empty-example";
+import { TableLoadingExample } from "@/examples/table/table-loading-example";
+import { TableActionsExample } from "@/examples/table/table-actions-example";
+
+<ComponentPreview>
+  <TableExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Table } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Table } from "@ajnacloud/ui/table";
+```
+
+### Basic usage
+
+```tsx
+<Table>
+  <Table.Caption>Recent invoices</Table.Caption>
+  <Table.Header>
+    <Table.Row>
+      <Table.Head>Invoice</Table.Head>
+      <Table.Head>Amount</Table.Head>
+    </Table.Row>
+  </Table.Header>
+  <Table.Body>
+    <Table.Row>
+      <Table.Cell>INV-001</Table.Cell>
+      <Table.Cell>$250.00</Table.Cell>
+    </Table.Row>
+  </Table.Body>
+</Table>
+```
+
+Table uses native table elements with a compound API. Add sections, rows, header cells, and data cells directly; your application supplies the records and maps them into rows. Default body rows alternate between the card and background surfaces and highlight on hover. Header backgrounds stay unchanged on hover. Headers have a bottom border; body rows have no borders.
+
+Table renders the table itself, with no automatic scroll wrapper. Place it in an overflow container when its content can exceed the available width. Use Table.Caption, a native caption, `aria-label`, or `aria-labelledby` to give the table an accessible name.
+
+### Parts
+
+```text
+Table
+├── Table.Caption (optional)
+├── colgroup / col (native HTML, optional)
+├── Table.Header
+│   └── Table.Row
+│       ├── Table.CheckHead
+│       ├── Table.Head or Table.SortHead
+│       └── Table.Head
+├── Table.Body
+│   └── Table.Row
+│       ├── Table.CheckCell
+│       └── Table.Cell
+└── Table.Footer
+    └── Table.Row
+        └── Table.Cell
+```
+
+Table.ResizeHandle goes inside a Table.Head, or into Table.SortHead's `resizeHandle` slot. This keeps the resize button beside the sort button and avoids nesting interactive controls.
+
+## Examples
+
+### Captions
+
+Table.Caption renders a native caption with a muted foreground, 12px padding, and bottom placement. It names the table and can explain its contents or sorting behaviour. Use `style={{ captionSide: "top" }}` or an application-generated class for top placement. It accepts standard caption props and a forwarded caption ref. Native caption elements remain supported.
+
+### Selection and compact headers
+
+<ComponentPreview>
+  <TableSelectionExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-selection-example.tsx</include>
+
+Table.CheckHead and Table.CheckCell wrap the existing Checkbox component. Use `checked` and `onCheckedChange` to connect them to application state. `indeterminate` on the header represents a partial selection. The callback receives the next boolean and Base UI event details, including `cancel()`.
+
+Pass a specific `label`, such as “Select Website”, to name the checkbox. `aria-label` placed on the cell names the cell rather than its checkbox. Disabled checkboxes cannot change state.
+
+`variant="selected"` on Table.Row changes its background; the checkbox and row do not update one another automatically. Keep both connected to the same selection state. Select-all means whatever your application defines; define whether selection applies to visible rows, a page, or all records. Server-side or cross-page selection needs its own application logic.
+
+Body cells use 14px text and 12px padding. Headers use 12px text on the muted surface and a 40px height. `variant="compact"` on Table.Header uses the background surface, a 32px height, and 6px vertical padding. It does not shrink body rows.
+
+The upstream `onValueChange` selection callback is retained as a deprecated alias. Use `onCheckedChange` for new code; it also receives event details. If both are supplied, both callbacks run, matching the upstream API.
+
+### Sorting without a table engine
+
+<ComponentPreview>
+  <TableSortingExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-sorting-example.tsx</include>
+
+Replace Table.Head with Table.SortHead for a sortable column. It renders the same header cell, adds a button and direction icon, and sets `aria-sort` on the th. A normal Table.Head remains noninteractive.
+
+`sortDirection` is `false`, `"asc"`, or `"desc"`. Activation requests the next state in the order unsorted → ascending → descending → unsorted. `onSortChange(nextDirection, event)` receives the original button click event, including modifier keys. Mouse activation, Enter, and Space use the same callback. `disabled` prevents activation while work is pending.
+
+SortHead is controlled and does not reorder rows. Update the sort state and provide sorted records, or use that state in your server query. The application can choose its own sorting cycle.
+
+`className` and native header attributes style the th. `buttonProps` configures the button, including its ref, accessible name, description, styles, and keyboard handlers. Its click handler, disabled state, children, and button type are managed by SortHead. Use `resizeHandle` for a separate resize control, not inside the label children.
+
+#### Adapting an existing table engine
+
+No TanStack dependency is installed or exposed by Ajna. In an application that already uses a table engine, pass plain state and callbacks across that boundary:
+
+```tsx
+import { Table, type TableSortDirection } from "@ajnacloud/ui/table";
+
+interface ProjectHeaderProps {
+  direction: TableSortDirection;
+  requestSort: (direction: TableSortDirection, additive: boolean) => void;
+}
+
+export function ProjectHeader({ direction, requestSort }: ProjectHeaderProps) {
+  return (
+    <Table.SortHead
+      sortDirection={direction}
+      onSortChange={(next, event) => requestSort(next, event.shiftKey)}
+    >
+      Project
+    </Table.SortHead>
+  );
+}
+```
+
+Translate these props into the engine's APIs in your application. Do not pass a column or header object to Ajna. This also supports ordinary React state and remote sorting without changing the component API.
+
+#### Multi-column indicators
+
+`sortPriority` is an optional positive, one-based integer. While the column is sorted, it adds a small priority marker and accessible “Sort priority N” text. The prop is visual information; it does not implement multi-column ordering.
+
+ARIA recommends reporting the active sort on one header. For a multi-column sort, keep `aria-sort` on the primary column, pass `aria-sort={undefined}` to secondary SortHead cells, and explain the full ordering in a caption or associated description. You can override the button's accessible name through `buttonProps` for a translated or more detailed description. The application owns the sort descriptors and priority values.
+
+### Fixed layout, long values, and totals
+
+<ComponentPreview>
+  <TableFixedExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-fixed-example.tsx</include>
+
+The default `layout="auto"` lets the browser allocate space according to content. Use `layout="fixed"` and native colgroup/col elements for explicit column widths. The table fills its parent's available width. With fixed layout, a long value may need wrapping, truncation, or a wider scrollable table.
+
+Table.Footer renders tfoot without a separate footer style. Use normal rows and cells for totals, and `colSpan` to cover multiple columns. Align numeric headers and values consistently. Inline styles work in both styling modes; Tailwind applications can use their own generated utilities too.
+
+The root applies default cell padding and header styling through descendant selectors, as in the original table. For custom cell padding, use inline styles on the cell or override the root's descendant utilities. Cell-level utility classes alone may have lower specificity than those defaults.
+
+### Sticky headers and columns
+
+<ComponentPreview>
+  <TableStickyExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-sticky-example.tsx</include>
+
+Set `sticky` on Table.Header to pin header cells to the top of a constrained scroll container. Set `sticky="left"` or `sticky="right"` on corresponding Table.Head and Table.Cell parts to pin columns at a physical edge. Selection cells and SortHead accept the same sticky prop.
+
+Sticky cells have an opaque surface and a gradient on their inner edge. Body cells follow their row's striped, hovered, or selected background. Compact sticky headers use the compact surface. The table isolates stacking: ordinary sticky headers and body cells use layer 1, and header cells pinned in both directions use layer 2.
+
+Give a sticky table an overflow container and a constrained height. Make the scroll region keyboard-accessible and give it an accessible name.
+
+Each sticky side starts at zero; pinning several columns on the same side requires application-owned offsets and careful testing. Sticky does not calculate widths or cumulative offsets. Left/right are physical edges, not logical start/end. Custom row backgrounds should also set `--ajna-table-row-bg` to the same complete CSS color so pinned cells and fades remain consistent.
+
+### Resizing with application-owned widths
+
+<ComponentPreview>
+  <TableResizeExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-resize-example.tsx</include>
+
+Table.ResizeHandle supplies the positioned control and its appearance. It does not install drag listeners, track widths, or add keyboard resizing by itself. Attach the handlers required by your application or existing sizing library.
+
+Keep widths in application state and apply them through `colgroup`. Support pointer cancellation and keyboard resizing, with instructions connected to the resize handle.
+
+The handle uses a 10px hit area at the right edge of the header. It appears on hover, keyboard focus, or touch devices. Set a column-specific `aria-label`, and keep it reachable and usable when changing its styling. The `resizeHandle` slot in SortHead places it outside the sort button, so resizing does not request a sort.
+
+### Empty results
+
+<ComponentPreview>
+  <TableEmptyExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-empty-example.tsx</include>
+
+Keep the header visible for empty results. Table.EmptyRow spans `colSpan` columns; compose [Empty](/docs/components/empty) inside it for a recovery action.
+
+Table.EmptyRow accepts row props and a forwarded tr ref. Use `cellProps` for the cell's classes, styles, and accessibility attributes. Its default cell height is 128px, and content can grow taller. Content is required and application-supplied; the helper does not inspect the data or decide when to appear. Account for selection and action columns when calculating the span. Nonpositive or noninteger spans fall back to one; spans above the HTML maximum are capped at 1000.
+
+### Loading rows
+
+<ComponentPreview>
+  <TableLoadingExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-loading-example.tsx</include>
+
+Use [Skeleton](/docs/components/skeleton) inside ordinary cells while loading. Mark the table `aria-busy`, hide decorative placeholder rows, and announce meaningful loading changes separately.
+
+Skeleton row count and cell widths belong to the application because they depend on the expected data. There is no automatic skeleton configuration or polling behaviour.
+
+### Row actions
+
+<ComponentPreview>
+  <TableActionsExample />
+</ComponentPreview>
+
+<include>../../../examples/table/table-actions-example.tsx</include>
+
+Put row actions inside cells. Use [Dropdown Menu](/docs/components/dropdown-menu) for secondary commands and give its trigger a row-specific name.
+
+A row does not become clickable when it contains an action. Avoid making the entire row a fake button or link when it also contains checkboxes, links, or menus.
+
+### Pagination
+
+Use [Pagination](/docs/components/pagination) below a table or in your application footer. It accepts plain controlled page/size state and known or unknown totals, with no table-engine dependency. Update both values through its single callback, pass your filtered row count, and reset the page when filters change. The guide includes complete local-data examples and the mapping for an existing TanStack table.
+
+## Accessibility
+
+The parts retain native table, section, row, and cell semantics. Table.Head and SortHead default to `scope="col"`; native header props such as scope, colSpan, rowSpan, headers, and id remain available. For grouped headers or row headers, choose scopes and associations that match the structure rather than treating every cell as a column header.
+
+Sorting state is on the header, not the button. Sort icons are decorative and differ in shape for unsorted, ascending, and descending states. Buttons retain native Enter/Space behaviour and visible focus. Explain sorting once in the caption or an associated description rather than adding repetitive instructions to every label. See the [WAI sortable table example](https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/sortable-table/) for the semantic pattern.
+
+Checkbox labels, useful table names, and any asynchronous result announcements are application-supplied. A semantic table does not add spreadsheet-style arrow navigation or a grid role. Tab moves through its actual interactive controls. Reduced motion removes sort-button color transitions and Skeleton follows its own reduced-motion behaviour.
+
+## API reference
+
+| Part                 | Element                | Added props                                                                                                        |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Table`              | table                  | `layout="auto" \| "fixed"` (default `auto`)                                                                        |
+| `Table.Header`       | thead                  | `variant="default" \| "compact"`, `sticky` boolean                                                                 |
+| `Table.Head`         | th                     | `sticky="left" \| "right"`; scope defaults to `col`                                                                |
+| `Table.Body`         | tbody                  | Native section props                                                                                               |
+| `Table.Row`          | tr                     | `variant="default" \| "selected"`                                                                                  |
+| `Table.Cell`         | td                     | `sticky="left" \| "right"`                                                                                         |
+| `Table.Footer`       | tfoot                  | Native section props                                                                                               |
+| `Table.Caption`      | caption                | Native caption props; bottom placement by default                                                                  |
+| `Table.EmptyRow`     | tr with one td         | Required `colSpan` and `children`; optional `cellProps`; Row props                                                 |
+| `Table.CheckHead`    | th containing Checkbox | `checked`, `indeterminate`, `onCheckedChange`, `disabled`, `label`; Head props                                     |
+| `Table.CheckCell`    | td containing Checkbox | Same selection props; Cell props                                                                                   |
+| `Table.ResizeHandle` | button                 | Native button props; defaults to `aria-label="Resize column"`; always type button                                  |
+| `Table.SortHead`     | th containing button   | Required `sortDirection` and `onSortChange`; `disabled`, `sortPriority`, `buttonProps`, `resizeHandle`; Head props |
+
+Refs target the native element listed in the table. SortHead's ref targets the th; use `buttonProps.ref` for its button. Standard className and style props are strings and native style objects. Checked row state, sort ordering, column widths, row actions, filtering, and request state stay outside the component. The same API works with standalone CSS and Tailwind v3.4 without another dependency or provider.

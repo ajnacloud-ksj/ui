@@ -1,0 +1,252 @@
+---
+title: Filter Bar
+description: Search a list, edit filters, and remove applied selections from one consistent toolbar.
+---
+
+import { ComponentPreview } from "@/components/component-preview";
+import { FilterBarBasic } from "@/examples/filter-bar/filter-bar-basic";
+import { FilterBarAllTypes } from "@/examples/filter-bar/filter-bar-all-types";
+import { FilterBarCustom } from "@/examples/filter-bar/filter-bar-custom";
+import { FilterBarOptionsAndLoading } from "@/examples/filter-bar/filter-bar-options-and-loading";
+import { FilterBarExternalUpdates } from "@/examples/filter-bar/filter-bar-external-updates";
+
+<ComponentPreview>
+  <FilterBarBasic />
+</ComponentPreview>
+
+<include>../../../examples/filter-bar/filter-bar-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { FilterBar } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { FilterBar } from "@ajnacloud/ui/filter-bar";
+```
+
+### Basic usage
+
+```tsx
+import { useState } from "react";
+
+export function ProjectFilters() {
+  const resetValue = { archived: false };
+  const [value, setValue] = useState(resetValue);
+
+  return (
+    <FilterBar
+      value={value}
+      resetValue={resetValue}
+      onValueChange={setValue}
+      filters={[{ id: "archived", type: "toggle", label: "Include archived" }]}
+    />
+  );
+}
+```
+
+Filter Bar combines optional search, a filter panel, applied-filter chips, and application actions. Describe the available filters, supply their controlled values, and receive complete value updates. Use it above a table, card collection, catalog, or any other list.
+
+If your application imports date helpers or date types directly, declare that dependency in your application:
+
+```bash
+npm install @internationalized/date
+```
+
+Filter Bar uses the existing DateInput for dates; it does not expose a separate calendar or a range-calendar picker.
+
+Every filter's `id` identifies a property in `value` and `resetValue`. Define the reset values explicitly: a single selection might reset to `null`, a multiple selection to `[]`, and a toggle to `false`. A selected value equal to its reset value is inactive by default.
+
+FilterBar collects values; your application matches records. Search has its own state and callback, and `actions` accepts application controls.
+
+The Filters button counts active **filter definitions**, so selecting several owners counts as one active filter. Applied chips appear below the toolbar. Removing one restores that filter's reset value. Clear filters resets enabled active filters in one update. Search remains independent and uses its own clear button.
+
+A filter's `disabled` state prevents editing and clearing that filter, including through Clear filters. Its existing active value remains visible. The root's `disabled` prop locks search and all filters. Application action controls receive their disabled state from the application.
+
+## Examples
+
+### All seven built-in types
+
+Use `applyMode="staged"` to edit a draft before committing the complete value.
+
+<ComponentPreview>
+  <FilterBarAllTypes />
+</ComponentPreview>
+
+<include>../../../examples/filter-bar/filter-bar-all-types.tsx</include>
+
+| Type           | Value shape                                            | Control                                                                    |
+| -------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `toggle`       | `boolean`                                              | An inline Checkbox and clickable label, with Reset alongside when changed. |
+| `select`       | A string/number ID, or `null`                          | Ajna Select with disabled options and optional counts.                     |
+| `multi-select` | An array of string/number IDs                          | A checkbox list, or Ajna Combobox when `searchable` is true.               |
+| `text`         | `string`                                               | Ajna Input.                                                                |
+| `number-range` | `{ min: number \| null; max: number \| null }`         | Two NumberInputs with independently editable boundaries.                   |
+| `date`         | A `DateValue` object or `null`                         | DateInput with its optional calendar.                                      |
+| `date-range`   | `{ start: DateValue \| null; end: DateValue \| null }` | Two DateInputs.                                                            |
+
+Number-range inputs show visible Minimum and Maximum labels and matching placeholders. A `number-range` or `date-range` can have either boundary empty. Zero is a valid numeric boundary. Ranges represent inclusive intervals; translating a calendar day into database timestamps and choosing a business timezone remains application work.
+
+Date values remain `@internationalized/date` objects throughout editing and callbacks. They are not converted to JavaScript `Date` objects or ISO strings. DateInput preserves the supplied date type and its calendar semantics.
+
+### Instant and staged updates
+
+The default `applyMode="instant"` emits a complete next value after each valid edit. Done, the close button, Escape, outside dismissal, and swiping close the panel. Valid changes have already been committed.
+
+With `applyMode="staged"`, opening the panel starts a fresh draft. Apply emits one complete update containing the edited fields. Cancel, the close button, Escape, outside dismissal, or swiping discard the pending edits. Applying an unchanged draft closes without emitting an unnecessary update.
+
+| Action                                   | Instant mode                           | Staged mode                            |
+| ---------------------------------------- | -------------------------------------- | -------------------------------------- |
+| Edit a valid field                       | Commit immediately.                    | Update the draft.                      |
+| Reset a field inside the panel           | Commit that reset.                     | Reset that field in the draft.         |
+| Clear filters inside the panel           | Commit enabled field resets together.  | Update the draft; Apply commits it.    |
+| Remove an applied chip outside the panel | Commit that reset immediately.         | Commit that reset immediately.         |
+| Clear filters outside the panel          | Commit enabled active resets together. | Commit enabled active resets together. |
+| Change search                            | Call the independent search callback.  | Call the independent search callback.  |
+
+Changing `applyMode` while the panel is open starts a fresh editing session using the committed values.
+
+### Custom records, option counts, and loading
+
+Options use `{ label, value, disabled?, count?, content? }`. IDs can be strings or numbers, including zero. Labels remain plain strings for matching and accessible names; `content` customizes the visible option content.
+
+Use `createFilterOptions(records, accessors)` to map application records. Its callbacks infer the record type, so label/value accessors do not require casting or explicit generic arguments.
+
+<ComponentPreview>
+  <FilterBarOptionsAndLoading />
+</ComponentPreview>
+
+<include>
+  ../../../examples/filter-bar/filter-bar-options-and-loading.tsx
+</include>
+
+The accessors are `getLabel`, `getValue`, optional `isOptionDisabled`, `getCount`, and `renderOption`. The helper preserves numeric IDs, zero counts, disabled state, and custom content. The resulting array can be reused by several filters.
+
+`isLoading` displays loading feedback. Select and checkbox-list choices are disabled while loading; a searchable multi-select preserves the existing Combobox's loading behavior and selected pills. Empty checkbox lists show `messages.emptyOptions`. Searchable lists use that message when their search has no results.
+
+Selections are preserved when an ID is missing from the current option array. Use `getMissingLabel` to describe a deleted, unloaded, or unavailable record. New option labels are used automatically when the record returns. Missing records are cleared only through an explicit user or application update.
+
+`search.loading` controls the separate search indicator. Debouncing, fetching, request cancellation, and result counts remain in application code.
+
+### Custom filters and operators
+
+Use `type="custom"` for a control that does not fit a built-in type. Its renderer receives the correctly typed value and setter, reset value, disabled state, labeling IDs, validation error, and a popup container ref.
+
+Custom renderers can include application-defined operators; FilterBar does not define or execute comparison operators.
+
+<ComponentPreview>
+  <FilterBarCustom />
+</ComponentPreview>
+
+<include>../../../examples/filter-bar/filter-bar-custom.tsx</include>
+
+Use immutable values: create a new object or array when editing, rather than mutating the received value. For structured custom values, provide `isEqual` so a newly created but equivalent object does not appear changed.
+
+`isActive(value, resetValue)` controls the applied chip and count. Use `isEqual` separately to compare values for draft and change tracking.
+
+`getActiveLabel(value)` controls the complete chip content. Without it, custom and toggle filters show their label; built-in choices, text, and ranges add their selected value automatically.
+
+### Validation and ranges
+
+Built-in ranges reject non-finite numeric boundaries and reversed intervals. Number boundaries also respect `numberProps.min` / `max`; dates respect `dateProps.minValue`, `maxValue`, and `isDateUnavailable`.
+
+Use `validate(value)` on any definition for additional synchronous checks. Return an error string, or `null` / `undefined` for a valid value. Validators should be pure. Error messages are associated with built-in controls automatically. Custom renderers receive `error` and `describedBy` to associate their own controls.
+
+In staged mode, an invalid editable field disables Apply. In instant mode, an invalid edit stays local to the panel until corrected; it does not replace the last valid committed value. Closing the panel discards those uncommitted invalid edits. Reset values should be valid values for their controls.
+
+`numberProps` supports bounds, step, locale, numeric format, suffix, and optional increment/decrement controls. `dateProps` passes DateInput configuration such as locale, bounds, unavailable dates, granularity, calendar visibility, and localized calendar labels. Filter Bar owns their value, callback, disabled state, and accessible field names.
+
+### Localization
+
+`locale` controls the built-in number/date controls and default chip formatting. Override `formatDate(date)` for application-specific date summaries. `messages` customizes toolbar/panel labels, instructions, range labels, errors, removal labels, counts, and summaries.
+
+Localize SearchInput-specific labels through `search` (`clearLabel`, `aria-label`, and `placeholder`). DateInput's calendar/clear/today labels use each filter's `dateProps`. Custom renderers own their control-specific copy.
+
+## Behavior
+
+### External values while editing
+
+Unedited fields follow the latest `value` prop. Locally edited fields retain their draft. Apply merges those edits into the latest committed object, preserving unrelated fields and external changes. If both the application and the user edit the same field, the user's pending edit wins when applied.
+
+Only filters currently configured and enabled are included in a commit. Removing or disabling a filter does not silently clear its committed value. Clear filters also preserves properties that have no filter definition.
+
+<ComponentPreview>
+  <FilterBarExternalUpdates />
+</ComponentPreview>
+
+<include>../../../examples/filter-bar/filter-bar-external-updates.tsx</include>
+
+When closing through the controlled `open` prop, pending edits are discarded. Reopening starts from the latest committed values. The native Drawer `onOpenChange` details support `cancel()` if the application needs to prevent a particular dismissal.
+
+### Responsive panels and focus
+
+The default `panelSide="responsive"` uses a bottom drawer below 768px and a side drawer on wider viewports. The desktop side follows `DirectionProvider`: right in left-to-right layouts and left in right-to-left layouts. Use `"bottom"`, `"left"`, or `"right"` to choose a fixed side.
+
+Side drawers are at most `24rem` (384px) wide. Override this with `classNames.panel` or `panelProps.className` when needed.
+
+There is one panel instance. Crossing the breakpoint preserves the open session and draft. The panel's body scrolls independently while its header and actions remain available. Base UI Drawer supplies focus containment, dismissal, and swipe gestures. Closing restores focus to the Filters trigger. Removing an applied chip moves focus to another enabled chip, or the trigger when none remain.
+
+The underlying [Drawer](/docs/components/drawer) requires `body { position: relative; }` in application CSS for iOS Safari, as documented in [Installation](/docs/installation).
+
+### Controlled state, callbacks, and refs
+
+`value`, `resetValue`, and `onValueChange` are required. `value` is always application-controlled; `defaultOpen` initializes only the panel's open state. Filter IDs must be unique and must exist as own properties in both value objects. Supply every configured field, even if its current value is empty.
+
+`onValueChange(nextValue, details)` receives:
+
+| Detail                | Meaning                                                    |
+| --------------------- | ---------------------------------------------------------- |
+| `reason: "change"`    | A valid instant edit or individual reset inside the panel. |
+| `reason: "apply"`     | A changed staged draft was applied.                        |
+| `reason: "clear"`     | An applied chip was removed.                               |
+| `reason: "clear-all"` | Multiple enabled filters were reset together.              |
+| `filterId`            | Present for individual changes and chip removal.           |
+
+The forwarded ref targets the outer section. `search.ref` targets its native input. `panelProps.ref` targets the Drawer popup. Custom renderers receive an `id`, `labelId`, `describedBy`, and `popupContainer`; forward them to your own controls and popups as shown above.
+
+Application pagination can reset in `onValueChange`, and URL updates can serialize the complete next value there. Filter Bar does not depend on TanStack Table or a router, perform requests, or interpret server operators.
+
+### Styling and theme scope
+
+On desktop, search grows to fill the row beside Filters and actions. Below 768px it takes a full row. Use `classNames.search` and `classNames.toolbar` to adjust this layout.
+
+Use `classNames` and per-definition props for layout and control styling.
+
+The panel portals to `document.body` by default. For a local theme, pass a themed element or ref through `panelProps.container`. Built-in Select, Combobox, and date popups use a container inside the panel, preserving its theme scope. A custom control can use the supplied `popupContainer` for the same behavior.
+
+## Accessibility
+
+The outer section has an accessible name through `aria-label` or `messages.listControls`. The panel has an associated title and description. Built-in controls receive labels and error descriptions; date segments use a FieldTitle with `aria-labelledby`, and range endpoints have distinct names.
+
+Checkboxes, Select, Combobox, DateInput, and Drawer retain their existing keyboard behavior. Decorative icons stay out of the accessibility tree. Keep visible focus styles when customizing classes. Library buttons use `type="button"`; custom action controls choose their own form behavior. Maintain labels, disabled state, and error associations in custom renderers.
+
+## API reference
+
+| Prop                                       | Purpose                                                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `filters`                                  | Array of definitions whose IDs and controls match the typed values.                                                                              |
+| `value`, `resetValue`                      | Current values and explicit reset values.                                                                                                        |
+| `onValueChange`                            | One callback receiving the complete next object and change details.                                                                              |
+| `applyMode`                                | `"instant"` by default, or `"staged"`.                                                                                                           |
+| `search`                                   | Controlled search configuration with string `onValueChange` and SearchInput props.                                                               |
+| `actions`                                  | Application-provided React content.                                                                                                              |
+| `disabled`                                 | Locks search, filter editing, and clearing.                                                                                                      |
+| `open`, `defaultOpen`, `onOpenChange`      | Controlled/uncontrolled panel visibility and native Drawer change details.                                                                       |
+| `panelSide`                                | Responsive, bottom, left, or right presentation.                                                                                                 |
+| `panelProps`                               | Drawer popup attributes, portal `container`, refs, classes, and focus controls.                                                                  |
+| `triggerProps`                             | Filter button attributes, variant, size, classes, and accessible labels.                                                                         |
+| `locale`, `formatDate`                     | Locale-aware controls and chip date formatting.                                                                                                  |
+| `messages`                                 | Partial overrides of `FilterBarMessages`.                                                                                                        |
+| `className`, `style`, native section props | Outer toolbar group styling and attributes.                                                                                                      |
+| `classNames`                               | Classes for `toolbar`, `search`, `trigger`, `actions`, `activeFilters`, `chip`, `panel`, `panelHeader`, `panelBody`, `panelFooter`, and `field`. |
+
+Every definition accepts `id`, `label`, `description`, `icon`, `disabled`, `className`, `isEqual`, `isActive`, `validate`, and `getActiveLabel`. Icons accept React elements from any library. Choice types add `options`, `placeholder`, `isLoading`, and `getMissingLabel`; multi-select also accepts `searchable` and `searchPlaceholder`. Text adds `inputProps`; range/date types add their documented control props; custom adds `render`.
+
+Named type exports include `FilterBarProps`, `FilterBarDefinition`, `FilterBarOption`, `FilterBarOptionValue`, `FilterBarNumberRange`, `FilterBarDateRange`, `FilterBarApplyMode`, `FilterBarCustomRenderProps`, `FilterBarChangeDetails`, `FilterBarMessages`, `FilterBarSearchProps`, `FilterBarClassNames`, and `FilterBarOptionAccessors`. The additional function export is `createFilterOptions`.

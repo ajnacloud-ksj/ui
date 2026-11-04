@@ -1,0 +1,61 @@
+---
+title: Label
+description: A native label for a control in a custom layout.
+---
+
+import { LabelExample } from "@/examples/label/label-example";
+import { LabelControls } from "@/examples/label/label-controls";
+
+<ComponentPreview>
+  <LabelExample />
+</ComponentPreview>
+
+<include>../../../examples/label/label-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Label, Input } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Label } from "@ajnacloud/ui/label";
+import { Input } from "@ajnacloud/ui/input";
+```
+
+### Basic usage
+
+```tsx
+<div>
+  <Label htmlFor="project-name">Project name</Label>
+  <Input id="project-name" name="projectName" />
+</div>
+```
+
+Match `htmlFor` with a unique control `id`. Clicking the label then focuses or activates the control, and its text provides an accessible name. Placeholders do not replace labels.
+
+### Label and FieldLabel
+
+Use Label for a control in your own layout. Use [FieldLabel](/docs/components/field) with FieldDescription and FieldError for a composed field. Use FieldSet and FieldLegend to name a group of choices.
+
+## Examples
+
+### Checkboxes and disabled controls
+
+`data-disabled` dims the label; set `disabled` on the control itself too.
+
+<ComponentPreview>
+  <LabelControls />
+</ComponentPreview>
+
+<include>../../../examples/label/label-controls.tsx</include>
+
+## API reference
+
+`LabelProps` accepts native label attributes, including `htmlFor`, a string `className`, `style`, and an `HTMLLabelElement` ref. Data and ARIA attributes pass through.

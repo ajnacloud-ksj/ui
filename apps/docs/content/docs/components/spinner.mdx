@@ -1,0 +1,107 @@
+---
+title: Spinner
+description: Indicate that an action or content is loading.
+---
+
+import { SpinnerExample } from "@/examples/spinner/spinner-example";
+import { SpinnerSizes } from "@/examples/spinner/spinner-sizes";
+import { SpinnerLoading } from "@/examples/spinner/spinner-loading";
+import { SpinnerColor } from "@/examples/spinner/spinner-color";
+import { SpinnerButton } from "@/examples/spinner/spinner-button";
+import { SpinnerBadge } from "@/examples/spinner/spinner-badge";
+
+<ComponentPreview>
+  <SpinnerExample />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Spinner } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Spinner } from "@ajnacloud/ui/spinner";
+```
+
+### Basic usage
+
+```tsx
+<Spinner aria-label="Loading projects" />
+```
+
+## Examples
+
+### Sizes
+
+Use `sm` (16px), `base` (24px), `lg` (32px), or a positive number for custom pixel dimensions.
+
+<ComponentPreview>
+  <SpinnerSizes />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-sizes.tsx</include>
+
+### Color
+
+Spinner inherits the surrounding text color. Set `color` to override it.
+
+<ComponentPreview>
+  <SpinnerColor />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-color.tsx</include>
+
+### Button
+
+Button's `loading` prop already includes a decorative Spinner.
+
+<ComponentPreview>
+  <SpinnerButton />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-button.tsx</include>
+
+### Badge
+
+<ComponentPreview>
+  <SpinnerBadge />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-badge.tsx</include>
+
+### Loading content
+
+Use `aria-busy` on the content region. When visible text already describes loading, hide the accompanying Spinner from assistive technology.
+
+<ComponentPreview>
+  <SpinnerLoading />
+</ComponentPreview>
+
+<include>../../../examples/spinner/spinner-loading.tsx</include>
+
+## Accessibility
+
+Spinner defaults to `role="status"` and the name “Loading”. Supply `aria-label` for a specific or translated name, or `aria-labelledby` to reference existing text. `aria-hidden="true"` removes its default role and name. Reduced motion stops both animations, leaving a static arc.
+
+## API reference
+
+| Prop              | Type                               | Default     | Description                                 |
+| ----------------- | ---------------------------------- | ----------- | ------------------------------------------- |
+| `size`            | `"sm" \| "base" \| "lg" \| number` | `"base"`    | Both dimensions; numeric values are pixels. |
+| `role`            | Native ARIA role                   | `"status"`  | Omitted when decorative.                    |
+| `aria-label`      | `string`                           | `"Loading"` | Omitted when externally labelled or hidden. |
+| `aria-labelledby` | `string`                           | —           | ID of the loading description.              |
+| `aria-hidden`     | Native ARIA value                  | —           | Makes the spinner decorative.               |
+
+Accepts `className`, `style`, native SVG props except `children`, `width`, and `height`, and an `SVGSVGElement` ref. Invalid runtime sizes fall back to `base`.
+
+`Spinner`, `SpinnerProps`, and `SpinnerSize` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/spinner`.

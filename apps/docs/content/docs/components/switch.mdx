@@ -1,0 +1,104 @@
+---
+title: Switch
+description: Turn a setting on or off.
+---
+
+import { SwitchExample } from "@/examples/switch/switch-example";
+import { SwitchStates } from "@/examples/switch/switch-states";
+import { SwitchSizes } from "@/examples/switch/switch-sizes";
+import { SwitchControlled } from "@/examples/switch/switch-controlled";
+
+<ComponentPreview>
+  <SwitchExample />
+</ComponentPreview>
+
+<include>../../../examples/switch/switch-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Switch, Field, FieldContent, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Switch } from "@ajnacloud/ui/switch";
+import { Field, FieldContent, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field orientation="horizontal">
+  <Switch id="notifications" name="notifications" />
+  <FieldContent>
+    <FieldLabel htmlFor="notifications">Email notifications</FieldLabel>
+  </FieldContent>
+</Field>
+```
+
+Keep the label stable as the value changes. Associate it through `id`/`htmlFor`, and connect supporting text using `aria-describedby`. Label clicks toggle the switch. Keyboard users can Tab to it and press Space to change its state.
+
+Use a switch for an on/off setting. Use a checkbox for accepting terms or choosing items that will be submitted together. Neither component performs application side effects by itself; connect those through its change handler.
+
+## Examples
+
+### States
+
+<ComponentPreview>
+  <SwitchStates />
+</ComponentPreview>
+
+<include>../../../examples/switch/switch-states.tsx</include>
+
+`disabled` prevents interaction and removes the control from keyboard navigation. `readOnly` prevents changes while retaining focusability. Field's `data-disabled` only affects presentation. Your application owns validation and supplies `aria-invalid` and error content. Switch has two states; it does not support an indeterminate value.
+
+### Sizes
+
+<ComponentPreview>
+  <SwitchSizes />
+</ComponentPreview>
+
+<include>../../../examples/switch/switch-sizes.tsx</include>
+
+`size="default"` is the default. Small switches use a proportionally smaller thumb. Prefer the matching size prop over changing track dimensions alone, because thumb size and travel must stay aligned. Thumb movement follows the surrounding `dir="rtl"` when present and stops animating when reduced motion is requested.
+
+### Controlled switch
+
+<ComponentPreview>
+  <SwitchControlled />
+</ComponentPreview>
+
+<include>../../../examples/switch/switch-controlled.tsx</include>
+
+`onCheckedChange` receives a boolean and Base UI event details. Use `defaultChecked` for uncontrolled usage. Form libraries should connect their boolean field value and change handler to `checked` and `onCheckedChange`.
+
+## Behavior
+
+### Forms and refs
+
+Base UI renders an interactive root and a hidden native input. A named, checked switch submits `value` (default `"on"`). An unchecked switch submits nothing unless you supply `uncheckedValue`. Disabled switches are omitted. Native `required` validation can require the switch to be on.
+
+The forwarded ref targets the interactive root, a `span` by default. `inputRef` targets the hidden native input. Supply `aria-label` or `aria-labelledby` if there is no visible label.
+
+When disabling a group with native `FieldSet`, also pass `disabled` to each Switch so its interactive root receives the disabled state and leaves keyboard navigation.
+
+## API reference
+
+| Prop                                      | Behavior / default                                           |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| `size`                                    | `"default" \| "sm"`; defaults to `"default"`.                |
+| `checked`                                 | Controlled boolean.                                          |
+| `defaultChecked`                          | Uncontrolled initial state; `false`.                         |
+| `onCheckedChange`                         | `(checked: boolean, eventDetails) => void`.                  |
+| `disabled`, `readOnly`, `required`        | Base UI control states; `false`.                             |
+| `name`, `value`, `uncheckedValue`, `form` | Native form participation.                                   |
+| `className`                               | String or Base UI state callback, merged with Ajna defaults. |
+| `ref`, `inputRef`                         | Interactive root and hidden input refs.                      |
+
+`SwitchProps` preserves Base UI Root's remaining props, including `render` and event details. The thumb is included; the unstyled composition remains available from `/primitives/switch`.

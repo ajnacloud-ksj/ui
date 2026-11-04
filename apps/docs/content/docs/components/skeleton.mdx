@@ -1,0 +1,86 @@
+---
+title: Skeleton
+description: A visual placeholder while content is loading.
+---
+
+import { SkeletonExample } from "@/examples/skeleton/skeleton-example";
+import { SkeletonLoading } from "@/examples/skeleton/skeleton-loading";
+import { SkeletonText } from "@/examples/skeleton/skeleton-text";
+import { SkeletonCard } from "@/examples/skeleton/skeleton-card";
+import { SkeletonTable } from "@/examples/skeleton/skeleton-table";
+
+<ComponentPreview>
+  <SkeletonExample />
+</ComponentPreview>
+
+<include>../../../examples/skeleton/skeleton-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Skeleton } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Skeleton } from "@ajnacloud/ui/skeleton";
+```
+
+### Basic usage
+
+```tsx
+<Skeleton style={{ width: 200, height: 16 }} />
+```
+
+Set dimensions to match the content being replaced. Use `style` or your own CSS; generated Tailwind utilities work too when your application uses Tailwind. Skeleton adds the background, rounded corners, and shimmer.
+
+## Examples
+
+### Text
+
+<ComponentPreview>
+  <SkeletonText />
+</ComponentPreview>
+
+<include>../../../examples/skeleton/skeleton-text.tsx</include>
+
+### Card
+
+<ComponentPreview>
+  <SkeletonCard />
+</ComponentPreview>
+
+<include>../../../examples/skeleton/skeleton-card.tsx</include>
+
+### Table
+
+<ComponentPreview>
+  <SkeletonTable />
+</ComponentPreview>
+
+<include>../../../examples/skeleton/skeleton-table.tsx</include>
+
+### Loading content
+
+Replace the placeholder when content is ready. Mark the content region with `aria-busy` and keep loading text outside the hidden skeletons.
+
+<ComponentPreview>
+  <SkeletonLoading />
+</ComponentPreview>
+
+<include>../../../examples/skeleton/skeleton-loading.tsx</include>
+
+## Accessibility
+
+Skeleton is hidden from assistive technology by default. The shimmer is removed when reduced motion is requested, leaving a static placeholder.
+
+## API reference
+
+Skeleton accepts native `div` props, including `className`, `style`, and an `HTMLDivElement` ref. It defaults to `aria-hidden="true"` and has no required props.
+
+`SkeletonProps` is exported from both `@ajnacloud/ui` and `@ajnacloud/ui/skeleton`.

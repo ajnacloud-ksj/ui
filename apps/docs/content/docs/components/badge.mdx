@@ -1,0 +1,115 @@
+---
+title: Badge
+description: A compact label for status, counts, and metadata.
+---
+
+import { BadgeExample } from "@/examples/badge/badge-example";
+import { BadgeVariants } from "@/examples/badge/badge-variants";
+import { BadgeLink } from "@/examples/badge/badge-link";
+import { BadgeIcons } from "@/examples/badge/badge-icons";
+import { BadgeLoading } from "@/examples/badge/badge-loading";
+
+<ComponentPreview>
+  <BadgeExample />
+</ComponentPreview>
+
+<include>../../../examples/badge/badge-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Badge } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Badge } from "@ajnacloud/ui/badge";
+```
+
+### Basic usage
+
+```tsx
+<Badge variant="secondary">Draft</Badge>
+```
+
+Badge renders a noninteractive `span` by default. Use [Button](/docs/components/button) for an action.
+
+## Examples
+
+### Variants
+
+<ComponentPreview>
+  <BadgeVariants />
+</ComponentPreview>
+
+<include>../../../examples/badge/badge-variants.tsx</include>
+
+| Variant       | Appearance                                                    |
+| ------------- | ------------------------------------------------------------- |
+| `default`     | Primary background and foreground.                            |
+| `secondary`   | Neutral background.                                           |
+| `destructive` | Destructive text on a tinted background.                      |
+| `success`     | Success text on a tinted background.                          |
+| `warning`     | Warning text on a tinted background.                          |
+| `info`        | Informational text on a tinted background.                    |
+| `outline`     | Border with a transparent background.                         |
+| `ghost`       | Transparent, with a hover background when rendered as a link. |
+| `link`        | Primary text, underlined on hover when rendered as a link.    |
+
+### With an icon
+
+Render icons as children and hide decorative icons from assistive technology. Direct SVG children are sized automatically. See [Icons](/docs/icons) for setup.
+
+<ComponentPreview>
+  <BadgeIcons />
+</ComponentPreview>
+
+<include>../../../examples/badge/badge-icons.tsx</include>
+
+### With a spinner
+
+Compose [Spinner](/docs/components/spinner) with a text label for pending work.
+
+<ComponentPreview>
+  <BadgeLoading />
+</ComponentPreview>
+
+<include>../../../examples/badge/badge-loading.tsx</include>
+
+### Link
+
+Use `render` to supply an anchor or framework link. Put destination props on that element; a visual variant alone does not create a link.
+
+<ComponentPreview>
+  <BadgeLink />
+</ComponentPreview>
+
+<include>../../../examples/badge/badge-link.tsx</include>
+
+## Accessibility
+
+Use text to convey status rather than color alone. A rendered link needs a descriptive name; decorative icons should not be part of that name.
+
+## API reference
+
+### Badge
+
+| Prop        | Type                             | Default     | Description                                                                                         |
+| ----------- | -------------------------------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| `variant`   | `BadgeVariant`                   | `"default"` | `default`, `secondary`, `destructive`, `success`, `warning`, `info`, `outline`, `ghost`, or `link`. |
+| `render`    | React element or render callback | —           | Replaces the default `span` without an extra wrapper.                                               |
+| `className` | `string`                         | —           | Classes merged with the badge's styles.                                                             |
+| `ref`       | `Ref<HTMLElement>`               | —           | Ref to the rendered element.                                                                        |
+
+Accepts children, `style`, native span attributes, and ARIA attributes.
+
+### badgeVariants
+
+`badgeVariants({ variant })` returns a class string, defaulting to `"default"`. When using it on a custom element with standalone CSS, include `data-ajna-component="badge"`.
+
+`BadgeProps`, `BadgeVariant`, and `BadgeVariantProps` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/badge`.

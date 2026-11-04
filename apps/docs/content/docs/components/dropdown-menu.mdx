@@ -1,0 +1,217 @@
+---
+title: Dropdown Menu
+description: Put related actions and settings in a keyboard-accessible menu.
+---
+
+import { DropdownMenuExample } from "@/examples/dropdown-menu/dropdown-menu-example";
+import { DropdownMenuIcons } from "@/examples/dropdown-menu/dropdown-menu-icons";
+import { DropdownMenuCheckboxes } from "@/examples/dropdown-menu/dropdown-menu-checkboxes";
+import { DropdownMenuRadio } from "@/examples/dropdown-menu/dropdown-menu-radio";
+import { DropdownMenuSubmenu } from "@/examples/dropdown-menu/dropdown-menu-submenu";
+import { DropdownMenuLinks } from "@/examples/dropdown-menu/dropdown-menu-links";
+import { DropdownMenuControlled } from "@/examples/dropdown-menu/dropdown-menu-controlled";
+
+<ComponentPreview>
+  <DropdownMenuExample />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { DropdownMenu, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { DropdownMenu } from "@ajnacloud/ui/dropdown-menu";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<DropdownMenu.Root>
+  <DropdownMenu.Trigger render={<Button variant="secondary" />}>
+    Project actions
+  </DropdownMenu.Trigger>
+  <DropdownMenu.Content>
+    <DropdownMenu.Item>Rename</DropdownMenu.Item>
+    <DropdownMenu.Item>Duplicate</DropdownMenu.Item>
+    <DropdownMenu.Separator />
+    <DropdownMenu.Item variant="destructive">Delete</DropdownMenu.Item>
+  </DropdownMenu.Content>
+</DropdownMenu.Root>
+```
+
+Use Dropdown Menu for commands and compact checkbox or radio settings. Use [Popover](/docs/components/popover) for forms or arbitrary interactive content.
+
+In Next.js, put compound component compositions in a file beginning with `"use client"`. All parts use the same standalone or native Tailwind setup as other Ajna components.
+
+### Composition and actions
+
+Root owns open state. Trigger renders a button; `render={<Button />}` composes its behavior onto an Ajna Button without nesting buttons. Content supplies its portal and positioning. Items receive focus/highlight and activation behavior from Base UI.
+
+Handle actions with `onClick`. Radix examples often use an `onSelect` action callback; that is not Base UI's command API. A React `onSelect` prop, if supplied, remains a native text-selection event handler.
+
+Ordinary items close the menu after activation. Set `closeOnClick={false}` when an action should leave it open. `disabled` prevents pointer and keyboard activation and applies disabled styling.
+
+## Examples
+
+### Groups, labels, and separators
+
+Put Label inside Group so the visible group name is associated with its items. Separator divides distinct action sets without creating another command.
+
+```tsx
+import { DropdownMenu } from "@ajnacloud/ui";
+
+<DropdownMenu.Content>
+  <DropdownMenu.Group>
+    <DropdownMenu.Label>Project</DropdownMenu.Label>
+    <DropdownMenu.Item>Rename</DropdownMenu.Item>
+    <DropdownMenu.Item>Duplicate</DropdownMenu.Item>
+  </DropdownMenu.Group>
+  <DropdownMenu.Separator />
+  <DropdownMenu.Group>
+    <DropdownMenu.Label>Workspace</DropdownMenu.Label>
+    <DropdownMenu.Item>Invite teammate</DropdownMenu.Item>
+  </DropdownMenu.Group>
+</DropdownMenu.Content>
+```
+
+Use `inset` on Label, Item, LinkItem, or SubTrigger to align plain text with rows that reserve a leading icon/indicator column. Checkbox and radio items reserve that column automatically.
+
+### Icons, shortcuts, and destructive actions
+
+<ComponentPreview>
+  <DropdownMenuIcons />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-icons.tsx</include>
+
+Place icon elements inside an item and mark decorative SVGs `aria-hidden="true"`. Rows size SVGs to 16px. See [Icons](/docs/icons) for application setup.
+
+Shortcut is a visual hint and is hidden from screen readers by default. It does not register a global keyboard shortcut. Bind shortcuts in your application and use `aria-keyshortcuts` on the item when a real shortcut exists. For icon-heavy or custom item content, `label` supplies clean text for typeahead navigation.
+
+`variant="destructive"` gives Item or LinkItem the destructive text/highlight colors. It does not ask for confirmation, delete data, or change activation behavior. Use a [Dialog](/docs/components/dialog) to confirm an irreversible action when needed.
+
+### Checkbox items
+
+<ComponentPreview>
+  <DropdownMenuCheckboxes />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-checkboxes.tsx</include>
+
+Use CheckboxItem for independent settings. `checked` and `onCheckedChange` make it controlled; `defaultChecked` sets an initial uncontrolled value. The callback receives a boolean and Base UI event details.
+
+Checkbox items stay open by default so several settings can be adjusted together. Pass `closeOnClick` when selecting one should dismiss the menu. The indicator is built in; do not nest an Ajna Checkbox inside a menu item. These are menu settings, not native form inputs, and do not add submitted form values automatically.
+
+### Radio items
+
+<ComponentPreview>
+  <DropdownMenuRadio />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-radio.tsx</include>
+
+RadioGroup owns the selected value. Give each RadioItem a distinct `value` and name the group with `aria-label` or `aria-labelledby`.
+
+Radio items also stay open by default in the installed Base UI API. Set `closeOnClick` on them when choosing a value should finish the interaction. `defaultValue` supports an uncontrolled group; `value` and `onValueChange` support application state.
+
+### Submenus
+
+<ComponentPreview>
+  <DropdownMenuSubmenu />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-submenu.tsx</include>
+
+Use Sub to connect a SubTrigger with its SubContent. SubTrigger includes a decorative chevron. SubContent supplies a second portal and positions itself beside the parent row; it defaults to `side="inline-end"` so it follows the writing direction. Collision handling can move it to the other side when necessary.
+
+Hover opens a submenu by default, and keyboard navigation opens it with the arrow key in the submenu direction. Use `openOnHover={false}` on SubTrigger when hover opening is unsuitable. Set `disabled` there to make the submenu unavailable. Selecting an ordinary command closes the menu tree; Escape normally closes the current submenu first.
+
+### Links
+
+<ComponentPreview>
+  <DropdownMenuLinks />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-links.tsx</include>
+
+Use LinkItem for navigation so the underlying element is an anchor with an `href`. This preserves opening in a new tab, copying a link, and the browser's normal navigation behavior. Ajna's LinkItem closes after activation by default; override `closeOnClick` if needed.
+
+For a router link, use LinkItem's `render` prop with a component that accepts an anchor ref and forwards native props. LinkItem has no `disabled` prop. Present an unavailable destination as a disabled Item instead of an anchor that appears usable but ignores navigation.
+
+### Controlled state
+
+<ComponentPreview>
+  <DropdownMenuControlled />
+</ComponentPreview>
+
+<include>../../../examples/dropdown-menu/dropdown-menu-controlled.tsx</include>
+
+Without `open`, Root manages visibility itself. Use `open`/`onOpenChange` when an application action needs to control it, and `defaultOpen` only for the initial uncontrolled value. For programmatic opening, Root's `triggerId` identifies the trigger; pair `defaultTriggerId` with an initially open uncontrolled menu.
+
+Use `closeOnClick={false}` to keep the menu open after an action. Control visibility explicitly when closing depends on an asynchronous result.
+
+## Behavior
+
+### Placement and mounting
+
+Content defaults to `side="bottom"`, `align="start"`, and a 4px gap. Set placement and offsets on Content or SubContent, not Root. Both support physical and logical sides, collision boundaries, and collision padding.
+
+```tsx
+import { DropdownMenu } from "@ajnacloud/ui";
+
+<DropdownMenu.Content align="end" sideOffset={8} style={{ minWidth: 240 }}>
+  <DropdownMenu.Item>Project settings</DropdownMenu.Item>
+</DropdownMenu.Content>
+```
+
+The surface has a 192px minimum width and scrolls within its available height. `className` styles the popup and can receive Base UI's popup state. Use inline styles or your stylesheet in standalone mode; native Tailwind consumers can also use their own generated utilities.
+
+Content and SubContent portal to `document.body`. Pass `container` to each content part that should use a different destination, including a Shadow DOM portal. `keepMounted` retains closed content without making it visible. For a custom portal, preserve a suitable writing direction; when using Base UI DirectionProvider, it is available from `/primitives/direction-provider`.
+
+Root preserves Base UI's modal default (`true`). `modal={false}` allows interaction with the surrounding page. The menu surface appears above Ajna Dialog surfaces, and reduced motion removes its scale/opacity transitions.
+
+## Accessibility
+
+| Key                                   | Behavior                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| Enter, Space, or ArrowDown on Trigger | Opens the menu and supports keyboard entry.                                    |
+| ArrowUp / ArrowDown                   | Moves among menu items; disabled items can be highlighted but cannot activate. |
+| Home / End                            | Moves to the first or last item.                                               |
+| Printable characters                  | Moves to a matching item using its text or `label`.                            |
+| Enter / Space on an item              | Activates a command or changes a setting.                                      |
+| Arrow toward a submenu                | Opens it; the opposite arrow returns to its parent.                            |
+| Escape                                | Closes the current menu; focus returns appropriately.                          |
+| Tab                                   | Leaves the menu rather than tabbing through every command.                     |
+
+Menu items use menu roles, including `menuitemcheckbox` and `menuitemradio` with checked state. Do not add nested buttons or checkboxes inside them. Preserve visible highlighted states and give icon-only triggers an accessible name.
+
+## API reference
+
+Menus and submenus use `--ajna-popover` and `--ajna-popover-foreground`. Highlighted items use the accent pair; destructive items keep their destructive text color. See [Theming](/docs/theming#default-surfaces).
+
+| Part                       | Relevant props / purpose                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Root`                     | `open`, `defaultOpen`, `onOpenChange`, `modal` (default true), `loopFocus` (default true), `triggerId`                               |
+| `Trigger`                  | `render`, native button props; compose with Button                                                                                   |
+| `Content`                  | `side=bottom`, `align=start`, `sideOffset=4`, `alignOffset=0`, `collisionPadding=8`, `collisionBoundary`, `container`, `keepMounted` |
+| `Group` / `Label`          | Related items and their visible name; Label supports `inset`                                                                         |
+| `Item`                     | `onClick`, `disabled`, `closeOnClick=true`, `label`, `inset`, `variant=default` or `destructive`                                     |
+| `LinkItem`                 | Native anchor props, `render`, `closeOnClick=true`, `label`, `inset`, `variant`                                                      |
+| `CheckboxItem`             | `checked`, `defaultChecked`, `onCheckedChange`, `disabled`, `closeOnClick=false`                                                     |
+| `RadioGroup` / `RadioItem` | Group value/change callback, item value/disabled; RadioItem defaults `closeOnClick=false`                                            |
+| `Separator` / `Shortcut`   | Divider and visual keyboard hint                                                                                                     |
+| `Sub` / `SubTrigger`       | Nested menu state; SubTrigger supports `inset`, `disabled`, `openOnHover`, delays                                                    |
+| `SubContent`               | Content props; defaults `inline-end`, `start`, side offset 4px, alignment offset -4px                                                |
+
+Styled parts forward refs and Base UI props. Content refs target a div; Item/CheckboxItem/RadioItem/SubTrigger refs target their interactive element. LinkItem preserves Base UI's polymorphic element ref. Invalid runtime Item/LinkItem variants fall back to `default`. The unstyled menu family remains available at `/primitives/menu` for custom composition.

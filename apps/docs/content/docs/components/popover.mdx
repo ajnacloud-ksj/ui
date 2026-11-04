@@ -1,0 +1,201 @@
+---
+title: Popover
+description: Open a small panel of information or controls beside a trigger.
+---
+
+import { PopoverExample } from "@/examples/popover/popover-example";
+import { PopoverForm } from "@/examples/popover/popover-form";
+import { PopoverPlacement } from "@/examples/popover/popover-placement";
+import { PopoverControlled } from "@/examples/popover/popover-controlled";
+import { PopoverInitialFocus } from "@/examples/popover/popover-initial-focus";
+
+<ComponentPreview>
+  <PopoverExample />
+</ComponentPreview>
+
+<include>../../../examples/popover/popover-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Popover, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Popover } from "@ajnacloud/ui/popover";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Popover.Root>
+  <Popover.Trigger render={<Button variant="secondary" />}>Open settings</Popover.Trigger>
+  <Popover.Content>
+    <Popover.Header>
+      <Popover.Title>Settings</Popover.Title>
+      <Popover.Description>Change the project details.</Popover.Description>
+    </Popover.Header>
+    <Popover.Close render={<Button variant="secondary" />}>Done</Popover.Close>
+  </Popover.Content>
+</Popover.Root>
+```
+
+Use Popover for a short task that belongs beside its trigger: editing a project name, changing display settings, or sharing a link. It supports interactive content and focus management. Use [Tooltip](/docs/components/tooltip) for brief non-interactive explanations, [Dropdown Menu](/docs/components/dropdown-menu) for a list of commands, and [Dialog](/docs/components/dialog) for a longer task or a decision that needs a modal surface.
+
+In Next.js, compose the parts inside a file beginning with `"use client"`. Both standalone CSS and native Tailwind v3 use the same API.
+
+### Parts
+
+Root owns visibility. Trigger and Close render native buttons; use `render={<Button />}` for Ajna styling and a single underlying button. Content includes its portal and collision-aware positioning. Header is optional spacing for a title and description; the Title and Description parts provide the popup's accessible name and description automatically.
+
+Always give Content a useful name through Title or `aria-label`. Header alone does not label the panel.
+
+## Examples
+
+### Form controls
+
+<ComponentPreview>
+  <PopoverForm />
+</ComponentPreview>
+
+<include>../../../examples/popover/popover-form.tsx</include>
+
+Use the usual Field, Input, Checkbox, and Switch components inside a popover. Associate each label with its control. The first focusable control receives focus on open by default, so keyboard users can begin the task immediately. On touch, Base UI normally focuses the panel instead of opening an input's virtual keyboard automatically.
+
+This example's Done button closes the panel; it does not save to an API. For application-owned values and submission, use the controlled example below.
+
+### Placement and sizing
+
+<ComponentPreview>
+  <PopoverPlacement />
+</ComponentPreview>
+
+<include>../../../examples/popover/popover-placement.tsx</include>
+
+Content prefers the bottom of the trigger with an 8px gap and center alignment. Set `side`, `align`, `sideOffset`, and `alignOffset` on Content. Available sides include `top`, `bottom`, `left`, `right`, `inline-start`, and `inline-end`. Logical sides follow the writing direction.
+
+For RTL, set HTML `dir` and use Base UI's DirectionProvider for directional positioning. If only a local section is RTL, set `dir="rtl"` on its portaled Content too.
+
+`anchor` accepts an element or element ref to position Content against a larger control instead of its trigger button. DateInput uses this to align its popup with the full input.
+
+Placement can flip or shift near a viewport or clipping boundary. `collisionPadding` leaves space from that boundary; `collisionBoundary` selects a different boundary when needed.
+
+Content is 288px wide by default, shrinks to the available width, and scrolls when it exceeds the available height. Override width with your own CSS or inline styles in either styling mode:
+
+```tsx
+import { Popover } from "@ajnacloud/ui";
+
+<Popover.Content align="end" style={{ width: 360 }}>
+  <Popover.Title>Display settings</Popover.Title>
+</Popover.Content>
+```
+
+### Controlled state and submission
+
+<ComponentPreview>
+  <PopoverControlled />
+</ComponentPreview>
+
+<include>../../../examples/popover/popover-controlled.tsx</include>
+
+Control `open` and close after a successful submission. Keep errors in the panel when saving fails. Use a submit Button for saving; Close only dismisses.
+
+Without `open`, Root manages its own state. `defaultOpen` controls only the initial value. If a panel is opened programmatically without interacting with its trigger, give the trigger an `id` and pass it as Root's `triggerId`; use `defaultTriggerId` with an initially open uncontrolled panel.
+
+## Behavior
+
+### Focus control
+
+<ComponentPreview>
+  <PopoverInitialFocus />
+</ComponentPreview>
+
+<include>../../../examples/popover/popover-initial-focus.tsx</include>
+
+Pass a ref to `initialFocus` when the first control is not the right starting point. Content also supports `initialFocus={false}` to preserve current focus. Use that option deliberately: opening a panel should still leave a clear keyboard path into its controls.
+
+By default, closing restores focus to the trigger or the previously focused element. `finalFocus` can point to another element when the action changes the surrounding interface.
+
+### Modal behavior
+
+Root defaults to `modal={false}`, allowing interaction with the rest of the page. For a small panel that must contain focus, `modal="trap-focus"` traps focus without locking page scrolling. `modal={true}` also limits outside interaction according to Base UI's modal behavior.
+
+```tsx
+import { Button, Popover } from "@ajnacloud/ui";
+
+<Popover.Root modal="trap-focus">
+  <Popover.Trigger render={<Button variant="secondary" />}>Edit preferences</Popover.Trigger>
+  <Popover.Content>
+    <Popover.Title>Preferences</Popover.Title>
+    <Popover.Close render={<Button variant="secondary" />}>Close preferences</Popover.Close>
+  </Popover.Content>
+</Popover.Root>
+```
+
+Include a Close control when trapping focus so touch screen-reader users have an explicit way out. Base UI's `modal={true}` mode enables focus trapping when Close is present. Choose Dialog when the task needs a full modal backdrop and more room.
+
+### Custom portal and mounting
+
+Content portals to `document.body`. Pass `container` to choose an element or supported ref, including a destination within a Shadow DOM. No application-wide portal provider is required.
+
+```tsx
+"use client";
+
+import { Button, Popover } from "@ajnacloud/ui";
+import { useRef } from "react";
+
+export function ScopedPopover() {
+  const container = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={container}>
+      <Popover.Root>
+        <Popover.Trigger render={<Button variant="secondary" />}>Project information</Popover.Trigger>
+        <Popover.Content container={container} keepMounted>
+          <Popover.Title>Website redesign</Popover.Title>
+          <Popover.Description>Review the current project.</Popover.Description>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
+  );
+}
+```
+
+`keepMounted` keeps closed content in the DOM so controls can retain their local state. It does not keep the panel visible. Without it, Content normally unmounts after its closing transition. Put data that must outlive the panel in application state, regardless of mounting strategy.
+
+## Accessibility
+
+| Interaction               | Result                                                            |
+| ------------------------- | ----------------------------------------------------------------- |
+| Enter or Space on Trigger | Opens or toggles the panel.                                       |
+| Open                      | Moves focus into the panel according to `initialFocus`.           |
+| Tab / Shift+Tab           | Moves through controls using the selected modal policy.           |
+| Escape                    | Dismisses the panel.                                              |
+| Click outside             | Dismisses the panel using Base UI's outside-interaction behavior. |
+| Close button              | Dismisses and normally restores focus to the trigger.             |
+
+Content has dialog semantics and Title/Description associations. Give icon-only triggers and close buttons accessible names. Keep visible focus indicators on custom controls. Opacity and scale transitions stop for reduced motion.
+
+## API reference
+
+Content uses `--ajna-popover` and `--ajna-popover-foreground`; descriptions use `--ajna-muted-foreground`. Override the popup background and foreground together when customizing its theme. See [Theming](/docs/theming#default-surfaces).
+
+| Part          | Relevant props                                                                  | Default                                 |
+| ------------- | ------------------------------------------------------------------------------- | --------------------------------------- |
+| `Root`        | `open`, `defaultOpen`, `onOpenChange`, `modal`, `triggerId`, `defaultTriggerId` | Closed; non-modal                       |
+| `Trigger`     | `render`, native button props                                                   | Native button                           |
+| `Content`     | `anchor`, `side`, `align`, `sideOffset`, `alignOffset`                          | `bottom`, `center`, `8`, `0`            |
+| `Content`     | `collisionPadding`, `collisionBoundary`                                         | 8px padding; Base UI's default boundary |
+| `Content`     | `initialFocus`, `finalFocus`, `container`, `keepMounted`                        | Base UI focus defaults; body; `false`   |
+| `Header`      | Native `div` attributes and `className`                                         | Groups title/description                |
+| `Title`       | Base UI Title props, `render`                                                   | Heading that labels Content             |
+| `Description` | Base UI Description props, `render`                                             | Paragraph that describes Content        |
+| `Close`       | `render`, native button props                                                   | Native button                           |
+
+Content forwards an `HTMLDivElement` ref and accepts string or state-based `className`. Header forwards a div ref; Title and Description forward heading/paragraph refs. Trigger, Root, and Close preserve Base UI's APIs. Use `/primitives/popover` for lower-level Portal, Positioner, Backdrop, Arrow, and Viewport composition.

@@ -1,0 +1,116 @@
+---
+title: Empty
+description: Explain missing content and offer a useful next action.
+---
+
+import { EmptyExample } from "@/examples/empty/empty-example";
+import { EmptySearch } from "@/examples/empty/empty-search";
+import { EmptyMediaExample } from "@/examples/empty/empty-media-example";
+import { EmptyText } from "@/examples/empty/empty-text";
+
+<ComponentPreview>
+  <EmptyExample />
+</ComponentPreview>
+
+<include>../../../examples/empty/empty-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@ajnacloud/ui/empty";
+```
+
+### Basic usage
+
+```tsx
+<Empty>
+  <EmptyHeader>
+    <EmptyTitle>No projects yet</EmptyTitle>
+    <EmptyDescription>Create a project to get started.</EmptyDescription>
+  </EmptyHeader>
+</Empty>
+```
+
+Use Empty for absent content. Use [Skeleton](/docs/components/skeleton) while loading and [Banner](/docs/components/banner) for an error.
+
+### Parts
+
+| Part               | Purpose                               |
+| ------------------ | ------------------------------------- |
+| `Empty`            | Centered outer container.             |
+| `EmptyHeader`      | Groups media, title, and description. |
+| `EmptyMedia`       | Icon, avatar, image, or illustration. |
+| `EmptyTitle`       | Main message.                         |
+| `EmptyDescription` | Explanation and supporting links.     |
+| `EmptyContent`     | Actions or additional controls.       |
+
+## Examples
+
+### Text only
+
+Media and actions are optional.
+
+<ComponentPreview>
+  <EmptyText />
+</ComponentPreview>
+
+<include>../../../examples/empty/empty-text.tsx</include>
+
+### No search results
+
+Keep the query editable and provide a way to clear it.
+
+<ComponentPreview>
+  <EmptySearch />
+</ComponentPreview>
+
+<include>../../../examples/empty/empty-search.tsx</include>
+
+### Custom media and border
+
+Use `variant="icon"` for an icon on a muted square, or the default variant for custom media. Empty has no border by default.
+
+<ComponentPreview>
+  <EmptyMediaExample />
+</ComponentPreview>
+
+<include>../../../examples/empty/empty-media-example.tsx</include>
+
+## Accessibility
+
+EmptyTitle renders a `div` by default; use `render` for an appropriate heading. Hide decorative media with `aria-hidden="true"`. Empty does not announce updates or move focus automatically; handle those when replacing content asynchronously.
+
+## API reference
+
+| Part               | Props                                                                   | Default element |
+| ------------------ | ----------------------------------------------------------------------- | --------------- |
+| `Empty`            | Native div props.                                                       | `div`           |
+| `EmptyHeader`      | Native div props.                                                       | `div`           |
+| `EmptyMedia`       | Native div props and `variant="default" \| "icon"` (default `default`). | `div`           |
+| `EmptyTitle`       | Native div props and a `render` element or callback.                    | `div`           |
+| `EmptyDescription` | Native div props.                                                       | `div`           |
+| `EmptyContent`     | Native div props.                                                       | `div`           |
+
+All parts accept children, `className`, `style`, and forwarded refs. EmptyTitle's ref follows its rendered element; other refs target divs. Header and content have a default maximum width of `24rem`.
+
+All six parts, their prop types, and `EmptyMediaVariant` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/empty`.

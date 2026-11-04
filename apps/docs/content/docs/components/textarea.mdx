@@ -1,0 +1,97 @@
+---
+title: Textarea
+description: A multiline text control that composes with Field.
+---
+
+import { TextareaExample } from "@/examples/textarea/textarea-example";
+import { TextareaStates } from "@/examples/textarea/textarea-states";
+import { TextareaControlled } from "@/examples/textarea/textarea-controlled";
+
+<ComponentPreview>
+  <TextareaExample />
+</ComponentPreview>
+
+<include>../../../examples/textarea/textarea-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Textarea, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Textarea } from "@ajnacloud/ui/textarea";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="feedback">Feedback</FieldLabel>
+  <Textarea
+    id="feedback"
+    name="feedback"
+    placeholder="Share your thoughts"
+    rows={4}
+  />
+</Field>
+```
+
+Use FieldLabel for the visible label and `aria-describedby` to connect help text or errors.
+
+## Examples
+
+### Disabled, read-only, and invalid
+
+Disabled textareas are not focusable and are omitted from form values. Read-only textareas remain focusable and submit their value. Use `aria-invalid` on the control and connect FieldError with `aria-describedby`.
+
+<ComponentPreview>
+  <TextareaStates />
+</ComponentPreview>
+
+<include>../../../examples/textarea/textarea-states.tsx</include>
+
+### Controlled textarea
+
+Use native `onChange` with `value` for controlled content, or `defaultValue` for an uncontrolled initial value. Native form attributes pass through.
+
+<ComponentPreview>
+  <TextareaControlled />
+</ComponentPreview>
+
+<include>../../../examples/textarea/textarea-controlled.tsx</include>
+
+### Sizing
+
+Textarea allows vertical resizing and has a `4rem` minimum height. Use `rows` for its initial height, or `style` for explicit dimensions. It does not grow automatically with its content.
+
+```tsx
+import { Textarea } from "@ajnacloud/ui";
+
+<Textarea
+  aria-label="Notes"
+  rows={6}
+  style={{ minHeight: 160, resize: "none" }}
+/>
+```
+
+## API reference
+
+| Prop                               | Behavior                                                |
+| ---------------------------------- | ------------------------------------------------------- |
+| `value`, `defaultValue`            | Controlled content or initial uncontrolled content.     |
+| `onChange`                         | Native React textarea event; read `event.target.value`. |
+| `rows`                             | Native initial row count, subject to minimum height.    |
+| `disabled`, `readOnly`, `required` | Native control states.                                  |
+| `aria-invalid`                     | Set to `true` to expose and style invalid content.      |
+| `className`                        | String, merged with Ajna defaults.                      |
+| `ref`                              | Forwarded `HTMLTextAreaElement` ref.                    |
+
+`TextareaProps` includes native textarea attributes. Unlike Base UI-backed controls, Textarea does not accept `render`, a state callback for `className`, or `onValueChange`.

@@ -1,0 +1,142 @@
+---
+title: Navigation Menu
+description: Build website navigation with links, expandable panels, and a shared popup.
+---
+
+import { ComponentPreview } from "@/components/component-preview";
+import { NavigationMenuBasic } from "@/examples/navigation-menu/navigation-menu-basic";
+import { NavigationMenuWithIcons } from "@/examples/navigation-menu/navigation-menu-with-icons";
+import { NavigationMenuControlled } from "@/examples/navigation-menu/navigation-menu-controlled";
+
+<ComponentPreview>
+  <NavigationMenuBasic />
+</ComponentPreview>
+
+<include>../../../examples/navigation-menu/navigation-menu-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { NavigationMenu } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { NavigationMenu } from "@ajnacloud/ui/navigation-menu";
+```
+
+### Basic usage
+
+```tsx
+<NavigationMenu aria-label="Main navigation">
+  <NavigationMenu.List>
+    <NavigationMenu.Item value="getting-started">
+      <NavigationMenu.Trigger>Getting started</NavigationMenu.Trigger>
+      <NavigationMenu.Content>
+        <NavigationMenu.Link href="/docs">Introduction</NavigationMenu.Link>
+        <NavigationMenu.Link href="/docs/installation">
+          Installation
+        </NavigationMenu.Link>
+      </NavigationMenu.Content>
+    </NavigationMenu.Item>
+  </NavigationMenu.List>
+</NavigationMenu>
+```
+
+Navigation Menu groups website links under expandable triggers. It opens panels on hover, click, or keyboard interaction and moves one shared popup between them. Use [Menubar](/docs/components/menubar) for application commands such as Save or Undo.
+
+Included in `@ajnacloud/ui`. Follow [Installation](/docs/installation) to choose standalone CSS or the Tailwind 3 preset. The parts and their prop types are available from the package root and `@ajnacloud/ui/navigation-menu`.
+
+Give every expandable `Item` a stable `value`, followed by its `Trigger` and `Content`. Put ordinary links in items without a trigger. `navigationMenuTriggerStyle()` makes a direct link match the top-level triggers.
+
+The root includes the portal, positioner, popup, and viewport. Content moves into that viewport when its item opens. Set a width on the panel's inner layout; the shared popup measures it and animates its width and height. Panels have a maximum width based on available screen space. Keep inner layouts responsive so they fit narrow viewports.
+
+## Examples
+
+### Rich links and icons
+
+Links can contain a title, description, and decorative icon. Keep each link's content meaningful when read together by assistive technology. Use lists to preserve the relationship between related destinations.
+
+<ComponentPreview>
+  <NavigationMenuWithIcons />
+</ComponentPreview>
+
+<include>
+  ../../../examples/navigation-menu/navigation-menu-with-icons.tsx
+</include>
+
+### Controlled state and current page
+
+`value` identifies the open panel and `null` closes the menu. Use `defaultValue` to start an uncontrolled menu on a particular panel. Set `active` on the link for the current route; it supplies `aria-current="page"` and the active appearance.
+
+<ComponentPreview>
+  <NavigationMenuControlled />
+</ComponentPreview>
+
+<include>
+  ../../../examples/navigation-menu/navigation-menu-controlled.tsx
+</include>
+
+Link clicks close the menu by default. Set `closeOnClick={false}` for an interaction that must leave its panel open. Your router or application remains responsible for navigation and route matching.
+
+### Router links
+
+`render` composes a router link without adding a second anchor. For Next.js:
+
+```tsx
+import Link from "next/link";
+import { NavigationMenu, navigationMenuTriggerStyle } from "@ajnacloud/ui";
+
+export function AppNavigation() {
+  return (
+    <NavigationMenu aria-label="Main navigation">
+      <NavigationMenu.List>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link
+            render={<Link href="/docs" />}
+            active
+            className={navigationMenuTriggerStyle()}
+          >
+            Documentation
+          </NavigationMenu.Link>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+    </NavigationMenu>
+  );
+}
+```
+
+## Behavior
+
+### Positioning and portals
+
+The root's `align` defaults to `"start"`. Use `positionerProps` for `side`, `sideOffset`, `alignOffset`, collision settings, `container`, `keepMounted`, a positioner ref, or `className`. Its `popupProps` customize the popup's attributes, classes, and ref. Defaults are a bottom placement, 8px offset, and 8px collision padding.
+
+Portals mount in `document.body` unless a container is provided. Put dark-mode or application theme variables on a shared ancestor of both the root and popup, or pass a container inside your theme scope. Positioner, popup, and content transitions respect reduced motion.
+
+## Accessibility
+
+Label the navigation landmark, especially when a page has multiple navigation areas. Triggers remain buttons and destinations remain links. Arrow keys move through the navigation, Down Arrow enters an open panel, and Escape dismisses it. Base UI manages focus across the portaled panels and retains pointer hover behavior. Keep visible focus styles when customizing classes and mark decorative icons `aria-hidden`.
+
+## API reference
+
+The compound API and named exports are equivalent: `NavigationMenu.Content` is `NavigationMenuContent`.
+
+| Part                           | Purpose and controls                                                                                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NavigationMenu` / `Root`      | A navigation landmark. Accepts `value`, `defaultValue`, `onValueChange`, hover `delay` / `closeDelay`, `orientation`, `align`, and `positionerProps`.                           |
+| `List`                         | The list containing menu items. Forwards a ul ref.                                                                                                                              |
+| `Item`                         | Groups a trigger with its content, or contains a direct link. Accepts `value` and an li ref.                                                                                    |
+| `Trigger`                      | A button with a decorative chevron. Accepts disabled state, `render`, and a button ref.                                                                                         |
+| `Content`                      | One measured panel. Accepts `className`, `render`, and a div ref.                                                                                                               |
+| `Link`                         | An anchor supporting `active`, `closeOnClick`, `render`, and an anchor ref.                                                                                                     |
+| `Indicator`                    | Base UI's trigger icon wrapper, for custom compositions. It is not an active-page underline.                                                                                    |
+| `Positioner`                   | The composed portal, positioner, popup, and viewport used by the root. Customize the included instance through `positionerProps`; do not add a second one inside the same root. |
+| `navigationMenuTriggerStyle()` | Returns the default trigger classes for a direct top-level link.                                                                                                                |
+
+Every part has a corresponding `NavigationMenu…Props` export. Base UI state-aware `className` callbacks are preserved. `onValueChange` receives the value and Base UI event details, including `cancel()`; `actionsRef` supports imperative closing. Refs reach the corresponding native elements.

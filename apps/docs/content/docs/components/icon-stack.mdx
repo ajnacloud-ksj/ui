@@ -1,0 +1,113 @@
+---
+title: Icon Stack
+description: Layered icon artwork for empty states, compact media, and feature callouts.
+---
+
+import { IconStackExample } from "@/examples/icon-stack/icon-stack-example";
+import { IconStackSizes } from "@/examples/icon-stack/icon-stack-sizes";
+import { IconStackColors } from "@/examples/icon-stack/icon-stack-colors";
+import { IconStackBadge } from "@/examples/icon-stack/icon-stack-badge";
+import { IconStackEmpty } from "@/examples/icon-stack/icon-stack-empty";
+import { IconStackCard } from "@/examples/icon-stack/icon-stack-card";
+
+<ComponentPreview>
+  <IconStackExample />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { IconStack } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { IconStack } from "@ajnacloud/ui/icon-stack";
+```
+
+### Basic usage
+
+```tsx
+import { Inbox } from "lucide-react";
+
+<IconStack aria-hidden="true">
+  <Inbox className="size-4" />
+</IconStack>;
+```
+
+IconStack draws a layered isometric surface and centers its children on top. Use it as decorative media for empty states, feature callouts, and compact list rows. Use [Empty](/docs/components/empty) when the message and actions need a full layout.
+
+## Examples
+
+### Sizes
+
+Keep the width and height near the artwork's 72:81 ratio.
+
+<ComponentPreview>
+  <IconStackSizes />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-sizes.tsx</include>
+
+### Colors
+
+A text color on IconStack tints the outlines, shadow, and child icon. The theme provides semantic colors such as primary, success, warning, destructive, and info.
+
+<ComponentPreview>
+  <IconStackColors />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-colors.tsx</include>
+
+### Icon badge
+
+Children accept custom markup, such as a framed icon.
+
+<ComponentPreview>
+  <IconStackBadge />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-badge.tsx</include>
+
+### Empty state
+
+Place IconStack in EmptyMedia above the message. Give the child a matching size so it sits cleanly on the top layer.
+
+<ComponentPreview>
+  <IconStackEmpty />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-empty.tsx</include>
+
+### Compact media
+
+IconStack also works as media in a small card row. Scale the child down with the artwork.
+
+<ComponentPreview>
+  <IconStackCard />
+</ComponentPreview>
+
+<include>../../../examples/icon-stack/icon-stack-card.tsx</include>
+
+## Accessibility
+
+IconStack is decorative. Add `aria-hidden="true"` and keep the meaning in surrounding text. The content layer ignores pointer events, so do not place buttons or links inside it.
+
+## API reference
+
+| Prop        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `className` | `string`          | -       | Sets the outer size, text color, and layout.       |
+| `children`  | `React.ReactNode` | -       | Decorative content centered on the top layer.      |
+| `style`     | `CSSProperties`   | -       | Native styles; override the content position vars. |
+
+IconStack renders a `div`, forwards a `HTMLDivElement` ref, and accepts native div props. Its content is positioned with `--ajna-icon-stack-content-x` and `--ajna-icon-stack-content-y`, which default to `71%` and `58%`.
+
+`IconStack` and `IconStackProps` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/icon-stack`.

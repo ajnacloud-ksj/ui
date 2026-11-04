@@ -1,0 +1,176 @@
+---
+title: Dialog
+description: Present content or a form in a modal dialog.
+---
+
+import { DialogExample } from "@/examples/dialog/dialog-example";
+import { DialogControlled } from "@/examples/dialog/dialog-controlled";
+import { DialogSizes } from "@/examples/dialog/dialog-sizes";
+import { DialogForm } from "@/examples/dialog/dialog-form";
+
+<ComponentPreview>
+  <DialogExample />
+</ComponentPreview>
+
+<include>../../../examples/dialog/dialog-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger, DialogClose } from "@ajnacloud/ui/dialog";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Dialog>
+  <DialogTrigger render={<Button variant="secondary" />}>View project</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Website redesign</DialogTitle>
+      <DialogDescription>
+        Review project details and upcoming milestones.
+      </DialogDescription>
+    </DialogHeader>
+  </DialogContent>
+</Dialog>;
+```
+
+Use `render={<Button />}` on Trigger and Close to compose their behavior onto one button. For a consequential action that requires confirmation, use [Alert Dialog](/docs/components/alert-dialog).
+
+### Parts
+
+| Part                | Purpose                                                 |
+| ------------------- | ------------------------------------------------------- |
+| `Dialog`            | Open state and dialog interactions.                     |
+| `DialogTrigger`     | Opens the dialog.                                       |
+| `DialogContent`     | Panel, backdrop, and portal.                            |
+| `DialogHeader`      | Groups the title and description.                       |
+| `DialogFooter`      | Full-width action area; optionally adds a Close button. |
+| `DialogTitle`       | Accessible dialog title.                                |
+| `DialogDescription` | Supporting explanation associated with the dialog.      |
+| `DialogClose`       | Requests dismissal.                                     |
+
+## Examples
+
+### Sizes
+
+Choose `sm`, `base`, `lg`, or `xl`. Content fits narrow viewports and grows to its natural height. The modal viewport scrolls when content is taller than the window; the dialog itself has no built-in height cap.
+
+<ComponentPreview>
+  <DialogSizes />
+</ComponentPreview>
+
+<include>../../../examples/dialog/dialog-sizes.tsx</include>
+
+### Controlled state
+
+Use `open` and `onOpenChange` for application-owned visibility, or `defaultOpen` for uncontrolled initial state.
+
+<ComponentPreview>
+  <DialogControlled />
+</ComponentPreview>
+
+<include>../../../examples/dialog/dialog-controlled.tsx</include>
+
+### Form and initial focus
+
+Use a real form, place actions in `DialogFooter`, and close after successful submission. `initialFocus` can target a field through its ref.
+
+<ComponentPreview>
+  <DialogForm />
+</ComponentPreview>
+
+<include>../../../examples/dialog/dialog-form.tsx</include>
+
+## Close button
+
+Content includes a close button. Set `showCloseButton={false}` when supplying your own dismissal control.
+
+```tsx
+<Dialog>
+  <DialogTrigger render={<Button variant="secondary" />}>Open dialog</DialogTrigger>
+  <DialogContent showCloseButton={false}>
+    <DialogHeader>
+      <DialogTitle>Project details</DialogTitle>
+      <DialogDescription>Review your project settings.</DialogDescription>
+    </DialogHeader>
+    <DialogFooter showCloseButton />
+  </DialogContent>
+</Dialog>;
+```
+
+## Behavior
+
+### Portals and themes
+
+Content portals to `document.body` by default. Pass `container` when the panel must inherit a theme scoped to a particular element. Set `backdropClassName` to style the backdrop independently.
+
+## Accessibility
+
+Always provide DialogTitle. The dialog manages modal focus and restores focus when dismissed; `initialFocus` and `finalFocus` customize those targets. Escape and backdrop interaction request dismissal. Content includes an accessible close button by default. When hiding it, provide another dismissal control. Panel and backdrop transitions respect reduced motion.
+
+## API reference
+
+### Dialog
+
+Accepts Base UI Dialog root props, including `open`, `defaultOpen`, `onOpenChange`, and `onOpenChangeComplete`. Change callbacks receive the open boolean and event details; `details.cancel()` can reject a close request.
+
+### DialogContent
+
+| Prop                | Type                             | Default         | Description                                       |
+| ------------------- | -------------------------------- | --------------- | ------------------------------------------------- |
+| `size`              | `"sm" \| "base" \| "lg" \| "xl"` | `"base"`        | Maximum widths of 18rem, 32rem, 32rem, and 48rem. |
+| `showCloseButton`   | `boolean`                        | `true`          | Show the built-in close button.                   |
+| `container`         | Base UI portal container         | `document.body` | Destination for the backdrop and panel.           |
+| `backdropClassName` | `string`                         | —               | Additional backdrop classes.                      |
+| `initialFocus`      | Base UI focus target             | Base UI default | Target when opening.                              |
+| `finalFocus`        | Base UI focus target             | Trigger         | Target when closing.                              |
+| `className`         | String or state callback         | —               | Additional panel classes.                         |
+
+Other Base UI popup props pass through. The ref targets the panel's `HTMLDivElement`.
+
+### Other parts
+
+Header groups the title and description. Footer aligns actions and accepts `showCloseButton` (default `false`) to append a Close button. Portal and Overlay are available for custom composition.
+
+Trigger and Close preserve Base UI button props, `render`, and refs. Title and Description preserve their Base UI props and state-based classes, with heading and paragraph refs respectively.
+
+Named exports include DialogContent, DialogHeader, DialogFooter, DialogTrigger, DialogClose, DialogTitle, DialogDescription, DialogPortal, and DialogOverlay. The styled API uses named components only; `Dialog` does not expose compound aliases. Import `DialogProps` for the root props.
+
+Dialog and its prop types, including `DialogContentProps` and `DialogSize`, are available from the root and `/dialog` entry point.
+
+## Unstyled primitives
+
+The styled `Dialog` has no `.Root`, `.Title`, or other compound properties. Use named styled components from `@ajnacloud/ui/dialog` or the package root.
+
+For fully custom unstyled composition, the explicit primitive entry point preserves Base UI's original API:
+
+```tsx
+import { Dialog as DialogPrimitive } from "@ajnacloud/ui/primitives/dialog";
+
+<DialogPrimitive.Root>
+  <DialogPrimitive.Trigger>Open an unstyled dialog</DialogPrimitive.Trigger>
+  <DialogPrimitive.Portal>
+    <DialogPrimitive.Backdrop />
+    <DialogPrimitive.Popup>
+      <DialogPrimitive.Title>Project details</DialogPrimitive.Title>
+      <DialogPrimitive.Description>Review your project.</DialogPrimitive.Description>
+      <DialogPrimitive.Close>Close</DialogPrimitive.Close>
+    </DialogPrimitive.Popup>
+  </DialogPrimitive.Portal>
+</DialogPrimitive.Root>;
+```
+
+The primitive path provides no Ajna styling. Its `DialogRootProps` type belongs to that primitive API; the styled root uses `DialogProps`.

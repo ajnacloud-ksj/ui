@@ -1,0 +1,50 @@
+{
+  "name": "ajna-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm build:library && pnpm --filter @ajnacloud/docs dev",
+    "build": "pnpm --filter @ajnacloud/docs build",
+    "build:library": "pnpm --filter @ajnacloud/ui build",
+    "codegen:primitives": "pnpm --filter @ajnacloud/ui codegen:primitives",
+    "codegen:check": "pnpm --filter @ajnacloud/ui codegen:check",
+    "test": "pnpm --filter @ajnacloud/ui test",
+    "test:browser": "pnpm build:library && playwright test",
+    "test:blocks": "pnpm build:library && playwright test --config apps/docs/playwright.config.ts",
+    "test:package": "pnpm build:library && node packages/react/scripts/test-package.mjs",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "lint:fix": "eslint . --fix --max-warnings=0"
+  },
+  "devDependencies": {
+    "@ajnacloud/ui": "workspace:*",
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/cli": "^2.29.7",
+    "@eslint/js": "^9.39.4",
+    "@internationalized/date": "^3.11.0",
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "prettier": "^3.9.3",
+    "prettier-plugin-tailwindcss": "^0.7.4",
+    "publint": "^0.3.25",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.62.1",
+    "vite": "^6.4.3"
+  }
+}

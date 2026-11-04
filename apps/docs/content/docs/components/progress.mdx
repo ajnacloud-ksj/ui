@@ -1,0 +1,165 @@
+---
+title: Progress
+description: Show how much of a task has finished, or that work is continuing when the total is unknown.
+---
+
+import { ProgressExample } from "@/examples/progress/progress-example";
+import { ProgressControlled } from "@/examples/progress/progress-controlled";
+import { ProgressFiles } from "@/examples/progress/progress-files";
+import { ProgressIndeterminate } from "@/examples/progress/progress-indeterminate";
+import { ProgressLoadingBar } from "@/examples/progress/progress-loading-bar";
+import { ProgressStates } from "@/examples/progress/progress-states";
+import { ProgressRegion } from "@/examples/progress/progress-region";
+
+<ComponentPreview>
+  <ProgressExample />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Progress, ProgressLabel, ProgressValue } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@ajnacloud/ui/progress";
+```
+
+### Basic usage
+
+```tsx
+<Progress value={60}>
+  <ProgressLabel>Uploading files</ProgressLabel>
+  <ProgressValue />
+</Progress>
+```
+
+Use Progress for a task with measurable completion, such as uploading files or importing projects. When work is continuing but the total is unknown, pass `value={null}`. Use [Spinner](/docs/components/spinner) for a compact activity indicator, or [Skeleton](/docs/components/skeleton) to reserve space for content that will appear later.
+
+Progress includes its track and fill automatically. Optional children go above the track, which is useful for a label and a displayed value. You do not need to add track or indicator elements for normal use.
+
+## Examples
+
+### Labels and application state
+
+<ComponentPreview>
+  <ProgressControlled />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-controlled.tsx</include>
+
+ProgressLabel names the progress bar. ProgressValue displays the formatted completion value. Without a visible ProgressLabel, provide `aria-label` or `aria-labelledby` on Progress.
+
+Pass the current task value as it changes; Progress does not advance automatically.
+
+### Custom bounds and value text
+
+<ComponentPreview>
+  <ProgressFiles />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-files.tsx</include>
+
+The default range is 0–100. Set `max` for a known item count; `min` also supports a nonzero starting value. Supply finite bounds with `max > min`. Fill width is calculated from the position within those bounds, so 3 out of 8 fills 37.5% of the track.
+
+Default visible and accessible value text uses a localized percentage. Use ProgressValue's render function for a visible count, and `getAriaValueText` or `aria-valuetext` for a useful spoken description. Changing the visible text alone does not change the progress bar's accessible value text.
+
+`format` and `locale` on Progress customize Base UI's number formatting. They affect text, not the fill calculation. Values outside the bounds are clamped for the indicator, default formatted text, and `aria-valuenow`; application code should still provide meaningful task values.
+
+### Thin loading bar
+
+<ComponentPreview>
+  <ProgressLoadingBar />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-loading-bar.tsx</include>
+
+Use this above a table, inside a page header, or along a loading region's edge. The application controls visibility and positioning. Reduced motion shows a static indicator.
+
+### Unknown progress
+
+<ComponentPreview>
+  <ProgressIndeterminate />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-indeterminate.tsx</include>
+
+`value={null}` shows two sweeping bars without reporting a numeric `aria-valuenow`. The example switches from finding files to a known total. Keep the explanatory text specific to the current task; do not display a made-up percentage while the total is unknown.
+
+ProgressValue normally has no visible percentage in this state. Its render function can supply text such as “Finding files…” when the raw value is null. Set `aria-valuetext` for a translated or more useful accessible description.
+
+### Empty and complete states
+
+<ComponentPreview>
+  <ProgressStates />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-states.tsx</include>
+
+Zero is a known starting value, not an indeterminate state. The completed state is reached when the value reaches the maximum. Progress exposes `data-progressing`, `data-complete`, and `data-indeterminate` state attributes for custom styling.
+
+Completing a progress bar does not finish an application operation by itself. Keep success/error messages and any next actions in your application state. For failed work, explain what happened and how to recover rather than continuing to show a filling bar.
+
+### Loading regions and announcements
+
+<ComponentPreview>
+  <ProgressRegion />
+</ComponentPreview>
+
+<include>../../../examples/progress/progress-region.tsx</include>
+
+Use `aria-busy` on the content region and a separate status message for meaningful completion announcements.
+
+A progress bar exposes its current value; it does not promise an announcement for every change. Avoid sending every percentage update to a live region. Announce meaningful milestones or completion when the task calls for it.
+
+## Behavior
+
+### Track and indicator
+
+The track is 8px high by default. Set width on its parent or through `style`.
+
+`className` styles the outer wrapper. `trackClassName` and `indicatorClassName` target their respective internal parts. For a Tailwind application, use your generated utilities; for standalone use, supply classes defined in your own stylesheet. For example:
+
+```tsx
+import { Progress } from "@ajnacloud/ui";
+
+<Progress value={65} aria-label="Upload" indicatorClassName="upload-fill" />
+```
+
+```css
+.upload-fill {
+  background-color: hsl(var(--ajna-success));
+}
+```
+
+Reduced motion removes fill transitions and leaves the indeterminate band static.
+
+## Accessibility
+
+Progress uses `role="progressbar"` and exposes its bounds and current value. It is not an interactive input or a keyboard tab stop. Use Slider when the user should change a value.
+
+Keep a stable task name, provide useful value text when a raw percentage is insufficient, and reserve null for genuinely unknown progress. ProgressValue is hidden from assistive technology by default to avoid duplicating the progress bar's own value announcement. ProgressLabel is associated automatically with the bar.
+
+## API reference
+
+| Part            | Props                                                                         | Default                                 |
+| --------------- | ----------------------------------------------------------------------------- | --------------------------------------- |
+| `Progress`      | `value: number` or `null` (required), `min`, `max`                            | Min 0, max 100                          |
+| `Progress`      | `format`, `locale`, `getAriaValueText`, `aria-valuetext`                      | Localized percentage for known progress |
+| `Progress`      | `className`, `trackClassName`, `indicatorClassName`, `children`               | Built-in track and indicator            |
+| `ProgressLabel` | Base UI Label props; children                                                 | Span naming the progress bar            |
+| `ProgressValue` | Base UI Value props; optional `(formattedValue, value) => ReactNode` children | Span showing the formatted percentage   |
+
+Progress forwards a div ref; Label and Value forward span refs. The outer className and Label/Value className can be functions of Base UI state. Track and indicator class overrides are strings. Use `/primitives/progress` when you need to compose the lower-level track and indicator yourself. Progress represents task completion; use a meter rather than a progress bar for a static measurement such as storage usage.

@@ -1,0 +1,58 @@
+---
+title: Icons
+description: Built-in Lucide icons and flexible slots for your application's icon library.
+---
+
+import { IconExample } from "@/examples/icon/icon-example";
+import { IconSlotsExample } from "@/examples/icon/icon-slots-example";
+
+Ajna uses [Lucide](https://lucide.dev/guide/react/) for its built-in checkmarks, indeterminate marks, and accordion chevrons. Lucide is a regular dependency installed automatically with Ajna. It is not a peer dependency, and no icon provider is required.
+
+Component icon slots accept React elements, so your application can use Lucide, Phosphor, or custom SVGs. Ajna does not re-export an icon collection or provide an `Icon` component.
+
+## Application icons
+
+If your application imports Lucide icons itself, declare Lucide as a direct dependency:
+
+```bash
+npm install lucide-react
+```
+
+Or use `pnpm add lucide-react`. This step is only needed for your own imports; Ajna's built-in icons work with the normal Ajna installation. The docs examples use Lucide too.
+
+<ComponentPreview>
+  <IconExample />
+</ComponentPreview>
+
+<include>../../examples/icon/icon-example.tsx</include>
+
+Pass an element such as `icon={<Plus />}`, rather than the component type `icon={Plus}`. Use named imports. Ajna also uses named Lucide imports so consumer bundlers can remove unused icons.
+
+## Slots and composition
+
+<ComponentPreview>
+  <IconSlotsExample />
+</ComponentPreview>
+
+<include>../../examples/icon/icon-slots-example.tsx</include>
+
+Button and Banner hide their icon slots from assistive technology. Input Group add-ons may contain meaningful text or actions, so hide decorative icons explicitly there. Banner does not choose a default icon; supply one when it helps convey the message.
+
+## Size and color
+
+| Placement          | Default dimensions                    |
+| ------------------ | ------------------------------------- |
+| Button icon        | `1em`: 12px in xs/sm, 14px in base/lg |
+| Banner icon        | 16px                                  |
+| Checkbox indicator | 14px                                  |
+| Accordion chevron  | 16px                                  |
+
+Button and Banner size direct SVG children through their slot styles. For icons placed directly in an add-on or another custom layout, set size on the icon itself. Lucide icons inherit `currentColor`, so they follow component variants, theme colors, and disabled states. No new icon color tokens are required.
+
+These defaults work in both [styling modes](/docs/installation). For custom standalone styling, use `style` or your application's stylesheet; application-only Tailwind classes require your own Tailwind build.
+
+## Accessibility and loading
+
+Keep visible button text or supply `aria-label`/`aria-labelledby` on an icon-only button. Ajna requires an accessible name for square and circular button shapes. Put interaction on the button, rather than making its SVG focusable.
+
+Loading buttons use the shared [Spinner](/docs/components/spinner), replacing the leading icon while preserving the label and disabling activation. The spinner is decorative inside a button; `aria-busy` remains on the button. Use the standalone Spinner for other loading regions.

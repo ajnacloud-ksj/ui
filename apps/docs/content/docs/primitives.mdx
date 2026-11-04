@@ -1,0 +1,43 @@
+---
+title: Primitives and utilities
+description: Build custom components with unstyled Base UI primitives and Ajna's class-merging helper.
+---
+
+## Unstyled primitives
+
+Ajna re-exports Base UI's stable public components and providers:
+
+```tsx
+import { Dialog, Select } from "@ajnacloud/ui/primitives";
+```
+
+Use an individual entry point when you need one primitive:
+
+```tsx
+import { Dialog } from "@ajnacloud/ui/primitives/dialog";
+import type { DialogRootProps } from "@ajnacloud/ui/primitives/dialog";
+```
+
+These exports preserve Base UI's API, types, and behavior. They have no Ajna styling and do not require Ajna's stylesheet. You provide their styles, including any Tailwind classes your application needs to generate.
+
+The styled API uses separate named components: `Dialog`, `DialogContent`, `DialogHeader`, and `DialogTitle`. `DialogContent` assembles its portal, backdrop, and panel. The styled `Dialog` has no compound properties. The raw `Dialog` imported from `/primitives` intentionally exposes Base UI's `Portal`, `Backdrop`, and `Popup` parts for custom composition.
+
+Public primitives are generated from the installed Base UI package. Internals, unstable APIs, metadata exports, and utility hooks such as `merge-props` and `use-render` are excluded.
+
+In Next.js, use interactive compound primitives from a client component.
+
+## Class merging
+
+Use Ajna's `cn` helper for conditional classes and Tailwind v3 utility conflicts:
+
+```tsx
+import { cn } from "@ajnacloud/ui/utils";
+
+const className = cn(
+  "px-3 rounded-ajna-base",
+  isActive && "bg-ajna-primary",
+  "px-6 rounded-full",
+);
+```
+
+In this example, `px-6` and `rounded-full` replace the conflicting defaults. The helper understands Ajna's radius utilities, generates no CSS, and can be imported in server components. Your application still needs to generate or provide CSS for the classes you use.

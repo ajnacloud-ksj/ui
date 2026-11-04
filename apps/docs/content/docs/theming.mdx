@@ -1,0 +1,391 @@
+---
+title: Theming
+description: Customize colors, dark mode, fonts, and radii, or connect Ajna to your application's existing theme.
+---
+
+Ajna uses CSS variables for colors, radii, and fonts. Both styling setups share the same tokens: standalone CSS includes them, and the Tailwind v3.4 preset emits them through `@tailwind base`.
+
+Complete [Installation](/docs/installation) first, then put theme overrides in your application stylesheet after Ajna's styles or the Tailwind directives.
+
+## Customize Ajna directly
+
+Override the roles you want to change. Leave the others at their defaults.
+
+```css title="globals.css"
+:root {
+  --ajna-primary: 173 80% 24%;
+  --ajna-primary-foreground: 0 0% 100%;
+  --ajna-ring: 173 80% 24%;
+  --ajna-radius: 0.5rem;
+}
+
+:root.dark {
+  --ajna-primary: 173 80% 72%;
+  --ajna-primary-foreground: 173 80% 10%;
+  --ajna-ring: 173 80% 72%;
+}
+```
+
+Set background and foreground roles together, such as `primary` and `primary-foreground`, so their text remains readable. `ring` controls the keyboard-focus color. Primary Button hover is derived from its fill; there is no separate primary-hover token.
+
+## Token value formats
+
+Color tokens contain **HSL channels**, without the `hsl()` wrapper. Wrap them when using them in your own CSS:
+
+```css
+.project-panel {
+  background-color: hsl(var(--ajna-card));
+  color: hsl(var(--ajna-card-foreground));
+  border: 1px solid hsl(var(--ajna-border) / 0.75);
+  border-radius: var(--ajna-radius);
+}
+```
+
+| Token              | Value format            | Example               |
+| ------------------ | ----------------------- | --------------------- |
+| Color roles        | HSL channels            | `221 83% 53%`         |
+| `--ajna-backdrop`  | HSL channels with alpha | `0 0% 0% / 0.2`       |
+| `--ajna-radius`    | CSS length              | `0.5rem`              |
+| `--ajna-font-sans` | Font family list        | `"Geist", sans-serif` |
+
+Do not assign `red`, `#ff0000`, `hsl(...)`, or `oklch(...)` directly to an Ajna color token. Components would wrap the complete color in another `hsl()`, producing an invalid value. For red, use `0 100% 50%`.
+
+## Light and dark mode
+
+Add `dark` to `<html>` to use the dark palette. Remove it to use the light palette. Ajna does not switch modes automatically; your application can manage this class with its existing theme switcher.
+
+```html
+<html lang="en" class="dark"></html>
+```
+
+Override dark colors with `:root.dark`, as in the first example. A `:root` override alone does not replace Ajna's more specific dark defaults. For values shared by both modes, use both selectors:
+
+```css
+:root,
+:root.dark {
+  --ajna-radius: 0.75rem;
+}
+```
+
+## Connect application tokens
+
+Choose which theme owns each color before adding aliases:
+
+| Your application          | Mapping                          |
+| ------------------------- | -------------------------------- |
+| Already has its own theme | `--ajna-primary: var(--primary)` |
+| Uses Ajna as its theme    | `--primary: var(--ajna-primary)` |
+
+Use one direction for each pair. Defining both directions creates a circular reference and makes both variables invalid.
+
+### Use an existing shadcn-like theme
+
+If your application stores colors as HSL channels, map its existing roles to Ajna. Keep its current light and dark definitions, and add these aliases after Ajna's defaults:
+
+```css title="globals.css"
+:root,
+:root.dark {
+  --ajna-background: var(--background);
+  --ajna-foreground: var(--foreground);
+  --ajna-card: var(--card);
+  --ajna-card-foreground: var(--card-foreground);
+  --ajna-popover: var(--popover);
+  --ajna-popover-foreground: var(--popover-foreground);
+  --ajna-primary: var(--primary);
+  --ajna-primary-foreground: var(--primary-foreground);
+  --ajna-secondary: var(--secondary);
+  --ajna-secondary-foreground: var(--secondary-foreground);
+  --ajna-muted: var(--muted);
+  --ajna-muted-foreground: var(--muted-foreground);
+  --ajna-accent: var(--accent);
+  --ajna-accent-foreground: var(--accent-foreground);
+  --ajna-destructive: var(--destructive);
+  --ajna-destructive-foreground: var(--destructive-foreground);
+  --ajna-border: var(--border);
+  --ajna-input: var(--input);
+  --ajna-ring: var(--ring);
+  --ajna-radius: var(--radius);
+  --ajna-destructive-text: var(--destructive-text, var(--destructive));
+}
+```
+
+Map only variables your application defines. Omit missing roles to keep Ajna's defaults. Info, success, warning, tint, and backdrop colors can stay independent when your theme has no equivalent.
+
+`destructive-text` is used for text on neutral or tinted surfaces. If your existing destructive fill has poor text contrast, define a separate `--destructive-text` value in each mode.
+
+### Themes with complete colors
+
+Some themes, including newer shadcn themes, store complete colors such as `oklch(...)`. A variable alias does not convert these to HSL channels. Keep your application's format and supply HSL-channel values for Ajna separately:
+
+```css
+:root {
+  --primary: hsl(221 83% 53%);
+  --primary-foreground: white;
+
+  --ajna-primary: 221 83% 53%;
+  --ajna-primary-foreground: 0 0% 100%;
+}
+
+:root.dark {
+  --primary: hsl(217 91% 67%);
+  --primary-foreground: hsl(222 47% 11%);
+
+  --ajna-primary: 217 91% 67%;
+  --ajna-primary-foreground: 222 47% 11%;
+}
+```
+
+Use the HSL equivalent of your own colors for each mapped role. There is no automatic color-format conversion.
+
+### Derive application colors from Ajna
+
+If Ajna owns your palette, use the opposite mapping instead of the one above:
+
+```css title="globals.css"
+:root,
+:root.dark {
+  --background: var(--ajna-background);
+  --foreground: var(--ajna-foreground);
+  --card: var(--ajna-card);
+  --card-foreground: var(--ajna-card-foreground);
+  --popover: var(--ajna-popover);
+  --popover-foreground: var(--ajna-popover-foreground);
+  --primary: var(--ajna-primary);
+  --primary-foreground: var(--ajna-primary-foreground);
+  --secondary: var(--ajna-secondary);
+  --secondary-foreground: var(--ajna-secondary-foreground);
+  --muted: var(--ajna-muted);
+  --muted-foreground: var(--ajna-muted-foreground);
+  --accent: var(--ajna-accent);
+  --accent-foreground: var(--ajna-accent-foreground);
+  --destructive: var(--ajna-destructive);
+  --destructive-foreground: var(--ajna-destructive-foreground);
+  --border: var(--ajna-border);
+  --input: var(--ajna-input);
+  --ring: var(--ajna-ring);
+  --radius: var(--ajna-radius);
+}
+
+.application-panel {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+```
+
+These aliases still contain HSL channels. Wrap them with `hsl()` in CSS or in your application's Tailwind color definitions.
+
+## Scoped themes and popups
+
+Root-level tokens reach the page and popups portaled to `document.body`. A theme applied only to a nested container does not reach a popup outside that container.
+
+For a local theme, put the popup's portal inside the same themed container. For example:
+
+```tsx
+"use client";
+
+import { Button, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from "@ajnacloud/ui";
+import { useRef } from "react";
+
+export function ProjectTheme() {
+  const container = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={container} className="project-theme">
+      <Dialog>
+        <DialogTrigger render={<Button variant="primary" />}>
+          Project details
+        </DialogTrigger>
+        <DialogContent container={container}>
+          <DialogTitle>Website redesign</DialogTitle>
+          <DialogDescription>Review the scope and upcoming milestones.</DialogDescription>
+          <DialogClose render={<Button variant="secondary" />}>Close</DialogClose>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+```
+
+```css
+.project-theme {
+  --ajna-primary: 173 80% 24%;
+  --ajna-primary-foreground: 0 0% 100%;
+  --ajna-ring: 173 80% 24%;
+}
+```
+
+When using aliases, declare them on the same element as their source tokens. An alias inherited from `:root` has already resolved there; it does not update when only its source token changes on a child.
+
+Other popup components expose their own container props. [Select](/docs/components/select), [Combobox](/docs/components/combobox), and [Filter Bar](/docs/components/filter-bar) document these alongside their styling props. Inside Shadow DOM, load the styles in that shadow root too.
+
+## Shape and type
+
+Components inherit your application's font by default. Set a font family or an existing font variable through `--ajna-font-sans`. `--ajna-radius` controls the base corner radius; individual parts derive sizes from it.
+
+```css
+:root,
+:root.dark {
+  --ajna-font-sans: var(--font-sans, sans-serif);
+  --ajna-radius: 0.5rem;
+}
+```
+
+## Custom styles
+
+Sidebar headers use `--ajna-sidebar-header-height` (default `3.5rem`). Set it on `Sidebar.Provider` and reuse `h-[var(--ajna-sidebar-header-height)]` for an adjacent application header. See [Sidebar sizing](/docs/components/sidebar#width-and-animation-variables).
+
+The [application blocks](/blocks) use the same theme variables. Their Tailwind v4 bridge maps layout utilities to these existing roles.
+
+Use `className` or `style` for individual components. With Tailwind v3.4, conflicting default utilities are merged in favor of the classes you pass:
+
+```tsx
+import { Button } from "@ajnacloud/ui";
+
+<Button className="h-12 rounded-full px-6">Save changes</Button>;
+```
+
+With standalone CSS, use inline styles or your own stylesheet:
+
+```tsx
+import { Button } from "@ajnacloud/ui";
+
+<Button style={{ height: 48, paddingInline: 24, borderRadius: 999 }}>
+  Save changes
+</Button>;
+```
+
+Standalone CSS includes Ajna's utilities, scoped to Ajna elements. Additional Tailwind classes need your application's own build. Compound components and composed controls document their internal styling slots in their component guides.
+
+## Card spacing
+
+`--ajna-card-spacing` controls a Card's section gaps and part insets. The defaults are `1rem` for `size="base"` and `0.75rem` for `size="sm"`. Set it on the Card to customize one instance. See [Card spacing](/docs/components/card#shared-spacing).
+
+## Token reference
+
+### Default surfaces
+
+The light palette uses a pale neutral page with white cards and popups. Cards, dialogs, and drawers use the card pair; anchored popups use the popover pair. Form controls use the card surface, with the input token for their border. The light sidebar uses a dark neutral surface with light text.
+
+| Variable                      | Light        | Dark           |
+| ----------------------------- | ------------ | -------------- |
+| `--ajna-background`           | `0 0% 97.1%` | `0 0% 7.04%`   |
+| `--ajna-foreground`           | `0 0% 6%`    | `0 0% 92%`     |
+| `--ajna-card`                 | `0 0% 100%`  | `0 0% 9.8%`    |
+| `--ajna-card-foreground`      | `0 0% 6%`    | `0 0% 98%`     |
+| `--ajna-popover`              | `0 0% 100%`  | `0 0% 14%`     |
+| `--ajna-popover-foreground`   | `0 0% 6%`    | `0 0% 86.9%`   |
+| `--ajna-secondary`            | `0 0% 90.6%` | `0 0% 12.9%`   |
+| `--ajna-secondary-foreground` | `0 0% 9.8%`  | `0 0% 92%`     |
+| `--ajna-muted`                | `0 0% 92.4%` | `0 0% 12.9%`   |
+| `--ajna-muted-foreground`     | `0 0% 37.4%` | `0 0% 57.408%` |
+| `--ajna-accent`               | `0 0% 93.5%` | `0 0% 17.198%` |
+| `--ajna-accent-foreground`    | `0 0% 9%`    | `0 0% 90%`     |
+| `--ajna-border`               | `0 0% 87.2%` | `0 0% 20%`     |
+| `--ajna-input`                | `0 0% 87.2%` | `0 0% 20%`     |
+
+### Actions and focus
+
+| Role             | Variables                                             |
+| ---------------- | ----------------------------------------------------- |
+| Primary action   | `--ajna-primary`, `--ajna-primary-foreground`         |
+| Destructive fill | `--ajna-destructive`, `--ajna-destructive-foreground` |
+| Destructive text | `--ajna-destructive-text`                             |
+| Keyboard focus   | `--ajna-ring`                                         |
+| Modal backdrop   | `--ajna-backdrop`                                     |
+
+Use the backdrop value directly inside `hsl(var(--ajna-backdrop))`; it already includes alpha.
+
+### Status colors
+
+Each status has a solid color and a tinted surface. Change both when customizing the pair.
+
+| Status      | Text                      | Surface                   |
+| ----------- | ------------------------- | ------------------------- |
+| Destructive | `--ajna-destructive-text` | `--ajna-destructive-tint` |
+| Info        | `--ajna-info`             | `--ajna-info-tint`        |
+| Success     | `--ajna-success`          | `--ajna-success-tint`     |
+| Warning     | `--ajna-warning`          | `--ajna-warning-tint`     |
+
+Tint tokens are surface colors in HSL-channel format. They are independent of the solid token, rather than opacity modifiers. [Badge](/docs/components/badge), [Banner](/docs/components/banner), and [Toast](/docs/components/toast#rich-colors) use these pairs for their status variants. Toast uses them when `richColors` is enabled.
+
+With the Tailwind v3.4 preset:
+
+```tsx
+<p className="bg-ajna-success-tint text-ajna-success">Project created.</p>
+```
+
+With application CSS:
+
+```css
+.success-message {
+  background-color: hsl(var(--ajna-success-tint));
+  color: hsl(var(--ajna-success));
+}
+```
+
+### Brand colors
+
+Brand colors stay the same in light and dark mode. They are separate from semantic roles such as `primary` and `success`.
+
+| Variable                  | Hex       | HSL channels                |
+| ------------------------- | --------- | --------------------------- |
+| `--ajna-brand-navy`       | `#12234E` | `223 62.5% 18.8235%`        |
+| `--ajna-brand-orange`     | `#FF8D2B` | `27.7358 100% 58.4314%`     |
+| `--ajna-brand-blue`       | `#569FF5` | `212.4528 88.8268% 64.902%` |
+| `--ajna-brand-light-blue` | `#E0EAF4` | `210 47.619% 91.7647%`      |
+| `--ajna-brand-gray`       | `#6F6F6F` | `0 0% 43.5294%`             |
+
+Use them in CSS with `hsl(var(--ajna-brand-blue))`, or with preset utilities such as `bg-ajna-brand-navy` and `text-ajna-brand-orange`. [Ajna Logo](/docs/components/ajna-logo) includes the palette and logo examples.
+
+To use a brand color for actions, connect it to the semantic role and set a readable foreground and focus color:
+
+```css
+:root,
+:root.dark {
+  --ajna-primary: var(--ajna-brand-navy);
+  --ajna-primary-foreground: 0 0% 100%;
+  --ajna-ring: var(--ajna-brand-blue);
+}
+```
+
+### Sidebar colors
+
+Sidebar intentionally uses shadcn's unprefixed variable names, with **HSL-channel values**. The light palette uses a dark neutral sidebar; dark-mode defaults follow Ajna's semantic tokens.
+
+| Variable                       | Light              | Dark                             |
+| ------------------------------ | ------------------ | -------------------------------- |
+| `--sidebar`                    | `0 0% 8.5%`        | `var(--ajna-background)`         |
+| `--sidebar-foreground`         | `0 0% 88.5%`       | `var(--ajna-foreground)`         |
+| `--sidebar-primary`            | `0 0% 92%`         | `var(--ajna-primary)`            |
+| `--sidebar-primary-foreground` | `0 0% 10%`         | `var(--ajna-primary-foreground)` |
+| `--sidebar-accent`             | `0 0% 15.9%`       | `var(--ajna-accent)`             |
+| `--sidebar-accent-foreground`  | `0 0% 92.9%`       | `var(--ajna-accent-foreground)`  |
+| `--sidebar-border`             | `0 0% 20%`         | `var(--ajna-border)`             |
+| `--sidebar-ring`               | `var(--ajna-ring)` | `var(--ajna-ring)`               |
+
+Utilities remain namespaced, such as `bg-ajna-sidebar`, `text-ajna-sidebar-foreground`, and `border-ajna-sidebar-border`. Use sidebar color roles for custom text and buttons inside the sidebar; their popups use the regular popover roles.
+
+Keep existing HSL sidebar overrides after Ajna's defaults. If your application uses the older `--sidebar-background` name, bridge it explicitly:
+
+```css
+:root,
+:root.dark {
+  --sidebar: var(--sidebar-background);
+}
+```
+
+Use that bridge only when your application defines `--sidebar-background`. Complete colors such as `oklch(...)` need HSL-channel equivalents for all eight Sidebar roles.
+
+For a scoped sidebar, declare the sidebar aliases on that scope too. Its mobile panel stays inside the provider's theme; nested popups follow their own portal settings. See [Sidebar](/docs/components/sidebar#theming) for a complete local theme.
+
+## Troubleshooting
+
+| Problem                                | Check                                                                                               |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Colors disappear after an override     | Use HSL channels, check the source variable exists, and avoid circular aliases.                     |
+| Overrides work only in light mode      | Include `:root.dark` and load overrides after Ajna's defaults.                                      |
+| A popup has different colors           | Keep the theme on `html`, or move the popup's portal into the themed container.                     |
+| A child theme does not update an alias | Redeclare the alias on the element where its source token changes.                                  |
+| A custom Tailwind class has no effect  | Generate it with your application's Tailwind build. Standalone CSS does not scan application files. |

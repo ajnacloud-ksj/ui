@@ -1,0 +1,95 @@
+---
+title: Input
+description: Enter text with native input attributes and form support.
+---
+
+import { InputExample } from "@/examples/input/input-example";
+import { InputStates } from "@/examples/input/input-states";
+import { InputTypes } from "@/examples/input/input-types";
+import { InputControlled } from "@/examples/input/input-controlled";
+
+<ComponentPreview>
+  <InputExample />
+</ComponentPreview>
+
+<include>../../../examples/input/input-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Input, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Input } from "@ajnacloud/ui/input";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="email">Email address</FieldLabel>
+  <Input
+    id="email"
+    name="email"
+    type="email"
+    autoComplete="email"
+    placeholder="you@example.com"
+  />
+</Field>
+```
+
+Give the input a visible FieldLabel and connect help or errors with `aria-describedby`.
+
+## Examples
+
+### Disabled, read-only, and invalid
+
+Disabled inputs cannot be focused and are omitted from form values. Read-only inputs remain focusable and submit their value. Set `aria-invalid` on the input and connect FieldError with `aria-describedby`; Field state attributes only affect presentation.
+
+<ComponentPreview>
+  <InputStates />
+</ComponentPreview>
+
+<include>../../../examples/input/input-states.tsx</include>
+
+### Input types and required fields
+
+Pass native attributes such as `type`, `name`, `required`, and `accept` directly. Read file selections from `event.target.files` in `onChange`; file inputs cannot be controlled with a string value.
+
+<ComponentPreview>
+  <InputTypes />
+</ComponentPreview>
+
+<include>../../../examples/input/input-types.tsx</include>
+
+### Controlled input
+
+Use `value` with `onValueChange` for a controlled string, or `defaultValue` for an initial uncontrolled value. `onValueChange` receives `(value, eventDetails)`; native `onChange` remains available for form registration.
+
+<ComponentPreview>
+  <InputControlled />
+</ComponentPreview>
+
+<include>../../../examples/input/input-controlled.tsx</include>
+
+## API reference
+
+| Prop                               | Behavior                                                         |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `value`, `defaultValue`            | Controlled value or initial uncontrolled value.                  |
+| `onValueChange`                    | `(value: string, eventDetails) => void`; Base UI value callback. |
+| `onChange`                         | Native React input change callback.                              |
+| `disabled`, `readOnly`, `required` | Native control states.                                           |
+| `aria-invalid`                     | Set to `true` to expose and style an invalid value.              |
+| `className`                        | String or Base UI state callback; merged with Ajna defaults.     |
+| `ref`                              | Underlying element, an `HTMLInputElement` by default.            |
+
+`InputProps` preserves Base UI Input's props, including `render` and its event details. With a custom `render`, the ref follows the rendered element. The native `size` attribute is numeric; Ajna does not add visual size variants. Custom Tailwind utilities must come from your application's build; standalone consumers can use their own CSS or `style`.

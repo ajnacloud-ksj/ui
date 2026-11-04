@@ -1,0 +1,569 @@
+---
+title: Field
+description: Build form fields with labels, help text, validation messages, and grouped choices.
+---
+
+import { NumberInputControlled } from "@/examples/number-input/number-input-controlled";
+import { SearchInputExample } from "@/examples/search-input/search-input-example";
+import { PasswordInputExample } from "@/examples/password-input/password-input-example";
+
+import { FieldForm } from "@/examples/field/field-form";
+import { FieldRequired } from "@/examples/field/field-required";
+import { FieldContextualHelp } from "@/examples/field/field-contextual-help";
+import { FieldExample } from "@/examples/field/field-example";
+import { FieldTextarea } from "@/examples/field/field-textarea";
+import { FieldCheckboxes } from "@/examples/field/field-checkboxes";
+import { FieldRadio } from "@/examples/field/field-radio";
+import { FieldSwitch } from "@/examples/field/field-switch";
+import { FieldChoiceCards } from "@/examples/field/field-choice-cards";
+import { FieldGrouping } from "@/examples/field/field-grouping";
+import { FieldHorizontal } from "@/examples/field/field-horizontal";
+import { FieldValidation } from "@/examples/field/field-validation";
+import { FieldErrorMessages } from "@/examples/field/field-error-messages";
+import { FieldDisabled } from "@/examples/field/field-disabled";
+
+import { SliderFieldExample } from "@/examples/slider/slider-field-example";
+
+<ComponentPreview>
+  <FieldForm />
+</ComponentPreview>
+
+<include>../../../examples/field/field-form.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Field, FieldLabel, FieldDescription, Input } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Field, FieldLabel, FieldDescription } from "@ajnacloud/ui/field";
+import { Input } from "@ajnacloud/ui/input";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="email">Email address</FieldLabel>
+  <Input
+    id="email"
+    name="email"
+    type="email"
+    autoComplete="email"
+    aria-describedby="email-help"
+  />
+  <FieldDescription id="email-help">
+    We will send your invitation to this address.
+  </FieldDescription>
+</Field>
+```
+
+Field composes labels, controls, help text, and errors. Use FieldSet and FieldLegend for related choices, and FieldGroup for layout.
+
+For [Select](/docs/components/select), match FieldLabel’s `htmlFor` to the trigger’s `id` and connect help or errors with `aria-describedby`.
+
+Controls are separate exports; Field supplies their surrounding layout and text.
+
+Connect FieldLabel through `htmlFor` and the control’s `id`. Connect help and errors through `aria-describedby`. Use `useId` for reusable field instances.
+
+### Parts
+
+A single field usually contains a label, one control, and optional help or error text:
+
+```text
+Field
+├── FieldLabel
+├── Input or another control
+├── FieldDescription
+└── FieldError
+```
+
+Use FieldContent to keep a label and its description together beside a checkbox, radio, or switch:
+
+```text
+Field orientation="horizontal"
+├── Checkbox
+└── FieldContent
+    ├── FieldLabel
+    ├── FieldDescription
+    └── FieldError
+```
+
+For a section of related fields, FieldSet gives the section a semantic name, while FieldGroup provides spacing:
+
+```text
+FieldSet
+├── FieldLegend
+├── FieldDescription
+└── FieldGroup
+    ├── Field
+    ├── FieldSeparator
+    └── Field
+```
+
+Use only the parts the form needs. A checkbox with a short label does not need FieldContent. Unrelated fields can share a FieldGroup without being placed in the same FieldSet.
+
+## Examples
+
+### Basic field
+
+<ComponentPreview>
+  <FieldExample />
+</ComponentPreview>
+
+<include>../../../examples/field/field-example.tsx</include>
+
+### Required indicator
+
+Set `required` on FieldLabel for the decorative asterisk, and on the control for validation. The label flag does not make a control required.
+
+<ComponentPreview>
+  <FieldRequired />
+</ComponentPreview>
+
+<include>../../../examples/field/field-required.tsx</include>
+
+### Contextual help
+
+Pass `contextualHelp` for a help button beside the label. It opens a Popover independently of label activation and form submission.
+
+<ComponentPreview>
+  <FieldContextualHelp />
+</ComponentPreview>
+
+<include>../../../examples/field/field-contextual-help.tsx</include>
+
+The help button is named from the field label and “More information”. Override `contextualHelpLabel` for a complete custom or translated name. Use FieldDescription for instructions that should stay visible.
+
+With contextual help, FieldLabel adds a surrounding row; its props and ref still target the native label.
+
+### Input
+
+Pass Input’s native `type`, `name`, `autoComplete`, and validation attributes directly. `name` determines its form-data key.
+
+Make required state visible in the label and set `required` on the control. Optional fields can use “(optional)” in the label.
+
+### Number inputs
+
+<ComponentPreview>
+  <NumberInputControlled />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-controlled.tsx</include>
+
+NumberInput forwards its id and aria attributes to the visible input. Use numeric value/null and onValueChange for state, and name the unit in the label. Its main ref targets the visible input; inputRef is Base UI's separate hidden form control. See [Number Input](/docs/components/number-input) for formatting, stepping, forms, and reset.
+
+### Search queries
+
+<ComponentPreview>
+  <SearchInputExample />
+</ComponentPreview>
+
+<include>../../../examples/search-input/search-input-example.tsx</include>
+
+SearchInput uses the same label/ID relationship as Input. Its icon is decorative, clearing returns focus to the control, and the application owns filtering or requests. See [Search Input](/docs/components/search-input) for forms, loading, and debouncing the operation.
+
+### Passwords
+
+<ComponentPreview>
+  <PasswordInputExample />
+</ComponentPreview>
+
+<include>../../../examples/password-input/password-input-example.tsx</include>
+
+PasswordInput preserves its native input and label when visibility changes. Choose the correct autocomplete value, and connect validation descriptions normally. The visibility button does not submit its form. See [Password Input](/docs/components/password-input) for complete form and controlled examples.
+
+### Textarea
+
+<ComponentPreview>
+  <FieldTextarea />
+</ComponentPreview>
+
+<include>../../../examples/field/field-textarea.tsx</include>
+
+Textarea uses the same label and description pattern. Set `rows` for the initial height and give the helper text a useful constraint, purpose, or example. A placeholder is a hint, not a replacement for the visible label.
+
+### Checkbox
+
+<ComponentPreview>
+  <FieldCheckboxes />
+</ComponentPreview>
+
+<include>../../../examples/field/field-checkboxes.tsx</include>
+
+Use horizontal orientation to put the control beside its label. When there is a description, wrap the label and description in FieldContent so they stay aligned. Use a FieldSet and FieldLegend for a related set of independent choices.
+
+Each checkbox still needs its own label. Use `name` and an optional `value` for form submission. Unchecked checkboxes do not contribute a value. For application state, use Checkbox's `checked` and `onCheckedChange`; `defaultChecked` is an initial uncontrolled value.
+
+### Radio group
+
+<ComponentPreview>
+  <FieldRadio />
+</ComponentPreview>
+
+<include>../../../examples/field/field-radio.tsx</include>
+
+Use one RadioGroup for mutually exclusive options. The group owns `name`, `value`/`onValueChange`, or `defaultValue`; each RadioGroupItem has its own `value` and label. Reference the legend from the group so the overall question is announced alongside the selected option.
+
+A Field around every option provides spacing and supporting text. Do not create a separate RadioGroup for each option, since that would break their shared selection and arrow-key behavior.
+
+### Switch
+
+<ComponentPreview>
+  <FieldSwitch />
+</ComponentPreview>
+
+<include>../../../examples/field/field-switch.tsx</include>
+
+A switch works well for a setting with an immediate on/off state. FieldContent can precede the Switch to place it at the far end of the row. Keep the label stable as the state changes; “Automatic backups” is clearer than changing it between “Enable backups” and “Disable backups.”
+
+### Slider
+
+<ComponentPreview>
+  <SliderFieldExample />
+</ComponentPreview>
+
+<include>../../../examples/slider/slider-field-example.tsx</include>
+
+Use SliderLabel inside Slider so the name is associated with its nested range input and clicking it focuses a single-thumb slider. FieldDescription stays outside the control and is connected through `aria-describedby`. Slider's outer ID identifies a div, so a native FieldLabel pointing to that ID would not label or focus the range input. See [Slider](/docs/components/slider) for range values, steps, forms, and keyboard behavior. For validation on its nested range input, use the [Slider validation composition](/docs/components/slider#validation).
+
+### Choice cards
+
+<ComponentPreview>
+  <FieldChoiceCards />
+</ComponentPreview>
+
+<include>../../../examples/field/field-choice-cards.tsx</include>
+
+Wrap a horizontal Field in FieldLabel to make the whole card activate its control. Use FieldTitle inside the wrapping label instead of nesting another FieldLabel. This pattern also works with Checkbox when several cards can be selected independently.
+
+Keep one control per card and links outside its wrapping label. Use `aria-labelledby` for the option name and `aria-describedby` for longer supporting text.
+
+### Fieldsets, groups, and separators
+
+<ComponentPreview>
+  <FieldGrouping />
+</ComponentPreview>
+
+<include>../../../examples/field/field-grouping.tsx</include>
+
+FieldSet renders a native `fieldset`, and FieldLegend names its contents. Use the default legend size for a form section and `variant="label"` for a smaller question or nested section. Keep the legend before the section's controls.
+
+FieldGroup stacks fields and nested sections. FieldSeparator adds a line, with or without centered text. Its optional text is a visual divider; it does not replace a section's legend. Prefer meaningful section names to dividing every pair of controls.
+
+### Orientation
+
+<ComponentPreview>
+  <FieldHorizontal />
+</ComponentPreview>
+
+<include>../../../examples/field/field-horizontal.tsx</include>
+
+| Orientation          | Use                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `vertical` (default) | Label, control, and supporting text stacked above one another. Works well for most text inputs and narrow forms.    |
+| `horizontal`         | A control beside its label, or a label/description block beside a control. Useful for choices and compact settings. |
+
+Orientation stays fixed at every viewport width. Use vertical fields when a side-by-side text input would become too cramped. FieldContent lets the label and description share a column in horizontal fields. Ajna does not expose a responsive orientation value.
+
+### Validation and errors
+
+<ComponentPreview>
+  <FieldValidation />
+</ComponentPreview>
+
+<include>../../../examples/field/field-validation.tsx</include>
+
+Set validation state and messages from your form logic. Field supplies presentation and accessibility hooks, not validation rules.
+
+There are three separate connections to make:
+
+1. `data-invalid` on Field applies the field's error presentation.
+2. `aria-invalid` on the actual control exposes its invalid state.
+3. `aria-describedby` references the error and any help text the user still needs.
+
+FieldError displays a message; it does not invalidate a control. Clear the message and invalid state when the error is resolved.
+
+#### Multiple error messages
+
+<ComponentPreview>
+  <FieldErrorMessages />
+</ComponentPreview>
+
+<include>../../../examples/field/field-error-messages.tsx</include>
+
+Pass an `errors` array when a control can have several failures. FieldError removes duplicate messages and ignores undefined entries and empty messages. One message renders as text; several messages render as a list. With no content it renders nothing. Explicit children take precedence over the array.
+
+### Disabled fields
+
+<ComponentPreview>
+  <FieldDisabled />
+</ComponentPreview>
+
+<include>../../../examples/field/field-disabled.tsx</include>
+
+`data-disabled` changes FieldLabel and FieldTitle presentation. It does not disable a control. Use the control's `disabled` prop too.
+
+A disabled FieldSet applies native disabled behavior to inputs and textareas inside it. Explicitly disable Base UI choice controls such as Checkbox, RadioGroup, and Switch as well, so their interactive roots have disabled styling and the right keyboard behavior. Disabled controls are normally excluded from form submission. Use `readOnly` instead when a supported text control should stay readable/focusable and keep its submitted value.
+
+### Complete form
+
+Use a real form and name submitted controls. Specify `type="submit"` or `type="reset"` on form actions; Button defaults to `type="button"`.
+
+```tsx
+"use client";
+
+import { useId, useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Input,
+  Field,
+  FieldSet,
+  FieldLegend,
+  FieldGroup,
+  FieldContent,
+  FieldLabel,
+  FieldDescription,
+  FieldSeparator,
+} from "@ajnacloud/ui";
+
+export function FieldForm() {
+  const id = useId();
+  const [result, setResult] = useState("");
+  return (
+    <form
+      style={{ width: "100%", maxWidth: 420 }}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        setResult(`Preferences received for ${data.get("name")}.`);
+      }}
+    >
+      <FieldSet aria-describedby={`${id}-help`}>
+        <FieldLegend>Profile</FieldLegend>
+        <FieldDescription id={`${id}-help`}>
+          Choose the details your teammates see.
+        </FieldDescription>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor={`${id}-name`}>Display name</FieldLabel>
+            <Input
+              id={`${id}-name`}
+              name="name"
+              autoComplete="name"
+              defaultValue="Alex Morgan"
+              required
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`${id}-email`}>Work email</FieldLabel>
+            <Input
+              id={`${id}-email`}
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="alex@example.com"
+              required
+            />
+          </Field>
+          <FieldSeparator />
+          <Field orientation="horizontal">
+            <Checkbox
+              id={`${id}-updates`}
+              name="updates"
+              defaultChecked
+              aria-describedby={`${id}-updates-help`}
+            />
+            <FieldContent>
+              <FieldLabel htmlFor={`${id}-updates`}>Product updates</FieldLabel>
+              <FieldDescription id={`${id}-updates-help`}>
+                Occasional news about new features.
+              </FieldDescription>
+            </FieldContent>
+          </Field>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button type="submit" variant="primary">
+              Save preferences
+            </Button>
+            <Button variant="secondary" type="reset" onClick={() => setResult("")}>
+              Reset
+            </Button>
+          </div>
+        </FieldGroup>
+      </FieldSet>
+      {result && <p role="status">{result}</p>}
+    </form>
+  );
+}
+```
+
+A FieldGroup is a layout wrapper, not a form. Put submission on a real `form`. Use `FormData` for native-style submission, or controlled values when your application needs them. Keep server errors in application state and render them near the affected control with FieldError.
+
+#### Form libraries
+
+Connect your form library’s value, event, ref, and error APIs to the control, then display its messages with FieldError.
+
+If your application already uses React Hook Form, a registered Input can be composed like this. React Hook Form is an optional application dependency (`npm install react-hook-form`), not an Ajna requirement:
+
+```tsx
+"use client";
+
+import { useId } from "react";
+import { useForm } from "react-hook-form";
+import { Button, Field, FieldError, FieldLabel, Input } from "@ajnacloud/ui";
+
+type Values = { email: string };
+
+export function ContactForm({
+  onSubmit,
+}: {
+  onSubmit: (values: Values) => void;
+}) {
+  const id = useId();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Values>();
+  return (
+    <form noValidate onSubmit={handleSubmit(onSubmit)}>
+      <Field data-invalid={Boolean(errors.email)}>
+        <FieldLabel htmlFor={id}>Email</FieldLabel>
+        <Input
+          {...register("email", {
+            required: "Enter your email address.",
+            pattern: {
+              value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+              message: "Enter a valid email address.",
+            },
+          })}
+          id={id}
+          type="email"
+          required
+          aria-invalid={Boolean(errors.email)}
+          aria-describedby={errors.email ? `${id}-error` : undefined}
+        />
+        <FieldError id={`${id}-error`} errors={[errors.email]} />
+      </Field>
+      <Button type="submit">Continue</Button>
+    </form>
+  );
+}
+```
+
+For controlled Checkbox, Switch, and RadioGroup fields, adapt the library's controlled-field API to `checked`/`onCheckedChange` or `value`/`onValueChange`. Field itself does not need a controller, provider, or registration call.
+
+### Segmented date controls
+
+DateInput contains multiple editable segments. Give the group a visible FieldTitle and connect it with `aria-labelledby`. Use `aria-describedby` to connect help and errors. FieldLabel's `htmlFor` pattern remains appropriate for a single native Input, Textarea, or similar labelable control.
+
+```tsx
+"use client";
+
+import { DateInput, Field, FieldDescription, FieldTitle } from "@ajnacloud/ui";
+import { useId } from "react";
+
+export function AppointmentField() {
+  const id = useId();
+  return (
+    <Field>
+      <FieldTitle id={id}>Appointment date</FieldTitle>
+      <DateInput aria-labelledby={id} aria-describedby={`${id}-help`} locale="en-GB" />
+      <FieldDescription id={`${id}-help`}>Type a date or choose one from the calendar.</FieldDescription>
+    </Field>
+  );
+}
+```
+
+See [Date Input](/docs/components/date-input) for date values, forms, validation, and complete examples.
+
+## Accessibility
+
+- Give every control an accessible name through a real label, a wrapping choice card, or `aria-labelledby`.
+- Connect help and error text through `aria-describedby`. Field does not generate those relationships automatically.
+- Use FieldSet/FieldLegend for the question that applies to several controls; FieldGroup alone has no grouping semantics.
+- Put required, invalid, disabled, and read-only states on the control. Field's data attributes provide presentation only.
+- Preserve the controls' normal focus indicators and keyboard interactions. A Field wrapper does not create another tab stop.
+
+Field renders `role="group"`, but that role does not automatically label its child controls. FieldTitle is a div, not a native label. FieldError defaults to `role="alert"`, so render errors when they become relevant instead of filling the page with initial alerts.
+
+## API reference
+
+All parts accept their rendered element's native attributes, a string `className`, `style`, and a forwarded ref. There is no `asChild` or `render` prop on Field parts. The following props are specific to the Field family.
+
+### FieldSet
+
+Renders `fieldset`. Use it for related controls and name it with FieldLegend. Native `disabled`, `name`, and `form` attributes remain available. Its ref targets `HTMLFieldSetElement`.
+
+### FieldLegend
+
+Renders `legend` inside FieldSet. Its ref targets `HTMLLegendElement`.
+
+| Prop      | Type                  | Default    |
+| --------- | --------------------- | ---------- |
+| `variant` | `"legend" \| "label"` | `"legend"` |
+
+`legend` uses section-title sizing; `label` uses the smaller field-label sizing.
+
+### FieldGroup
+
+Renders a div that stacks fields and nested groups. It adds spacing, not a form, validation scope, accessible name, or responsive orientation. Its ref targets `HTMLDivElement`.
+
+### Field
+
+Renders a div with `role="group"`. Its ref targets `HTMLDivElement`.
+
+| Prop            | Type                            | Default      |
+| --------------- | ------------------------------- | ------------ |
+| `orientation`   | `"vertical" \| "horizontal"`    | `"vertical"` |
+| `data-invalid`  | Boolean or data-attribute value | Unset        |
+| `data-disabled` | Boolean or data-attribute value | Unset        |
+
+Use boolean values such as `data-invalid={Boolean(error)}` for state-driven presentation.
+
+### FieldContent
+
+Renders a flexible div containing a label/title, description, and optional error. It keeps supporting text together beside a control in horizontal fields. Its ref targets `HTMLDivElement`.
+
+### FieldLabel
+
+Renders a native label. Set `htmlFor` to the control's ID, or wrap a single choice control for a selectable card. It can contain Field with FieldTitle; it must not contain another label. Its ref targets `HTMLLabelElement`.
+
+| Prop                  | Purpose                                                               | Default                  |
+| --------------------- | --------------------------------------------------------------------- | ------------------------ |
+| `required`            | Show a decorative asterisk; set validation separately on the control. | false                    |
+| `contextualHelp`      | Text or React content displayed in an Ajna Popover.                   | Omitted                  |
+| `contextualHelpLabel` | Complete accessible name for the help button.                         | Label + More information |
+
+Native label attributes remain supported. Help adds a surrounding label row; label props and ref still target the label itself.
+
+### FieldTitle
+
+Renders a div with label-like typography, useful inside a wrapping FieldLabel. It does not associate itself with a control automatically; use `aria-labelledby` when naming a control from it. Its ref targets `HTMLDivElement`.
+
+### FieldDescription
+
+Renders a paragraph of supporting text. It can contain links; do not place it inside a wrapping choice label when it contains interactive content. Supply an ID for `aria-describedby`. Its ref targets `HTMLParagraphElement`.
+
+### FieldSeparator
+
+Renders a div with a decorative line and optional centered children. It does not add an announced separator role or name a section. Its ref targets `HTMLDivElement`.
+
+### FieldError
+
+Renders a div with `role="alert"` when it has content, otherwise nothing. Its ref targets `HTMLDivElement`.
+
+| Prop       | Type                                       | Default                               |
+| ---------- | ------------------------------------------ | ------------------------------------- |
+| `errors`   | `Array<{ message?: string } \| undefined>` | Unset                                 |
+| `children` | `ReactNode`                                | Unset; takes precedence over `errors` |
+
+Field's layout API is separate from the unstyled Base UI Field family at `/primitives/field`. Import that primitive family when you want Base UI's own validation and field-context composition.

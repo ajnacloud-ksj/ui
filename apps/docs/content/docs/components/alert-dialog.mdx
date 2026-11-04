@@ -1,0 +1,122 @@
+---
+title: Alert Dialog
+description: Ask for explicit confirmation before an important action.
+---
+
+import { AlertDialogBasic } from "@/examples/alert-dialog/alert-dialog-basic";
+import { AlertDialogSmall } from "@/examples/alert-dialog/alert-dialog-small";
+import { AlertDialogDestructive } from "@/examples/alert-dialog/alert-dialog-destructive";
+
+<ComponentPreview>
+  <AlertDialogBasic />
+</ComponentPreview>
+
+<include>../../../examples/alert-dialog/alert-dialog-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { AlertDialog, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { AlertDialog } from "@ajnacloud/ui/alert-dialog";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<AlertDialog>
+  <AlertDialog.Trigger render={<Button variant="destructive" />}>
+    Delete project
+  </AlertDialog.Trigger>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Delete this project?</AlertDialog.Title>
+      <AlertDialog.Description>
+        This permanently deletes the project and its files.
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+    <AlertDialog.Footer>
+      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+      <AlertDialog.Action variant="destructive">
+        Delete project
+      </AlertDialog.Action>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog>
+```
+
+Alert Dialog asks people to confirm a consequential action before continuing. Give the dialog a clear title, explain the result of the action, and provide an explicit way to cancel. Clicking the backdrop does not dismiss it.
+
+Compose Root, Trigger, Content, Header, Title, Description, Footer, Cancel, and Action. The callable `AlertDialog` and `AlertDialog.Root` are equivalent. All parts also have named exports such as `AlertDialogContent`.
+
+Control `open` when an action closes the dialog. Action is a Button and does not close automatically; Cancel requests dismissal itself.
+
+## Examples
+
+### Small dialogs and media
+
+Content supports `size="sm"` and `size="base"` (default). The small layout keeps the two footer actions in equal columns. Media provides a consistent place for an icon or image; it can also be used at the base size. Mark decorative icons with `aria-hidden` and give meaningful images appropriate alt text.
+
+<ComponentPreview>
+  <AlertDialogSmall />
+</ComponentPreview>
+
+<include>../../../examples/alert-dialog/alert-dialog-small.tsx</include>
+
+### Destructive actions and asynchronous work
+
+Use `variant="destructive"` on Action for irreversible changes. Keep the action label specific, such as “Delete project”. Root does not run requests or handle failures for you.
+
+Action shares Button's `loading` behavior: it shows Spinner, preserves its label, and prevents duplicate activation. Disable Cancel while an operation must finish, and reject close requests in `onOpenChange` when appropriate. Close only after success; for a real request, handle rejection and show a useful error while keeping the dialog open.
+
+<ComponentPreview>
+  <AlertDialogDestructive />
+</ComponentPreview>
+
+<include>../../../examples/alert-dialog/alert-dialog-destructive.tsx</include>
+
+## Behavior
+
+### State, focus, and portals
+
+Use `defaultOpen` for an uncontrolled initial state, or `open`/`onOpenChange` for controlled visibility. Base UI change details include `reason`, `event`, and `cancel()`. `actionsRef` also exposes the native close action for applications that use uncontrolled state.
+
+Content includes its portal and overlay. It accepts `container` for a custom portal destination and `keepMounted` for mounting control. A theme scoped to a wrapper must also reach that container; the default portal inherits the document theme. `className`, state-based classes/styles, and `overlayClassName` customize presentation.
+
+The initial focus follows Base UI. Keep Cancel first in DOM order for a non-destructive initial target, or supply Content's `initialFocus` for another appropriate target. `finalFocus` customizes focus restoration. Backdrop clicks do not dismiss an Alert Dialog; Escape follows Base UI and can be rejected through the controlled Root callback.
+
+## Accessibility
+
+- Include Title and a useful Description. The popup uses `role="alertdialog"` and Base UI's associations.
+- Keep a cancellation action visible and keyboard accessible.
+- Preserve the focus trap and focus restoration; the native modal behavior cannot be disabled.
+- Use action text that describes the outcome, especially for destructive operations.
+- Loading controls remain labeled. Announce request errors in the dialog rather than silently closing it.
+- Popup and overlay transitions respect reduced motion. Both styling modes keep visible focus.
+
+## API reference
+
+| Part                  | Purpose                                                                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AlertDialog`, `Root` | Base UI alert-dialog state, payloads, handles, events, and imperative actions.                                                                                       |
+| `Trigger`             | Opens the dialog; use `render={<Button />}` for Ajna button styling.                                                                                                 |
+| `Content`             | Centered popup with portal and overlay; `size`, `container`, `keepMounted`, and `overlayClassName` additions. Forwards its popup ref and native Base UI popup props. |
+| `Header`              | Groups the title, description, and optional media.                                                                                                                   |
+| `Title`               | Accessible dialog title.                                                                                                                                             |
+| `Description`         | Explanation associated with the dialog.                                                                                                                              |
+| `Footer`              | Full-width action area.                                                                                                                                              |
+| `Media`               | Icon or image container.                                                                                                                                             |
+| `Action`              | Ajna Button, defaulting to primary. Supports variants, sizes, loading, native events, and refs. Closing remains application-owned.                                   |
+| `Cancel`              | Base UI Close rendered as an outline Button; supports `variant`, `size`, disabled state, and Base UI props.                                                          |
+| `Portal`, `Overlay`   | Lower-level parts for compositions using the primitive Popup. Content already includes them.                                                                         |
+
+The named exports use the `AlertDialog` prefix, including `AlertDialogTrigger`, `AlertDialogTitle`, `AlertDialogAction`, and `AlertDialogCancel`. Each part's props and `AlertDialogSize` are exported through the root and `/alert-dialog`.

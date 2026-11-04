@@ -1,0 +1,255 @@
+---
+title: Toast
+description: Show temporary notifications with actions, progress updates, and keyboard-accessible dismissal.
+---
+
+import { ToastExample } from "@/examples/toast/toast-example";
+import { ToastTypesExample } from "@/examples/toast/toast-types-example";
+import { ToastRichColorsExample } from "@/examples/toast/toast-rich-colors-example";
+import { ToastActionExample } from "@/examples/toast/toast-action-example";
+import { ToastPromiseExample } from "@/examples/toast/toast-promise-example";
+import { ToastUpdateExample } from "@/examples/toast/toast-update-example";
+import { ToastTimeoutExample } from "@/examples/toast/toast-timeout-example";
+import { ToastHookExample } from "@/examples/toast/toast-hook-example";
+import { ToastPriorityExample } from "@/examples/toast/toast-priority-example";
+import { ToastCustomExample } from "@/examples/toast/toast-custom-example";
+
+<ComponentPreview>
+  <ToastExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Toaster, toast, Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Toaster, toast } from "@ajnacloud/ui/toast";
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Toaster>
+  <Button variant="secondary"
+    onClick={() => toast.add({ title: "Settings saved", type: "success" })}
+  >
+    Save settings
+  </Button>
+</Toaster>
+```
+
+Use a toast for a short update about an action, such as saving settings or finishing an export. Keep information that must remain available in the page itself. Use [Banner](/docs/components/banner) for an inline message, and Dialog when the user needs to make a decision before continuing.
+
+For Next.js, keep the host in the root layout so it stays mounted across navigation. The exported component is already a client boundary:
+
+```tsx
+import type { ReactNode } from "react";
+import { Toaster } from "@ajnacloud/ui/toast";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Toaster>{children}</Toaster>
+      </body>
+    </html>
+  );
+}
+```
+
+The live examples on this page share the docs application's host. Their copied event handlers work after the same setup in your application. The global `toast` manager can also be used with a sibling `<Toaster />`; wrap children as above when they need `useToastManager`.
+
+Call the manager from client event handlers or other client code after the host has mounted. It has no offline queue: calls before a matching provider subscribes do not create a later notification. For a server action, return its result and notify from the client. Mount one host for each manager; mounting several with the same manager duplicates its messages.
+
+Toaster is the ready-to-use host. The individual parts support custom layouts and viewports. The lower-level parts are named exports, so the styled root is `<Toast>` rather than `<Toast.Root>`.
+
+## Examples
+
+### Notification types
+
+<ComponentPreview>
+  <ToastTypesExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-types-example.tsx</include>
+
+The default renderer recognises `success`, `info`, `warning`, `error`, and `loading`. They add a status icon; omitted or custom types render without a built-in icon. Error uses the destructive text color. The other icons inherit the notification's text color. Type names remain plain strings so custom renderers can define their own meanings.
+
+Loading uses the shared [Spinner](/docs/components/spinner) and does not dismiss automatically while its type remains `loading`. Update or close it when the operation finishes. The icon is decorative; the notification's text communicates the activity. Choosing `type="error"` changes its appearance, not its announcement priority.
+
+### Actions
+
+<ComponentPreview>
+  <ToastActionExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-action-example.tsx</include>
+
+Use `actionProps` for a toast action’s native button props and visible label. An action without content is omitted.
+
+An action does not close its notification automatically. Call `toast.close(id)` after the action if it should dismiss. Keep actions short, and preserve a route to important information outside a timed notification. An action for real server data should be connected to the actual record and operation.
+
+### Promise progress, success, and failure
+
+<ComponentPreview>
+  <ToastPromiseExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-promise-example.tsx</include>
+
+`toast.promise(request, { loading, success, error })` creates one loading notification and updates it when the promise settles. Success receives the resolved value; error receives the rejection reason. Each option can be a string or an options object, and success/error can be functions returning either form.
+
+Strings populate the description. Use objects when you need a title, description, action, timeout, or other option. The manager sets the loading, success, and error types for the respective stages. It returns a promise with the original result type and rethrows failures, so handle rejection in application code. Notifications do not replace error handling.
+
+### Updating and closing notifications
+
+<ComponentPreview>
+  <ToastUpdateExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-update-example.tsx</include>
+
+`add` returns an ID. Pass it to `update(id, options)` to change a notification without inserting another. An update can also be a function of the previous notification:
+
+```tsx
+import { toast } from "@ajnacloud/ui/toast";
+
+export function notifyProjectCount() {
+  const id = toast.add({
+    title: "Project import",
+    data: { completed: 0 },
+    timeout: 0,
+  });
+  toast.update<{ completed: number }>(id, (previous) => {
+    const completed = (previous.data?.completed ?? 0) + 1;
+    return { title: `${completed} project imported`, data: { completed } };
+  });
+  return id;
+}
+```
+
+A supplied `id` makes repeated `add` calls update that entry and restart its dismissal timer. Stable IDs are useful for an export or background operation that should have one notification. A closed or missing ID is not revived by update; use add to create a fresh entry.
+
+Use `close(id)` for one notification, or `close()` to close every notification managed by that instance. `onClose` runs when it starts closing. `onRemove` runs after the exit animation and removal. Cleanup that must happen immediately belongs in onClose; cleanup tied to removal can use onRemove.
+
+### The scoped hook
+
+<ComponentPreview>
+  <ToastHookExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-hook-example.tsx</include>
+
+`useToastManager()` reads the nearest ToastProvider or Toaster. It returns `toasts`, `add`, `update`, `close`, and `promise`. Call it inside that provider's descendants; a sibling Toaster does not provide context to the component.
+
+`createToastManager<Data>()` creates a separate external manager. Pass the same instance to one host's `toastManager` prop. Keep that instance stable with a module-level declaration or a state initializer. The global manager exposes operations but no reactive toast array; use the hook to render or observe current entries. Both APIs support typed custom metadata through `data`.
+
+### Custom composition and placement
+
+<ComponentPreview>
+  <ToastCustomExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-custom-example.tsx</include>
+
+Use a separate manager and viewport for an independent notification flow. Give viewports distinct positions or consolidate them into one host.
+
+ToastProvider supplies the state. ToastPortal moves the viewport to document.body by default, and accepts a `container` for another destination. ToastViewport supplies the notification landmark, timer interaction, and keyboard entry point. Render its entries with the `toasts` array from useToastManager, passing each complete object to Toast.
+
+ToastContent groups the visible contents. ToastTitle and ToastDescription use the manager's text automatically, and accept children for custom content. They omit themselves when they have no content. ToastAction reads actionProps; ToastClose closes its owning notification. The custom list includes Action even when there is no action, so the same renderer can handle either case.
+
+Root, viewport, content, title, description, action, and close preserve Base UI render composition, forwarded refs, and state-based className/style props. Default Close renders an Ajna ghost icon button and an X. Replace its children or render element as needed, and supply a translated aria-label. Name a custom viewport through its aria-label too. The convenience Toaster uses the default English labels; custom composition gives you control over those labels and the layout.
+
+The default viewport is near the bottom-right on larger screens and centered with 16px side insets on small screens. It has a 384px maximum width and sits at layer 1200, above Ajna's normal overlays. Position changes to the lower left work with the existing bottom-up stacking. A top-origin stack needs matching root transforms and swipe directions; the convenience host has no top-position prop.
+
+The styled renderer handles stacked notifications. Base UI's anchored Positioner and Arrow are available through `/primitives/toast` for a separate custom implementation; the default host does not consume positionerProps to anchor messages to elements.
+
+## Behavior
+
+### Duration, stacking, and interaction
+
+<ComponentPreview>
+  <ToastTimeoutExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-timeout-example.tsx</include>
+
+The default timeout is 5000ms. Set `timeout` on Toaster to change that default, or on an individual notification to override it. `timeout: 0` keeps a notification until it is closed. A loading notification remains persistent even if a nonzero timeout is supplied; updating to a completed type starts its normal timeout.
+
+By default, three notifications are visible in the stack. `limit` on Toaster changes that count. Older entries beyond the limit are marked limited and hidden; the limit does not remove them from the manager. When a newer entry closes, an older still-active entry can become visible again.
+
+The newest notification appears at the front. Hovering or focusing the viewport expands the stack and pauses dismissal timers. Timers also pause when the window loses focus, and resume when the corresponding interaction ends. Pointer swipes dismiss notifications in the supported directions; the default root permits down and right. Interactive children do not start a swipe.
+
+These behaviours come from the underlying Toast primitives. Root and Content retain their state attributes and CSS variables for measured height, stack order, and swipe movement. Reduced motion removes the stack's transitions and stops the loading Spinner animation while retaining readable status text.
+
+### Announcement priority
+
+<ComponentPreview>
+  <ToastPriorityExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-priority-example.tsx</include>
+
+`priority="low"` uses polite announcements. Reserve `"high"` for time-sensitive interruptions.
+
+Base UI provides the live region and focus behaviour. Notifications do not move focus on arrival. Do not add a second live region around them or announce the same message separately. An error icon by itself does not make a message urgent.
+
+### Appearance
+
+Notifications use the existing popover surface and foreground, standard border, muted description text, destructive error text, and focus ring. No new theme color roles or stylesheet are required. The shared standalone build and Tailwind v3 preset/content setup include the stacking styles; the loading icon reuses Spinner's animation.
+
+`className` styles the native part and can read Base UI state, such as `expanded` or `type`. Use application CSS, generated Tailwind classes, or inline style overrides to customise it. Internal layout variables use the `--ajna-toast-*` prefix; Base UI supplies its measured `--toast-*` variables. These layout values are separate from Ajna's HSL color channels.
+
+## Rich colors
+
+Status icons use success, info, warning, and error colors by default. Enable `richColors` to tint the background, text, border, and controls too.
+
+<ComponentPreview>
+  <ToastRichColorsExample />
+</ComponentPreview>
+
+<include>../../../examples/toast/toast-rich-colors-example.tsx</include>
+
+`richColors` defaults to `false`. It is also available on `ToastProvider` for custom lists; individual `Toast` roots can override it. Default, loading, and custom toast types keep neutral surfaces. Status colors follow the light or dark theme automatically.
+
+## Accessibility
+
+- F6 moves focus into the notifications viewport while notifications exist.
+- Tab moves through the toast roots and their actual action/close controls. Shift+Tab from the viewport returns to the previous control.
+- Enter and Space activate action and close buttons. Escape closes a toast when focus is inside it.
+- Closing a focused toast lets Base UI move focus to another available notification or restore the prior control.
+
+Use concise titles and useful descriptions. Native toast title and description elements are h2 and p; their refs target those elements. The notification roots are nonmodal dialogs, with separate urgent announcements for high-priority entries. Keep recovery actions and important information available elsewhere when users may miss a timed notification.
+
+Custom rendering must retain ToastContent, meaningful labels, visible keyboard focus, and Base UI's interaction props. Elements inside a toast can opt out of swipe gestures through `data-base-ui-swipe-ignore`; interactive elements are already ignored. Test important notification flows with the assistive technology used by your audience.
+
+## API reference
+
+| Export                       | Purpose                                       | Main props                                                                      |
+| ---------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `Toaster`                    | Provider, portal, viewport, and built-in list | `toastManager`, `timeout` (5000), `limit` (3), `richColors` (false), `children` |
+| `ToastProvider`              | State and manager context                     | Same provider props, without a built-in renderer                                |
+| `ToastPortal`                | Portal for a viewport                         | Base UI Portal props, including container                                       |
+| `ToastViewport`              | Notification region and interaction boundary  | Base UI Viewport props                                                          |
+| `Toast`                      | One notification root                         | Required `toast` object; optional `swipeDirection`, `richColors`                |
+| `ToastContent`               | Visible content and collapsed-stack handling  | Base UI Content props                                                           |
+| `ToastTitle`                 | h2 associated with the notification           | Base UI Title props; optional children                                          |
+| `ToastDescription`           | p associated with the notification            | Base UI Description props; optional children                                    |
+| `ToastAction`                | Action button using actionProps               | Base UI Action props; default outline Button                                    |
+| `ToastClose`                 | Close button                                  | Base UI Close props; default label `Close toast`                                |
+| `toast`                      | Shared external manager                       | add, update, close, promise                                                     |
+| `createToastManager<Data>()` | Independent external manager                  | Optional metadata type                                                          |
+| `useToastManager<Data>()`    | Nearest provider's reactive manager           | Includes the toasts array                                                       |
+
+Manager add options include `id`, `title`, `description`, `type`, `timeout`, `priority`, `actionProps`, `data`, `onClose`, and `onRemove`. Update accepts the changeable options or a callback returning them. Promise options require loading, success, and error values. Component props and the manager/option types are exported from the root and `/toast`.

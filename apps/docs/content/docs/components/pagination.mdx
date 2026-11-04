@@ -1,0 +1,231 @@
+---
+title: Pagination
+description: Navigate paginated lists with result counts, page controls, and page-size selection.
+---
+
+import { PaginationBasic } from "@/examples/pagination/pagination-basic";
+import { PaginationPageSizeExample } from "@/examples/pagination/pagination-page-size-example";
+import { PaginationInputExample } from "@/examples/pagination/pagination-input-example";
+import { PaginationSimple } from "@/examples/pagination/pagination-simple";
+import { PaginationUnknown } from "@/examples/pagination/pagination-unknown";
+import { PaginationEmpty } from "@/examples/pagination/pagination-empty";
+import { PaginationDisabled } from "@/examples/pagination/pagination-disabled";
+import { PaginationComposition } from "@/examples/pagination/pagination-composition";
+import { PaginationResults } from "@/examples/pagination/pagination-results";
+
+<ComponentPreview>
+  <PaginationBasic />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Pagination } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Pagination } from "@ajnacloud/ui/pagination";
+```
+
+### Basic usage
+
+```tsx
+import { useState } from "react";
+
+export function ProjectPagination() {
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 20 });
+
+  return (
+    <Pagination
+      {...pagination}
+      totalCount={237}
+      onPaginationChange={setPagination}
+    />
+  );
+}
+```
+
+Pagination provides a ready-to-use footer for a table, list, or grid. It displays the current result range and page, with first, previous, next, and last controls. Add a page-size selector or compose the parts for a different layout.
+
+Keep `{ page, pageSize }` in application state. Pages start at **1**. `onPaginationChange` receives the complete next state, so a size change and its page reset can be applied together. Passing the state setter directly is sufficient for local state.
+
+The default controls show “Page X of Y”. Previous and first are disabled on page 1; next and last are disabled on the last page. Pagination requests state changes but does not fetch, slice, or filter your data.
+
+## Examples
+
+### Page-size selection
+
+Set `showPageSize` to include an Ajna Select. The default choices are `10`, `20`, `50`, and `100`; override them with `pageSizeOptions`.
+
+Choosing a **different** size emits exactly one `onPaginationChange({ page: 1, pageSize: nextSize })`. Selecting the current size again leaves the current page unchanged. There is no separate page-size callback to coordinate with a second page-reset callback.
+
+<ComponentPreview>
+  <PaginationPageSizeExample />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-page-size-example.tsx</include>
+
+For custom layouts, use `Pagination.PageSize`. Its `options` override the root's choices, and `label` customizes the visible label. `label={null}` hides the label while retaining the accessible name from `labels.pageSize`. Include the current page size among your available choices. The part’s `contentProps` configures Select popup placement, styling, and portal container.
+
+### Jump to a page
+
+Set `pageSelector="input"` to replace the page-status text with an editable page number and total-page count. This is available with full controls and a known `totalCount`.
+
+The input keeps a draft while typing and commits on Enter or blur. It accepts whole numbers using digits 0–9. A valid number outside the range is clamped to the first or last page. Blank input, decimals, scientific notation, negative numbers, and mixed text restore the current page without navigation. Pressing Enter does not submit a surrounding form, and the subsequent blur does not repeat the same request.
+
+<ComponentPreview>
+  <PaginationInputExample />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-input-example.tsx</include>
+
+The requested page remains controlled by the `page` prop. Update application state in `onPaginationChange`; a callback that does not accept the next state leaves the current page unchanged.
+
+### Simple controls
+
+Use `controls="simple"` for previous/next buttons and a readable page status. First/last buttons and the editable page input are omitted. Result information and the optional page-size selector work in both modes.
+
+<ComponentPreview>
+  <PaginationSimple />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-simple.tsx</include>
+
+### Unknown totals
+
+When the server does not provide a total count, omit `totalCount` and pass `hasNextPage` from the response. Pagination uses sequential controls and shows “Page X”. First, last, and page-jump controls are unavailable because the final page is unknown.
+
+Pass `itemCount` for the number of records actually returned on the current page. This allows an accurate range on partially filled pages, such as “Showing 41–47”. Without `itemCount`, the default range information stays empty rather than assuming every page is full.
+
+<ComponentPreview>
+  <PaginationUnknown />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-unknown.tsx</include>
+
+For cursor-based APIs, the application owns the cursor for each visited page and sends it with the request. Pagination's page number is only the user-facing position. Changing the page size should also reset the application's cursor history. If `hasNextPage` is omitted, Next is disabled when the total is unknown.
+
+### Empty results
+
+With `totalCount={0}`, the range is `0–0`, the page count is 1, and every navigation button is disabled. Pagination never requests page 0. The page-size selector remains usable unless the entire component is disabled.
+
+<ComponentPreview>
+  <PaginationEmpty />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-empty.tsx</include>
+
+When filters or deletions reduce the result count, reset the application's page as part of that operation. The component does not change controlled state merely because a new total arrives.
+
+### Disable while results are changing
+
+`disabled` disables navigation, the page input, and page-size selection together. Applications can use this while fetching a new result set. Supply `aria-busy` on the result region or footer when it represents an in-progress update; disabled state itself does not fetch or show a loading indicator.
+
+<ComponentPreview>
+  <PaginationDisabled />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-disabled.tsx</include>
+
+### Compose a custom footer
+
+`Pagination.Info`, `Pagination.PageSize`, `Pagination.Controls`, and `Pagination.Separator` share the root's state. Supplying children replaces the default layout, so arrange the parts in any order without repeating callbacks or page calculations.
+
+`Info` accepts a render function with `{ page, pageSize, start, end, totalCount, pageCount }`. Counts are numbers, so custom content can format them with your application's locale or add a meaningful record name. Unknown totals and page counts are `undefined`.
+
+<ComponentPreview>
+  <PaginationComposition />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-composition.tsx</include>
+
+The matching named exports—`PaginationInfo`, `PaginationPageSize`, `PaginationControls`, and `PaginationSeparator`—are available from the root and `/pagination`. Place every part inside Pagination. The root ref targets its outer div, and each part forwards its DOM ref.
+
+### Connect a real list and filters
+
+Use `page` and `pageSize` to select the displayed records, and pass the filtered count as `totalCount`. Reset the page to 1 when a filter changes. This example shows both page-size updates and filtering against actual local rows.
+
+<ComponentPreview>
+  <PaginationResults />
+</ComponentPreview>
+
+<include>../../../examples/pagination/pagination-results.tsx</include>
+
+For server pagination, use the same state in your request or query key, pass the server's total as `totalCount`, and render the returned rows directly. Do not slice a server-paginated response a second time.
+
+For an existing TanStack Table instance, map `table.getState().pagination.pageIndex + 1` to `page` and pass its `pageSize`. In the change callback, call `table.setPagination({ pageIndex: next.page - 1, pageSize: next.pageSize })` once. Use `table.getRowCount()` as `totalCount` when that count is known. For unknown totals, omit `totalCount` and supply the API's next-page signal instead. Ajna has no TanStack dependency or automatic table-context lookup.
+
+### Translate labels
+
+Use `labels` to translate navigation labels, the page-size label, the page-status formatter, and the range formatter. A custom `Pagination.Info` render function can also replace the range text. Page input mode uses the translated `pageNumber` accessible label and a numeric `/ total` display.
+
+## Behavior
+
+### Styling and layout
+
+The footer wraps naturally when its information and controls do not fit on one row. Controls stay joined, and their first/last buttons remain available at every width. Choose simple controls when that layout suits your application.
+
+The root and each part accept `className`, `style`, native DOM attributes, and refs. The default layout uses existing Button, ButtonGroup, InputGroup, and Select components. Styling uses the shared background, foreground, input, muted-foreground, border, accent, and focus tokens. No new theme variables are introduced. The page-size popup normally portals to `document.body`. In a locally scoped theme, use a compound `Pagination.PageSize` with `contentProps.container` pointing to a themed element.
+
+## Accessibility
+
+- Navigation controls use native buttons with accessible names and correct disabled states.
+- `Controls` provides the navigation landmark. Give multiple pagination regions distinct names through its `aria-label` when appropriate.
+- `Info` uses a polite, atomic live region to announce updated result ranges.
+- Tab moves through enabled controls; Enter and Space activate the native buttons.
+- The page input commits on Enter or blur without submitting a surrounding form. Invalid drafts restore the current page.
+- Page-size selection retains Select's keyboard, focus, and dismissal behavior.
+- Directional icons are decorative and follow RTL direction. Separators are also decorative.
+- Existing controls keep their visible focus treatment and reduced-motion behavior in both styling modes.
+
+## API reference
+
+### Pagination
+
+| Prop                 | Purpose and default                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `page`               | Required controlled page number, starting at 1.                                                                      |
+| `pageSize`           | Controlled page size; defaults to `20`.                                                                              |
+| `onPaginationChange` | Required callback receiving `{ page, pageSize }`.                                                                    |
+| `totalCount`         | Known total result count. Omit for sequential pagination.                                                            |
+| `hasNextPage`        | Next-page signal for unknown totals; defaults to `false`, ignored when the total is known.                           |
+| `itemCount`          | Actual number of returned records on this page. Enables unknown-total ranges and can refine known-total ranges.      |
+| `disabled`           | Disables every interactive part; defaults to `false`.                                                                |
+| `controls`           | `full` or `simple`; defaults to `full` in the composed layout.                                                       |
+| `pageSelector`       | `text` or `input`; defaults to `text`. Input requires full controls and a known total.                               |
+| `showPageSize`       | Includes the page-size part in the composed layout; defaults to `false`.                                             |
+| `pageSizeOptions`    | Root choices, defaulting to `[10, 20, 50, 100]`.                                                                     |
+| `labels`             | Partial navigation/text overrides and formatters.                                                                    |
+| `children`           | Custom layout instead of the default footer. Configure Controls and PageSize on those parts when composing manually. |
+
+`page` and `pageSize` must be positive safe integers. `totalCount` and `itemCount` must be non-negative safe integers. Page-size choices must be positive safe integers. Invalid numeric configuration throws a RangeError rather than producing invalid page counts. Keep the controlled page within the available range when changing filters or data sources.
+
+### Parts
+
+| Part        | Purpose and props                                                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Info`      | Polite result-count region. Optional `children(info)` replaces the default text, including when no default range is available.                                     |
+| `PageSize`  | Select and label. `options` overrides root choices; `label` overrides visible text or hides it with `null`; `contentProps` customizes the Select popup and portal. |
+| `Controls`  | Navigation landmark and joined controls. Accepts `controls`, `pageSelector`, and native nav props such as a distinct `aria-label`.                                 |
+| `Separator` | Decorative divider for custom layouts, hidden from assistive technology.                                                                                           |
+
+### Labels
+
+| Label                                               | Default                                                               |
+| --------------------------------------------------- | --------------------------------------------------------------------- |
+| `navigation`                                        | Pagination                                                            |
+| `firstPage`, `previousPage`, `nextPage`, `lastPage` | First page, Previous page, Next page, Last page                       |
+| `pageNumber`                                        | Page number                                                           |
+| `pageSize`                                          | Items per page                                                        |
+| `pageStatus(page, pageCount)`                       | Page X of Y, or Page X when the total is unknown                      |
+| `range(info)`                                       | Showing X–Y of Z, or Showing X–Y when only an item count is available |
+
+Public types include `PaginationProps`, `PaginationState`, `PaginationInfoState`, `PaginationLabels`, and each part's props. `DEFAULT_PAGE_SIZE_OPTIONS` is exported through the root and `/pagination`.

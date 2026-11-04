@@ -1,0 +1,180 @@
+---
+title: Toggle Group
+description: Organize selectable buttons with single or multiple selection and shared keyboard navigation.
+---
+
+import { ToggleGroupExample } from "@/examples/toggle-group/toggle-group-example";
+import { ToggleGroupSingle } from "@/examples/toggle-group/toggle-group-single";
+import { ToggleGroupSizes } from "@/examples/toggle-group/toggle-group-sizes";
+import { ToggleGroupVertical } from "@/examples/toggle-group/toggle-group-vertical";
+import { ToggleGroupDisabled } from "@/examples/toggle-group/toggle-group-disabled";
+
+<ComponentPreview>
+  <ToggleGroupExample />
+</ComponentPreview>
+
+<include>../../../examples/toggle-group/toggle-group-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from "@ajnacloud/ui/toggle-group";
+```
+
+### Basic usage
+
+```tsx
+<ToggleGroup defaultValue={["grid"]} aria-label="View layout">
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+  <ToggleGroupItem value="list">List</ToggleGroupItem>
+</ToggleGroup>
+```
+
+Use ToggleGroup for related options that behave like pressed buttons. Set `multiple` when several options can be active together, such as text formatting. Omit it when at most one option may be pressed. Use [Button Group](/docs/components/button-group) for visual grouping without selection state, and [Radio Group](/docs/components/radio-group) for a form field whose choices should behave as radio buttons.
+
+Each item needs a stable, unique, nonempty string `value`. ToggleGroup manages each item's pressed state. Use the group's `value` or `defaultValue` rather than setting `pressed` on individual items.
+
+## Examples
+
+### Single selection and controlled state
+
+<ComponentPreview>
+  <ToggleGroupSingle />
+</ComponentPreview>
+
+<include>../../../examples/toggle-group/toggle-group-single.tsx</include>
+
+Values are arrays in both modes. With `multiple={false}` (the default), the array contains zero or one value. Pressing the active item clears it and produces `[]`. With `multiple`, the array can contain several values.
+
+Use `defaultValue={["left"]}` for an initial uncontrolled selection. Use `value` and `onValueChange` when the application owns the selection. The callback receives `(values, eventDetails)`; call `eventDetails.cancel()` to reject a proposed change. An item's `onPressedChange` can also cancel its own interaction before the group commits it.
+
+If a selection must never be empty, reject the empty array in your controlled handler or cancel that change. For example:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@ajnacloud/ui/toggle-group";
+
+export function RequiredViewChoice() {
+  const [value, setValue] = useState(["list"]);
+  return (
+    <ToggleGroup
+      aria-label="View"
+      value={value}
+      onValueChange={(next, details) => {
+        if (next.length === 0) details.cancel();
+        else setValue(next);
+      }}
+    >
+      <ToggleGroupItem value="list">List</ToggleGroupItem>
+      <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+    </ToggleGroup>
+  );
+}
+```
+
+There is no Radix-style `type="single"` prop. Ajna preserves Base UI's `multiple` API rather than translating it into a second state model.
+
+### Outline, spacing, and sizes
+
+<ComponentPreview>
+  <ToggleGroupSizes />
+</ComponentPreview>
+
+<include>../../../examples/toggle-group/toggle-group-sizes.tsx</include>
+
+The group passes `variant="default" | "outline"` and `size="sm" | "base" | "lg"` to its items. An explicit item prop overrides the group's styling. Use consistent sizes within a joined group.
+
+`spacing` accepts 0, 1, 2, 3, or 4, representing 0, 4, 8, 12, or 16px. The default is 2. `spacing={0}` joins adjacent corners and removes shared borders; it is especially useful with the outline variant. Spaced groups leave each item's corners intact. Changing spacing does not change the selection or keyboard model.
+
+### Vertical orientation
+
+<ComponentPreview>
+  <ToggleGroupVertical />
+</ComponentPreview>
+
+<include>../../../examples/toggle-group/toggle-group-vertical.tsx</include>
+
+`orientation="vertical"` stacks items and changes navigation to ArrowUp/ArrowDown. Horizontal groups use ArrowLeft/ArrowRight. Set orientation through the prop rather than only changing the CSS direction so the keyboard model matches the layout. Items stretch to a shared width in a vertical group.
+
+### Disabled options and groups
+
+<ComponentPreview>
+  <ToggleGroupDisabled />
+</ComponentPreview>
+
+<include>../../../examples/toggle-group/toggle-group-disabled.tsx</include>
+
+Disable a single item when one option is unavailable, or disable the group to prevent every change. Disabled items keep their current pressed state, cannot be activated, and are skipped by group navigation. Describe unavailable choices nearby when the reason is not apparent.
+
+## Behavior
+
+### Form values
+
+ToggleGroup does not create native hidden inputs or participate in required-field validation. To submit selections, serialize application state explicitly:
+
+```tsx
+"use client";
+
+import { Button, ToggleGroup, ToggleGroupItem } from "@ajnacloud/ui";
+import { useState } from "react";
+
+export function FormattingForm() {
+  const [values, setValues] = useState(["bold"]);
+  const [submitted, setSubmitted] = useState("");
+  return (
+    <form onSubmit={(event) => {
+      event.preventDefault();
+      setSubmitted(new FormData(event.currentTarget).getAll("formatting").join(", "));
+    }}>
+      <ToggleGroup multiple value={values} onValueChange={setValues} aria-label="Formatting">
+        <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+        <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+      </ToggleGroup>
+      {values.map((value) => (
+        <input key={value} type="hidden" name="formatting" value={value} />
+      ))}
+      <Button type="submit">Apply</Button>
+      <output>{submitted}</output>
+    </form>
+  );
+}
+```
+
+Read repeated values with `FormData.getAll("formatting")`. Use RadioGroup or Checkbox when native field behaviour is the main requirement.
+
+## Accessibility
+
+Name the group with `aria-label` or `aria-labelledby`. Each item also needs visible text or an accessible name; the group name does not name its buttons. Hide decorative icons from assistive technology. Pressed state is exposed through `aria-pressed`, not radio checked state.
+
+Tab enters or leaves the group through its roving tab stop. Arrow keys move focus without changing selection; Space or Enter toggles the focused item. Home and End move to the first or last enabled item. `loopFocus` defaults to true; set it to false to stop arrow navigation at the ends. Focus rings remain visible at shared borders, and reduced motion removes item transitions.
+
+## API reference
+
+| Part / prop                       | Purpose                                         | Default           |
+| --------------------------------- | ----------------------------------------------- | ----------------- |
+| `ToggleGroup.multiple`            | Allow several pressed items                     | `false`           |
+| `value`, `defaultValue`           | Controlled or initial string array              | `[]`              |
+| `onValueChange`                   | `(values, eventDetails) => void`                | —                 |
+| `variant`, `size`                 | Shared Toggle appearance                        | `default`, `base` |
+| `spacing`                         | 0–4 spacing steps; 0 joins items                | `2`               |
+| `orientation`                     | `horizontal` or `vertical`                      | `horizontal`      |
+| `loopFocus`                       | Wrap arrow navigation at the ends               | `true`            |
+| `disabled`                        | Disable every item                              | `false`           |
+| `ToggleGroupItem.value`           | Required unique nonempty string                 | —                 |
+| `ToggleGroupItem.variant`, `size` | Override the group's appearance                 | Inherited         |
+| `ToggleGroupItem.disabled`        | Disable only this item                          | `false`           |
+| `ToggleGroupItem.onPressedChange` | Item boolean change callback, with cancellation | —                 |
+
+The group forwards a div ref, and each item forwards a button ref. Both preserve Base UI `render`, `style`, and state-based `className` props. Group values retain string-union inference; for explicit types use `ToggleGroup<"list" | "grid">`. Items expose `data-pressed` and `data-disabled` alongside size and variant attributes.

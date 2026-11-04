@@ -1,0 +1,129 @@
+---
+title: Toggle
+description: Turn an option on or off with a button that exposes its pressed state.
+---
+
+import { ToggleExample } from "@/examples/toggle/toggle-example";
+import { ToggleOutline } from "@/examples/toggle/toggle-outline";
+import { ToggleControlled } from "@/examples/toggle/toggle-controlled";
+import { ToggleSizes } from "@/examples/toggle/toggle-sizes";
+import { ToggleDisabled } from "@/examples/toggle/toggle-disabled";
+
+<ComponentPreview>
+  <ToggleExample />
+</ComponentPreview>
+
+<include>../../../examples/toggle/toggle-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Toggle } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Toggle } from "@ajnacloud/ui/toggle";
+```
+
+### Basic usage
+
+```tsx
+<Toggle aria-label="Toggle bold">Bold</Toggle>
+```
+
+Use Toggle for an independent option, such as bold formatting or a bookmark. It remains a button while exposing whether the option is pressed. Use [Switch](/docs/components/switch) for a labelled on/off setting, and [Toggle Group](/docs/components/toggle-group) for related selectable buttons.
+
+## Examples
+
+### Outline and text labels
+
+<ComponentPreview>
+  <ToggleOutline />
+</ComponentPreview>
+
+<include>../../../examples/toggle/toggle-outline.tsx</include>
+
+The default variant has a transparent border and background while unpressed. `variant="outline"` adds a visible input border and light shadow. Both use the accent surface when pressed. Use an icon alone with an accessible name, or combine an icon with visible text. Built-in styling sizes immediate SVG children to 16px; hide decorative icons from assistive technology.
+
+### Controlled state
+
+<ComponentPreview>
+  <ToggleControlled />
+</ComponentPreview>
+
+<include>../../../examples/toggle/toggle-controlled.tsx</include>
+
+Use `defaultPressed` for an initial uncontrolled value. Use `pressed` and `onPressedChange` when the application needs the current boolean. Keep the button label stable: “Bookmark” remains the name whether the option is pressed or not, and `aria-pressed` supplies its state.
+
+The change callback receives `(pressed, eventDetails)`. Call `eventDetails.cancel()` to reject an interaction before it changes the state. Toggle does not persist the setting, issue a request, or implement optimistic updates for you.
+
+### Sizes
+
+<ComponentPreview>
+  <ToggleSizes />
+</ComponentPreview>
+
+<include>../../../examples/toggle/toggle-sizes.tsx</include>
+
+Sizes are `sm` (32px high), `base` (36px, the default), and `lg` (40px). Minimum width matches the height, and longer labels expand the button. Choose a size that leaves enough space for the target and its surrounding controls.
+
+### Disabled
+
+<ComponentPreview>
+  <ToggleDisabled />
+</ComponentPreview>
+
+<include>../../../examples/toggle/toggle-disabled.tsx</include>
+
+`disabled` prevents activation and removes the native button from the tab order. Disabled toggles can remain pressed to communicate the current value. Explain why an option is unavailable in nearby text when that is not obvious.
+
+## Behavior
+
+### Composition and forms
+
+Toggle forwards Base UI's `render` prop and state-based `className`. For example, add an application class only when the option is pressed:
+
+```tsx
+import { Toggle } from "@ajnacloud/ui/toggle";
+
+export function HighlightToggle() {
+  return (
+    <Toggle
+      className={(state) => (state.pressed ? "my-pressed-toggle" : undefined)}
+    >
+      Highlight
+    </Toggle>
+  );
+}
+```
+
+If replacing the native button through `render`, preserve Base UI's button semantics and set `nativeButton={false}` when the replacement is not a native button. Most uses should keep the default element.
+
+Toggle is an option button, not a native checkbox input. It does not submit a selected value or take part in native form validation, and activation does not submit its surrounding form. Serialize application state explicitly when needed, or use Checkbox for a field that should submit directly.
+
+## Accessibility
+
+Provide visible text or an `aria-label`/`aria-labelledby` for every toggle. Keep icon-only names specific, such as “Bold” or “Bookmark project”. The native button exposes `aria-pressed` and supports Enter and Space. Pressed and disabled states also appear as `data-pressed` and `data-disabled` attributes.
+
+Keyboard focus has a visible ring, and reduced motion removes color and shadow transitions. Group-related controls with ToggleGroup when arrow-key navigation is appropriate; simply placing independent toggles next to one another does not establish group semantics.
+
+## API reference
+
+| Prop                     | Purpose                           | Default         |
+| ------------------------ | --------------------------------- | --------------- |
+| `variant`                | `default` or `outline`            | `default`       |
+| `size`                   | `sm`, `base`, or `lg`             | `base`          |
+| `defaultPressed`         | Initial uncontrolled state        | `false`         |
+| `pressed`                | Controlled boolean                | Uncontrolled    |
+| `onPressedChange`        | `(pressed, eventDetails) => void` | —               |
+| `disabled`               | Prevent activation                | `false`         |
+| `render`, `nativeButton` | Base UI element composition       | Native button   |
+| `className`              | String or `(state) => string`     | Built-in styles |
+
+Toggle forwards a button ref and Base UI Toggle props. `toggleVariants({ variant, size })` exports the style classes for custom composition. Prefer Toggle itself when you need its pressed state and interaction semantics.

@@ -1,0 +1,85 @@
+---
+title: Banner
+description: Show a status message with optional icons and actions.
+---
+
+import { BannerExample } from "@/examples/banner/banner-example";
+import { BannerVariants } from "@/examples/banner/banner-variants";
+import { BannerActions } from "@/examples/banner/banner-actions";
+
+<ComponentPreview>
+  <BannerExample />
+</ComponentPreview>
+
+<include>../../../examples/banner/banner-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Banner } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Banner } from "@ajnacloud/ui/banner";
+```
+
+### Basic usage
+
+```tsx
+<Banner
+  title="Update available"
+  description="A new version is ready to install."
+  action={<Banner.Action>Update</Banner.Action>}
+/>
+```
+
+`title`, `description`, `icon`, and `action` accept React nodes. The structured `title` replaces the native HTML tooltip attribute. Supply an icon element through `icon`; its wrapper hides decorative icons from assistive technology. The title and description receive stable IDs and accessible associations automatically, which you can override with ARIA props.
+
+The icon slot sizes direct SVG children to 16px. It accepts any icon library; Banner does not insert a default icon. See [Icons](/docs/icons) for application dependencies and accessibility.
+
+In Next.js, compose `Banner.Action` inside a client component. A Banner without compound actions can be rendered from a server component.
+
+## Examples
+
+### Variants
+
+The default is `info`. Status variants use their matching text and tint colors; `neutral` uses the muted surface.
+
+<ComponentPreview>
+  <BannerVariants />
+</ComponentPreview>
+
+<include>../../../examples/banner/banner-variants.tsx</include>
+
+### Sizes and actions
+
+`size="base"` stacks title and description. `size="sm"` places them inline where space permits. Actions wrap when necessary. `Banner.Action` inherits the banner's status accent and defaults to `sm` buttons in base banners and `xs` in compact banners.
+
+<ComponentPreview>
+  <BannerActions />
+</ComponentPreview>
+
+<include>../../../examples/banner/banner-actions.tsx</include>
+
+Action variants are `primary` (default), `secondary`, and `ghost`. They preserve Button's `loading`, disabled state, icon, and accessible square/circle shapes. Actions default to `type="button"`; use `type="submit"` explicitly inside forms. Multiple actions can be supplied in a fragment. Dismissal and application side effects are owned by your handlers; Banner adds no timers or automatic removal.
+
+## Accessibility
+
+Destructive banners default to `role="alert"`; other variants use `role="status"`. Override `role` when needed. Titles and descriptions are associated automatically, and icons are decorative.
+
+## API reference
+
+| Prop                                     | Values / default                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| `variant`                                | `info`, `success`, `warning`, `destructive`, `neutral`; default `info`. |
+| `size`                                   | `base` or `sm`; default `base`.                                         |
+| `title`, `description`, `icon`, `action` | Optional React nodes.                                                   |
+| `className`, `ref`                       | String utilities and an `HTMLDivElement` ref.                           |
+
+`Banner.Action` exposes Button props with `primary`, `secondary`, or `ghost` variants and `xs`/`sm` sizes. Icon-only shapes require an accessible name. `bannerVariants` returns the container classes.

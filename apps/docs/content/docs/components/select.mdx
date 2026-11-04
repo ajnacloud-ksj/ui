@@ -1,0 +1,238 @@
+---
+title: Select
+description: Choose one or more values from a list opened by a button.
+---
+
+import { SelectBasic } from "@/examples/select/select-basic";
+import { SelectCustom } from "@/examples/select/select-custom";
+import { SelectGroups } from "@/examples/select/select-groups";
+import { SelectMultiple } from "@/examples/select/select-multiple";
+import { SelectAlignment } from "@/examples/select/select-alignment";
+import { SelectScrollable } from "@/examples/select/select-scrollable";
+import { SelectStates } from "@/examples/select/select-states";
+import { SelectForm } from "@/examples/select/select-form";
+import { SelectFocus } from "@/examples/select/select-focus";
+import { SelectManual } from "@/examples/select/select-manual";
+
+<ComponentPreview>
+  <SelectBasic />
+</ComponentPreview>
+
+<include>../../../examples/select/select-basic.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Select, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Select } from "@ajnacloud/ui/select";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="fruit">Fruit</FieldLabel>
+  <Select
+    id="fruit"
+    name="fruit"
+    placeholder="Choose a fruit"
+    options={[
+      { label: "Apple", value: "apple" },
+      { label: "Banana", value: "banana" },
+    ]}
+  />
+</Field>
+```
+
+Select opens a list of choices from a button. Use the composed `Select` for an options array, or build the layout with `Select.Root` and the styled parts. Selection, typeahead, focus, dismissal, and form values use Base UI's Select behavior.
+
+Options default to `{ label, value, disabled? }`. Give each option a unique string or number value. `onValueChange` receives that value, or `null` when no single value is selected. The visible label and the form value can be different.
+
+Use `FieldLabel` with `htmlFor` matching the Select's `id`. The ID belongs to the button trigger. Associate help text and errors with `aria-describedby`; a placeholder does not replace a label.
+
+## Examples
+
+### Custom option records and content
+
+Use `getLabel` and `getValue` for application records. Labels are strings, so Base UI can use them for keyboard typeahead. Values remain strings or numbers; a numeric zero is a valid choice. TypeScript requires accessors when your records do not have the default label/value shape.
+
+`renderOption(option)` customizes the content inside an option while retaining its text label, selection indicator, and Base UI behavior. Keep buttons, links, and other controls out of option content. The selected trigger still shows the label from `getLabel`; use `valueProps.children` or manual `Select.Value` composition to customize it.
+
+<ComponentPreview>
+  <SelectCustom />
+</ComponentPreview>
+
+<include>../../../examples/select/select-custom.tsx</include>
+
+The options array is the current list of available choices and their labels. Keep the selected option in that array when its label must remain available. The composed Select does not fetch, cache, or filter records.
+
+### Groups and disabled options
+
+Use `groupBy(option)` to organize options. Groups follow their first appearance in the array, with labeled headings and separators. Use `renderGroupLabel(label)` to customize a heading. For manual composition, use `Select.Group`, `Select.Label`, and `Select.Separator`.
+
+An option's `disabled` flag is recognized by default. Use `isOptionDisabled(option)` when availability depends on a different field or an application rule. Disabled options remain visible and cannot change the value; Base UI preserves their disabled semantics during keyboard navigation.
+
+<ComponentPreview>
+  <SelectGroups />
+</ComponentPreview>
+
+<include>../../../examples/select/select-groups.tsx</include>
+
+### Multiple selection
+
+Set `multiple` to select an array of values. Base UI keeps the list open as options are toggled. Select a chosen option again to remove it, then press Escape or move focus outside when finished.
+
+The trigger shows selected labels by default. `valueProps.children` receives the selected value or values and returns custom trigger content. Supply its empty-state text as well, since it replaces `placeholder`.
+
+<ComponentPreview>
+  <SelectMultiple />
+</ComponentPreview>
+
+<include>../../../examples/select/select-multiple.tsx</include>
+
+### Align the selected item with the trigger
+
+`contentProps.alignItemWithTrigger` defaults to `true`, matching Base UI’s selected-item alignment. For mouse input, the popup can overlap the trigger so the selected item's text lines up with the trigger's value. Base UI disables that alignment for touch and when there is insufficient space.
+
+Set it to `false` for an anchored dropdown. `side`, `align`, `sideOffset`, and `alignOffset` then control placement; the defaults are bottom, center, 4px, and 0px. Collision handling keeps the popup within the available space.
+
+<ComponentPreview>
+  <SelectAlignment />
+</ComponentPreview>
+
+<include>../../../examples/select/select-alignment.tsx</include>
+
+### Scrolling
+
+Content includes the scrollable list and Base UI's scroll-up/down controls. They appear when the list can scroll and support hovering with a pointer; Base UI omits them for touch input. Wheel, touch, and keyboard scrolling continue to use the list.
+
+The default popup height is bounded by 24rem and the available viewport space. Override it with `contentProps.className`; use `listClassName` for the internal list. Options use Base UI typeahead, which moves to matching labels without filtering the list.
+
+<ComponentPreview>
+  <SelectScrollable />
+</ComponentPreview>
+
+<include>../../../examples/select/select-scrollable.tsx</include>
+
+### Sizes, disabled, read-only, and invalid states
+
+`size="base"` is the default 36px trigger. `size="sm"` uses a 32px trigger and smaller text. The same sizes work on manual `Select.Trigger`.
+
+`disabled` prevents interaction and excludes the field's value from form submission. `readOnly` preserves the current choice while allowing the list to be opened and inspected, as in Base UI. It does not commit a different value.
+
+Use `aria-invalid` on the composed Select or manual Trigger, `data-invalid` on Field, and `aria-describedby` to connect an error. Field's visual state does not run validation or alter the Select's behavior.
+
+<ComponentPreview>
+  <SelectStates />
+</ComponentPreview>
+
+<include>../../../examples/select/select-states.tsx</include>
+
+### Forms, validation, and resetting
+
+`name` submits the selected value through Base UI's hidden input. Numeric application values serialize to strings in `FormData`. Multiple selection submits repeated entries under the same name; use `FormData.getAll(name)`. `form` associates a Select with a form elsewhere in the document, and `required` validates that a selection exists.
+
+Control values and restore them in `onReset` when the form needs a reset action. Native reset alone does not reset Select’s internal selection state.
+
+<ComponentPreview>
+  <SelectForm />
+</ComponentPreview>
+
+<include>../../../examples/select/select-form.tsx</include>
+
+`defaultValue` provides uncontrolled initial selection. `value` and `onValueChange` provide controlled selection. `open`/`onOpenChange` and `defaultOpen` work the same way for popup visibility. Call `details.cancel()` in a change callback to reject the corresponding request. The wrapper forwards those details unchanged.
+
+### Manual composition
+
+`Select.Root` is Base UI's Root. It uses `items`, while the composed Select uses `options`. Supply `items` to resolve labels before the popup opens, especially for server rendering. Manual Root preserves Base UI's object-value accessors and equality functions as well as primitive values.
+
+`Select.Trigger` includes the decorative chevron. `Select.Value` renders selected labels or a placeholder. `Select.Content` includes its portal, positioner, scroll controls, and list, so place groups and items directly inside it. `Select.Item` includes its text and selected check indicator. Use `Select.Label` to label a group; use `FieldLabel` for the form field itself.
+
+<ComponentPreview>
+  <SelectManual />
+</ComponentPreview>
+
+<include>../../../examples/select/select-manual.tsx</include>
+
+The equivalent named exports—`SelectRoot`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectGroup`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, and `SelectScrollDownButton`—are available from the root and `/select`. `Select.GroupLabel` and `SelectGroupLabel` alias the group Label part.
+
+## Behavior
+
+### Refs, focus, and trigger props
+
+The composed Select forwards its ref to the actual button trigger. Its native `focus()` and `blur()` methods are available, including focus options such as `preventScroll`. `inputRef` is Base UI's separate ref to the hidden form input; it is not an editable search field.
+
+Use `triggerProps` for the button's native events, state-based classes/styles, and render composition. `triggerProps.onFocus` and `onBlur` are native trigger events. The trigger does not become a text input when focused.
+
+<ComponentPreview>
+  <SelectFocus />
+</ComponentPreview>
+
+<include>../../../examples/select/select-focus.tsx</include>
+
+For form libraries, connect `value`, `onValueChange`, `name`, and the trigger ref through their controller API. Read the selected values from React state or form data, rather than the button's DOM value.
+
+### Styling and portals
+
+`className` and `style` on the composed Select apply to the trigger. `triggerProps`, `valueProps`, and `contentProps` customize those parts; manual DOM parts also support their Base UI state-based `className`, `style`, and `render` props. Use the `data-highlighted`, `data-selected`, `data-disabled`, and `aria-invalid` states when styling.
+
+The popup portals to `document.body` by default. For a locally scoped theme, pass a themed element or ref as `contentProps.container`. A document theme reaches the default portal automatically. See [theming](/docs/theming) for color inheritance. Select uses the existing input, popover, background, foreground, accent, border, and focus tokens.
+
+## Accessibility
+
+- Give the trigger an accessible name through a visible label or ARIA naming.
+- Open with Enter, Space, or an arrow key; navigate options with arrow keys and use Home/End to reach the ends of the list.
+- Type an option's label to use Base UI's typeahead. In single selection, typeahead can also select from the closed trigger.
+- Use Enter or Space to commit a choice, Escape to dismiss, and Tab to continue through the form.
+- Disabled options cannot be selected. Read-only controls allow inspection without changing the value.
+- Keep interactive controls out of option content, and hide decorative icons from assistive technology.
+- Connect help text and errors to the trigger, and set `required` on Select as well as any visual required indicator.
+- Reduced motion disables popup transitions. The forwarded parts preserve Base UI focus and dismissal behavior.
+
+## API reference
+
+### Select
+
+| Prop                                                                | Purpose                                                                                 |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `options`                                                           | Required readonly array of records.                                                     |
+| `getLabel`, `getValue`                                              | Accessors for custom records; optional for matching default shapes.                     |
+| `isOptionDisabled`                                                  | Availability accessor; defaults to the record's `disabled` flag.                        |
+| `renderOption`                                                      | Custom option content; receives the original record.                                    |
+| `groupBy`, `renderGroupLabel`                                       | Group key and heading content.                                                          |
+| `placeholder`                                                       | Trigger content when no value is chosen.                                                |
+| `size`                                                              | `sm` or `base`; defaults to `base`.                                                     |
+| `className`, `style`                                                | Trigger presentation.                                                                   |
+| `triggerProps`                                                      | Additional trigger props; children, ID, size, and ref belong to the composed component. |
+| `valueProps`                                                        | Value presentation, including a custom `children` function.                             |
+| `contentProps`                                                      | Popup presentation, positioning, portal container, and `listClassName`.                 |
+| `ref`                                                               | Native button trigger ref.                                                              |
+| `aria-label`, `aria-labelledby`, `aria-describedby`, `aria-invalid` | Accessible naming, descriptions, and validation state on the trigger.                   |
+
+All other props follow Base UI Root: `value`, `defaultValue`, `onValueChange`, `multiple`, `open`, `defaultOpen`, `onOpenChange`, `onOpenChangeComplete`, `disabled`, `readOnly`, `required`, `name`, `form`, `id`, `autoComplete`, `inputRef`, `modal`, `actionsRef`, `highlightItemOnHover`, `itemToStringLabel`, `itemToStringValue`, and `isItemEqualToValue`. The convenience component owns `items` and `children`; use `Select.Root` when supplying those yourself.
+
+### Styled parts
+
+| Part                                 | Purpose and additions                                                                                                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Root`                               | Base UI selection, popup state, typeahead, and form integration.                                                                                                      |
+| `Trigger`                            | Button and chevron; adds `size="sm" \| "base"`.                                                                                                                       |
+| `Value`                              | Selected content or placeholder; accepts native Base UI children/value rendering.                                                                                     |
+| `Content`                            | Portal, positioner, popup, scroll controls, and list; adds `container` and `listClassName`. Placement defaults to bottom/center with selected-item alignment enabled. |
+| `Group`                              | Semantically groups related options.                                                                                                                                  |
+| `Label`, `GroupLabel`                | Group heading; distinct from the field's label.                                                                                                                       |
+| `Item`                               | Selectable row with ItemText and the selected check indicator.                                                                                                        |
+| `Separator`                          | Decorative divider between option groups.                                                                                                                             |
+| `ScrollUpButton`, `ScrollDownButton` | Base UI hover scrolling controls, already included in Content.                                                                                                        |
+
+Public types include `SelectProps`, `SelectOption`, `SelectSize`, `SelectChangeDetails`, `SelectOpenChangeDetails`, and each part's props. Use `import type { SelectValue }` for the string/number value type; the runtime `SelectValue` export is the manual Value part.

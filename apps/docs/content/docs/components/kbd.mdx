@@ -1,0 +1,91 @@
+---
+title: Kbd
+description: Display keyboard keys and combinations in controls or instructions.
+---
+
+import { KbdExample } from "@/examples/kbd/kbd-example";
+import { KbdCombination } from "@/examples/kbd/kbd-combination";
+import { KbdIcons } from "@/examples/kbd/kbd-icons";
+import { KbdSearch } from "@/examples/kbd/kbd-search";
+import { KbdInputGroup } from "@/examples/kbd/kbd-input-group";
+
+<ComponentPreview>
+  <KbdExample />
+</ComponentPreview>
+
+<include>../../../examples/kbd/kbd-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Kbd } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Kbd } from "@ajnacloud/ui/kbd";
+```
+
+### Basic usage
+
+```tsx
+<Kbd>Esc</Kbd>
+```
+
+Kbd displays a hint; your application registers the shortcut.
+
+## Examples
+
+### Key combinations
+
+Use KbdGroup to keep related keys together.
+
+<ComponentPreview>
+  <KbdCombination />
+</ComponentPreview>
+
+<include>../../../examples/kbd/kbd-combination.tsx</include>
+
+### Icon keys
+
+Give icon-only keys readable names and hide their decorative SVGs. See [Icons](/docs/icons) for setup.
+
+<ComponentPreview>
+  <KbdIcons />
+</ComponentPreview>
+
+<include>../../../examples/kbd/kbd-icons.tsx</include>
+
+### Buttons and tooltips
+
+Keep a shortcut hint separate from the button's accessible name. The handler here applies only while focus is inside the search area.
+
+<ComponentPreview>
+  <KbdSearch />
+</ComponentPreview>
+
+<include>../../../examples/kbd/kbd-search.tsx</include>
+
+### Input Group
+
+<ComponentPreview>
+  <KbdInputGroup />
+</ComponentPreview>
+
+<include>../../../examples/kbd/kbd-input-group.tsx</include>
+
+## API reference
+
+| Part       | Purpose                        | Props               |
+| ---------- | ------------------------------ | ------------------- |
+| `Kbd`      | A single keycap.               | Native `kbd` props. |
+| `KbdGroup` | An inline combination of keys. | Native `kbd` props. |
+
+Both render `kbd` elements, accept children, `className`, `style`, and ARIA attributes, and forward `HTMLElement` refs. They are not interactive controls.
+
+`Kbd`, `KbdGroup`, `KbdProps`, and `KbdGroupProps` are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/kbd`.

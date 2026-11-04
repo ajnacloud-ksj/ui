@@ -1,0 +1,212 @@
+---
+title: Ajna Logo
+description: The Ajna eye symbol and wordmark, ready for navigation, application headers, and brand displays.
+---
+
+import { AjnaLogoExample } from "@/examples/ajna-logo/ajna-logo-example";
+import { AjnaLogoVariants } from "@/examples/ajna-logo/ajna-logo-variants";
+import { AjnaLogoGlyph } from "@/examples/ajna-logo/ajna-logo-glyph";
+import { AjnaBrandColors } from "@/examples/ajna-logo/ajna-brand-colors";
+import { AjnaLogoColors } from "@/examples/ajna-logo/ajna-logo-colors";
+import { AjnaLogoLink } from "@/examples/ajna-logo/ajna-logo-link";
+
+<ComponentPreview>
+  <AjnaLogoExample />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-logo-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui/ajna-logo";
+```
+
+### Basic usage
+
+```tsx
+<AjnaLogo color="current" width={200} />
+```
+
+Use the horizontal wordmark where Ajna needs to be identified by name. Use the eye symbol when space is limited or the Ajna name appears beside it. The stacked arrangement works well in centered brand displays.
+
+The logo is an inline SVG with a transparent background. All lettering is vector artwork, so it needs no font download. Its default accessible name is `Ajna`.
+
+## Examples
+
+### Arrangements
+
+<ComponentPreview label="Eye symbol, horizontal wordmark, and stacked wordmark">
+  <AjnaLogoVariants />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-logo-variants.tsx</include>
+
+`full` is the horizontal eye-and-wordmark arrangement and the default variant. `glyph` uses the eye symbol alone; `stacked` places the symbol above the wordmark. Each arrangement retains its original proportions and is cropped to the artwork, without the square presentation background or surrounding empty canvas.
+
+### Glyph
+
+<ComponentPreview label="Eye-only glyph in navy, orange, and white">
+  <AjnaLogoGlyph />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-logo-glyph.tsx</include>
+
+The glyph is the original Ajna eye submark, without the wordmark or tagline. Use `variant="glyph"` for compact navigation, application switches, and links that already display the Ajna name.
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+export function Glyph() {
+  return <AjnaLogo variant="glyph" width={48} aria-label="Ajna" />;
+}
+```
+
+Use `color="current"` to apply a brand color through the surrounding text color:
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+<AjnaLogo
+  variant="glyph"
+  color="current"
+  width={48}
+  style={{ color: "hsl(var(--ajna-brand-orange))" }}
+/>
+```
+
+The default width is 48px. Its canvas follows the wide eye shape, so the visible artwork fills the requested width. For a square icon button or avatar, center the glyph inside a square container rather than stretching the eye. The [transparent glyph SVG](/brand/ajna-glyph.svg) is also available outside React.
+
+### Brand colors and dark backgrounds
+
+<ComponentPreview>
+  <AjnaLogoColors />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-logo-colors.tsx</include>
+
+`brand` uses the global `--ajna-brand-navy` token and `--ajna-brand-orange` for the optional tagline. Their defaults match the supplied SVGs: navy (`#12234E`) and orange (`#FF8D2B`). Choose `white` for dark surfaces or `black` for a black monochrome logo. `current` makes all artwork, including the tagline, inherit the surrounding text color. It is useful in navigation that already changes text color between light and dark themes:
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+<AjnaLogo color="current" width={160} />
+```
+
+The component does not detect the current theme. Choose a color that contrasts with its background. Global brand tokens are available throughout the application; changing a brand token updates brand-colored logos and any styles using that token. The logo retains the default brand colors if the variables are unavailable.
+
+### Tagline
+
+Add `tagline` to a horizontal or stacked wordmark to include “Third eye for your business.” It is off by default and ignored for the eye-only variant.
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+<>
+  <AjnaLogo width={320} tagline />
+  <AjnaLogo variant="stacked" width={240} tagline />
+</>
+```
+
+Reserve the tagline for larger displays. In navigation, compact headers, and other small placements, use the wordmark without it rather than shrinking the tagline until it becomes unreadable.
+
+### Brand palette
+
+<ComponentPreview label="Ajna brand palette">
+  <AjnaBrandColors />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-brand-colors.tsx</include>
+
+The palette is included in both Ajna's standalone CSS and its Tailwind v3.4 preset. Values contain HSL channels and stay the same in light and dark themes.
+
+| Color      | Global variable           | Default   | Tailwind v3.4 example      |
+| ---------- | ------------------------- | --------- | -------------------------- |
+| Navy       | `--ajna-brand-navy`       | `#12234E` | `bg-ajna-brand-navy`       |
+| Orange     | `--ajna-brand-orange`     | `#FF8D2B` | `text-ajna-brand-orange`   |
+| Blue       | `--ajna-brand-blue`       | `#569FF5` | `border-ajna-brand-blue`   |
+| Light blue | `--ajna-brand-light-blue` | `#E0EAF4` | `bg-ajna-brand-light-blue` |
+| Gray       | `--ajna-brand-gray`       | `#6F6F6F` | `text-ajna-brand-gray`     |
+
+Use the variables anywhere, including applications without Tailwind:
+
+```css
+.brand-panel {
+  background: hsl(var(--ajna-brand-navy));
+  color: hsl(var(--ajna-brand-orange));
+}
+```
+
+With the Tailwind v3.4 preset, use named utilities and opacity modifiers such as `bg-ajna-brand-orange/20`. An application needs its own Tailwind build to generate utilities for its own elements. See [brand theming](/docs/theming#brand-colors) for overrides and mapping brand colors to application roles.
+
+### Sizing
+
+Set `width` in pixels, or use `className` or `style` for layout. The SVG keeps its aspect ratio. Default widths are 160px for the horizontal logo, 128px for the stacked logo, and 48px for the eye symbol.
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+<>
+  <AjnaLogo width={220} />
+  <AjnaLogo variant="glyph" width={40} />
+  <AjnaLogo color="current" className="w-40" />
+  <AjnaLogo color="current" style={{ width: "100%", maxWidth: 240 }} />
+</>
+```
+
+Application-specific utility classes require your own Tailwind build; `width` and inline styles also work with Ajna's standalone stylesheet. Leave clear space around the logo using its container. Avoid stretching, rotating, or adding strokes to the artwork.
+
+## Accessibility
+
+<ComponentPreview>
+  <AjnaLogoLink />
+</ComponentPreview>
+
+<include>../../../examples/ajna-logo/ajna-logo-link.tsx</include>
+
+When a parent link already supplies its name, hide the SVG with `aria-hidden` to avoid announcing the brand twice. Keep a visible keyboard focus indicator on the link. A standalone logo has `role="img"` and the accessible name `Ajna`; customize its name with `aria-label`, or use `aria-labelledby` to reference existing text.
+
+```tsx
+import { AjnaLogo } from "@ajnacloud/ui";
+
+<>
+  <AjnaLogo aria-label="Ajna UI" />
+  <span id="ajna-product">Ajna Cloud</span>
+  <AjnaLogo aria-labelledby="ajna-product" />
+</>
+```
+
+## API reference
+
+| Prop                            | Type                                         | Default                                      | Purpose                                             |
+| ------------------------------- | -------------------------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| `variant`                       | `"full" \| "glyph" \| "stacked"`             | `"full"`                                     | Selects the arrangement.                            |
+| `color`                         | `"brand" \| "current" \| "black" \| "white"` | `"brand"`                                    | Selects fixed brand colors or a monochrome fill.    |
+| `tagline`                       | `boolean`                                    | `false`                                      | Includes the original tagline in wordmark variants. |
+| `width`                         | SVG width                                    | Depends on variant                           | Controls the displayed width.                       |
+| `className`, `style`            | Native SVG props                             | —                                            | Controls placement, size, and inherited text color. |
+| `aria-label`, `aria-labelledby` | Native ARIA props                            | `"Ajna"` when no label reference is supplied | Names the image.                                    |
+| `aria-hidden`                   | Native ARIA prop                             | —                                            | Hides decorative artwork from assistive technology. |
+| `ref`                           | `Ref<SVGSVGElement>`                         | —                                            | References the SVG element.                         |
+
+Other native SVG attributes are forwarded. The component owns its `children`, `viewBox`, and `fill`; use `variant` and `color` to select its artwork.
+
+### SVG downloads
+
+Download transparent SVGs for use outside React:
+
+- [Eye symbol](/brand/ajna-glyph.svg)
+- [Horizontal logo](/brand/ajna-full.svg) · [with tagline](/brand/ajna-full-tagline.svg)
+- [Stacked logo](/brand/ajna-stacked.svg) · [with tagline](/brand/ajna-stacked-tagline.svg)
+
+These downloads use navy artwork and, where present, an orange tagline. With an HTML image, supply meaningful `alt` text or `alt=""` when the image is decorative.

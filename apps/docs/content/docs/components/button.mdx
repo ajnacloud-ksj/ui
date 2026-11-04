@@ -1,0 +1,208 @@
+---
+title: Button
+description: Trigger an action with text, an icon, or a loading indicator.
+---
+
+import { ButtonExample } from "@/examples/button/button-example";
+import { ButtonVariants } from "@/examples/button/button-variants";
+import { ButtonSizes } from "@/examples/button/button-sizes";
+import { ButtonIcons } from "@/examples/button/button-icons";
+import { ButtonDisabled } from "@/examples/button/button-disabled";
+import { ButtonLoading } from "@/examples/button/button-loading";
+import { ButtonForm } from "@/examples/button/button-form";
+import { ButtonLink } from "@/examples/button/button-link";
+import { ButtonTrigger } from "@/examples/button/button-trigger";
+
+<ComponentPreview>
+  <ButtonExample />
+</ComponentPreview>
+
+<include>../../../examples/button/button-example.tsx</include>
+
+## When to use
+
+Use Button for actions such as saving a form, creating a record, or opening a dialog. Use `primary` for the main action and a lower-emphasis variant for supporting actions.
+
+For navigation, use a link styled with [`buttonVariants`](#links). Use [Toggle](/docs/components/toggle) for a control that stays pressed, or [Toggle Group](/docs/components/toggle-group) for a set of selectable buttons. Use [Button Group](/docs/components/button-group) to arrange related actions together.
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { Button } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { Button } from "@ajnacloud/ui/button";
+```
+
+### Basic usage
+
+```tsx
+<Button variant="primary">Create project</Button>
+```
+
+Button renders a native `<button>` and defaults to `variant="primary"`, `size="base"`, and `type="button"`. Pass native attributes and handlers such as `onClick`, `name`, and `type` directly. In Next.js, examples with event handlers or state belong in a `"use client"` file.
+
+## Examples
+
+### Variants
+
+Choose a variant according to the action's importance and consequence.
+
+| Variant                 | Use for                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `primary`               | The main action on a surface, such as Save or Create. This is the default.   |
+| `secondary`             | Supporting actions, such as Cancel.                                          |
+| `outline`               | A bordered action with a transparent background.                             |
+| `ghost`                 | Lower-emphasis actions in toolbars or beside other controls.                 |
+| `destructive`           | A prominent destructive action, such as confirming deletion.                 |
+| `secondary-destructive` | A destructive action with a neutral background and destructive-colored text. |
+
+<ComponentPreview>
+  <ButtonVariants />
+</ComponentPreview>
+
+<include>../../../examples/button/button-variants.tsx</include>
+
+A destructive variant changes appearance only. For an action that needs confirmation, compose it with [Alert Dialog](/docs/components/alert-dialog).
+
+### Sizes
+
+Use `size` to change the button's height, padding, and text size. The default is `base`.
+
+<ComponentPreview>
+  <ButtonSizes />
+</ComponentPreview>
+
+<include>../../../examples/button/button-sizes.tsx</include>
+
+| Size   | Height                          | Typical use                         |
+| ------ | ------------------------------- | ----------------------------------- |
+| `xs`   | `1.25rem` (20px at a 16px root) | Compact inline actions.             |
+| `sm`   | `1.625rem` (26px)               | Dense toolbars and table actions.   |
+| `base` | `2.25rem` (36px)                | Most forms and application actions. |
+| `lg`   | `2.5rem` (40px)                 | Larger actions.                     |
+
+### Icons and icon-only buttons
+
+Pass a React element to `icon` to place it before the label. Use `shape="square"` or `shape="circle"` for an icon-only action; its width matches its height at the selected size.
+
+<ComponentPreview>
+  <ButtonIcons />
+</ComponentPreview>
+
+<include>../../../examples/button/button-icons.tsx</include>
+
+Give every icon-only button an `aria-label` or `aria-labelledby`. The `icon` slot is decorative and hidden from assistive technology. To put an icon after the label, render it as a child, set its size, and mark it `aria-hidden="true"`.
+
+The `icon` slot accepts elements from any icon library and sizes direct SVG children to match the text. See [Icons](/docs/icons) for setup.
+
+### Disabled
+
+Use `disabled` to prevent activation.
+
+<ComponentPreview>
+  <ButtonDisabled />
+</ComponentPreview>
+
+<include>../../../examples/button/button-disabled.tsx</include>
+
+### Loading
+
+Set `loading` to replace the leading icon with [Spinner](/docs/components/spinner), keep the label visible, and set `aria-busy`. The button is natively disabled while loading.
+
+<ComponentPreview>
+  <ButtonLoading />
+</ComponentPreview>
+
+<include>../../../examples/button/button-loading.tsx</include>
+
+### Form submission
+
+Set `type="submit"` explicitly to submit a form. Use `type="reset"` for the browser's native form reset behavior. Other buttons inside the form can keep the default `type="button"`.
+
+<ComponentPreview>
+  <ButtonForm />
+</ComponentPreview>
+
+<include>../../../examples/button/button-form.tsx</include>
+
+Native reset restores uncontrolled fields to their initial values. Reset controlled React state in the form's `onReset` handler when your form uses controlled inputs.
+
+### Links
+
+Keep navigation as an anchor with `href`, and apply `buttonVariants` for Button's appearance. Framework links that forward `className` and `data-*` attributes can use the same approach.
+
+<ComponentPreview>
+  <ButtonLink />
+</ComponentPreview>
+
+<include>../../../examples/button/button-link.tsx</include>
+
+Keep `data-ajna-component="button"` on the styled link so the compiled standalone stylesheet applies to it. The helper supplies styles only.
+
+Button itself always renders a native button. It does not accept `asChild` or a `render` prop for changing that element.
+
+### Dialog and popup triggers
+
+Pass Button to a compound component's trigger through that trigger's `render` prop. This produces one button with both the trigger behavior and Button's styles.
+
+<ComponentPreview>
+  <ButtonTrigger />
+</ComponentPreview>
+
+<include>../../../examples/button/button-trigger.tsx</include>
+
+Use the same pattern with [Popover](/docs/components/popover), [Tooltip](/docs/components/tooltip), and [Dropdown Menu](/docs/components/dropdown-menu). Do not nest Button inside another button.
+
+## Accessibility
+
+- Use a visible action label where possible. Icon-only buttons require `aria-label` or `aria-labelledby`; a native `title` tooltip is not a substitute for that name.
+- Keep decorative icons hidden from assistive technology. The leading `icon` slot already does this.
+- Preserve the keyboard focus indicator when customizing styles.
+- The loading spinner becomes static, and button transitions are removed, when reduced motion is requested.
+
+## API reference
+
+### Button
+
+| Prop        | Type                                      | Default     | Description                                                                                   |
+| ----------- | ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `variant`   | `ButtonVariant`                           | `"primary"` | One of `primary`, `secondary`, `outline`, `ghost`, `destructive`, or `secondary-destructive`. |
+| `size`      | `ButtonSize`                              | `"base"`    | One of `xs`, `sm`, `base`, or `lg`.                                                           |
+| `shape`     | `ButtonShape`                             | `"base"`    | `base` fits the content; `square` and `circle` use equal width and height.                    |
+| `icon`      | `ReactNode`                               | —           | Decorative leading icon. Replaced by Spinner while loading.                                   |
+| `loading`   | `boolean`                                 | `false`     | Shows Spinner, sets `aria-busy`, and disables the button.                                     |
+| `disabled`  | `boolean`                                 | `false`     | Uses native disabled behavior.                                                                |
+| `type`      | `"button" \| "submit" \| "reset"`         | `"button"`  | Native form action.                                                                           |
+| `children`  | `ReactNode`                               | —           | Button content. Kept visible while loading.                                                   |
+| `className` | `string`                                  | —           | Additional classes, merged with the component's utilities.                                    |
+| `style`     | `CSSProperties`                           | —           | Inline styles on the button.                                                                  |
+| `ref`       | `Ref<HTMLButtonElement>`                  | —           | Access to the native button element.                                                          |
+| `...props`  | `ButtonHTMLAttributes<HTMLButtonElement>` | —           | Native handlers, form attributes, and ARIA attributes.                                        |
+
+`shape="square"` and `shape="circle"` require an accessible name in `ButtonProps`: provide either `aria-label` or `aria-labelledby`. The `title` prop is the native string tooltip; use Tooltip for a styled explanation.
+
+### buttonVariants
+
+```tsx
+import { buttonVariants } from "@ajnacloud/ui/button";
+
+const classes = buttonVariants({
+  variant: "outline",
+  size: "sm",
+  shape: "base",
+});
+```
+
+Returns a class string for the supplied `ButtonVariantProps`. All arguments are optional and use Button's defaults. Combine extra classes separately; the helper does not accept `className`.
+
+### Exported types
+
+`ButtonProps`, `ButtonVariantProps`, `ButtonVariant`, `ButtonSize`, and `ButtonShape` are available from `@ajnacloud/ui` and `@ajnacloud/ui/button`.

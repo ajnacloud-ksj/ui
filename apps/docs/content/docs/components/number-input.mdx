@@ -1,0 +1,135 @@
+---
+title: Number Input
+description: Enter numeric values with optional units, step controls, and locale-aware formatting.
+---
+
+import { NumberInputExample } from "@/examples/number-input/number-input-example";
+import { NumberInputControlled } from "@/examples/number-input/number-input-controlled";
+import { NumberInputFormatting } from "@/examples/number-input/number-input-formatting";
+import { NumberInputForm } from "@/examples/number-input/number-input-form";
+import { NumberInputStates } from "@/examples/number-input/number-input-states";
+
+<ComponentPreview>
+  <NumberInputExample />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once.
+
+### Barrel
+
+```tsx
+import { NumberInput, Field, FieldLabel } from "@ajnacloud/ui";
+```
+
+### Granular
+
+```tsx
+import { NumberInput } from "@ajnacloud/ui/number-input";
+import { Field, FieldLabel } from "@ajnacloud/ui/field";
+```
+
+### Basic usage
+
+```tsx
+<Field>
+  <FieldLabel htmlFor="quantity">Quantity</FieldLabel>
+  <NumberInput
+    id="quantity"
+    name="quantity"
+    defaultValue={1}
+    min={1}
+    max={100}
+  />
+</Field>
+```
+
+Use NumberInput for quantities, measurements, prices, and other values that participate in numeric calculations. Use a regular Input for phone numbers, postal codes, and identifiers where leading zeroes or text characters matter.
+
+The input works without step buttons by default. Use `showControls` to add compact up/down buttons on the trailing side. NumberInput includes the group and control internally; labels, descriptions, and errors compose through [Field](/docs/components/field).
+
+## Examples
+
+### Controlled values, bounds, and units
+
+<ComponentPreview>
+  <NumberInputControlled />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-controlled.tsx</include>
+
+`value` accepts a number or null. Null represents an empty input; strings are not accepted. `onValueChange(value, eventDetails)` receives numeric values as editing and stepping occur. Leave value undefined and use defaultValue for uncontrolled input. An omitted default starts empty; there is no automatic conversion to zero.
+
+`min`, `max`, and `step` control the range and stepping amount. The default step is 1. Buttons stop at the bounds, and Base UI handles parsing, intermediate editing text, and clamping when values are committed. A controlled parent must update value to accept a change. Event details identify the reason and allow cancellation.
+
+`suffix` is a decorative unit or other short content, not part of the numeric value. Include the unit in the accessible label or description with “Weight in kilograms”. A suffix does not change conversion, formatting, or submission. For percentages, choose deliberately between displaying a literal percent suffix and Intl's percent format, which displays a fractional value such as 0.25 as 25%.
+
+### Locale and currency formatting
+
+<ComponentPreview>
+  <NumberInputFormatting />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-formatting.tsx</include>
+
+`format` accepts Intl.NumberFormat options and `locale` chooses the formatting/parsing locale. The stored value remains numeric: currency and grouping characters are display formatting. Use an explicit locale when server and client runtime defaults might differ.
+
+Use a suitable step and fraction-digit policy. NumberInput stores JavaScript numbers; use application-level arithmetic when exact decimal calculations are required.
+
+### Forms, labels, and reset
+
+<ComponentPreview>
+  <NumberInputForm />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-form.tsx</include>
+
+Root `id` targets the visible input, so FieldLabel's htmlFor works normally. Top-level aria attributes are forwarded to that input. Use aria-describedby for supporting text and aria-invalid plus FieldError for validation feedback.
+
+`name` submits the raw numeric value through Base UI's separate native form input, without currency symbols or grouping. Empty values submit as an empty value, not zero. Disabled controls are excluded. Pass required, min, max, and step as appropriate for native validation; Base UI preserves its number-field validation rules. Base UI owns its numeric state, so a native form reset alone does not restore that state. The example controls quantity explicitly and restores it in onReset.
+
+The forwarded ref targets the visible input for focus. Base UI's separate `inputRef` prop targets its hidden form input; the two refs serve different purposes. `form` can associate the field with an external form.
+
+### Disabled, read-only, and invalid states
+
+<ComponentPreview>
+  <NumberInputStates />
+</ComponentPreview>
+
+<include>../../../examples/number-input/number-input-states.tsx</include>
+
+Disabled fields prevent editing and stepping. Read-only fields retain their value while preventing changes. The invalid example shows an application-supplied error state; NumberInput does not choose error messages or run a validation schema.
+
+Use `inputProps` for visible-input attributes and native handlers, such as autoComplete, inputMode, onBlur, or aria-valuetext. Its className styles the actual input. Top-level className and style target the visible group, including its border and spacing; width can also be constrained through a parent. Root value, ID, form, and disabled properties remain authoritative.
+
+## Behavior
+
+### Keyboard and committed changes
+
+ArrowUp and ArrowDown step the value. Shift uses largeStep (default 10), and Alt uses smallStep (default 0.1). Home/End use the configured bounds. The optional buttons use the same numeric state and support Base UI's press-and-hold behaviour. Wheel scrubbing is disabled by default; allowWheelScrub enables it deliberately.
+
+`onValueCommitted` is useful when work should happen after an edit finishes. Base UI calls it on input blur, on release after a step-button interaction, and alongside keyboard/wheel changes. Keep immediate state updates in onValueChange; use committed changes for work that should wait until the current interaction finishes.
+
+The buttons have configurable incrementLabel and decrementLabel strings. Icons and suffixes are decorative, and keyboard focus is visible on both the input and step controls. Reduced motion removes group transitions.
+
+## API reference
+
+| Prop                                                           | Purpose                                                  | Default                         |
+| -------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------- |
+| `value`, `defaultValue`                                        | Controlled number/null or initial uncontrolled number    | Empty when omitted              |
+| `onValueChange`                                                | Numeric value and Base UI change details                 | —                               |
+| `onValueCommitted`                                             | Committed value and commit details                       | —                               |
+| `min`, `max`, `step`                                           | Bounds and stepping                                      | Step 1                          |
+| `format`, `locale`                                             | Intl formatting/parsing options                          | Runtime locale                  |
+| `showControls`                                                 | Show stacked increment/decrement buttons                 | false                           |
+| `suffix`                                                       | Decorative trailing unit/content                         | —                               |
+| `incrementLabel`, `decrementLabel`                             | Accessible button labels                                 | Increase value / Decrease value |
+| `placeholder`                                                  | Visible empty-value hint                                 | —                               |
+| `inputProps`                                                   | Visible-input attributes, handlers, and classes          | —                               |
+| `className`, `style`                                           | Visible group styling, including Base UI state functions | —                               |
+| `name`, `form`, `required`, `disabled`, `readOnly`, `inputRef` | Base UI form behaviour                                   | Base UI defaults                |
+
+Other Base UI NumberField root props, including smallStep, largeStep, snapOnStep, and allowOutOfRange, remain available. The convenience component owns its input type and parts; use `/primitives/number-field` for a custom composition or scrub area.
