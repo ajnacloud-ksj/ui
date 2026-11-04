@@ -40,6 +40,6 @@
 
 - Discuss proposed conventions and test-cleanup scope before changing them.
 - Do not publish packages or deploy the docs without an explicit request.
-- While the library is unpublished, keep version `0.1.0` and do not add changesets or bump versions unless explicitly requested.
+- Do not add changesets or bump versions unless explicitly requested.
 - Keep ESLint, Prettier, and TypeScript 5.9. Run `pnpm lint` without warnings, `pnpm format:check`, and the relevant checks before completing a change. Use `pnpm lint:fix` for import ordering and safe fixes; Prettier owns formatting and Tailwind class sorting, with separate v3/v4 contexts.
 - Preserve side-effect import order and generated primitive exports. Public entry points are bundled; verify packed consumers resolve types with both Bundler and NodeNext settings. Do not introduce broad lint suppressions or dummy keyboard interactions to satisfy accessibility checks.

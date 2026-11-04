@@ -60,10 +60,6 @@ For Vercel, set the root directory to `apps/docs`, select Next.js, and enable **
 
 The docs build also builds the library.
 
-## Package status
-
-Preparing `@ajnacloud/ui@0.1.0-beta.0` for the npm `beta` tag. It has not been published yet.
-
 ## License
 
 [MIT](LICENSE).

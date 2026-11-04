@@ -4,8 +4,6 @@ Accessible React components built with Base UI. Supports React 18.2+ and 19, wit
 
 ## Install
 
-The beta release is being prepared and has not been published yet. Once available:
-
 ```bash
 npm install @ajnacloud/ui@beta
 ```
