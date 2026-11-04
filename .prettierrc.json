@@ -7,7 +7,7 @@
   "tailwindPreserveDuplicates": true,
   "overrides": [
     {
-      "files": ["packages/react/**/*", "tests/consumer/**/*"],
+      "files": ["packages/react/**/*"],
       "options": { "tailwindConfig": "./packages/react/tailwind.config.cjs" }
     },
     {

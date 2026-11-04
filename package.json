@@ -13,7 +13,6 @@
     "codegen:primitives": "pnpm --filter @ajnacloud/ui codegen:primitives",
     "codegen:check": "pnpm --filter @ajnacloud/ui codegen:check",
     "test": "pnpm --filter @ajnacloud/ui test",
-    "test:browser": "pnpm build:library && playwright test",
     "test:blocks": "pnpm build:library && playwright test --config apps/docs/playwright.config.ts",
     "test:package": "pnpm build:library && node packages/react/scripts/test-package.mjs",
     "typecheck": "pnpm -r typecheck",

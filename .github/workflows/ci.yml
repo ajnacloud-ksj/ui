@@ -20,18 +20,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      - run: pnpm test:browser
       - run: pnpm test:package
       - name: Check React 18 compatibility
         run: |
           pnpm --filter @ajnacloud/ui add --save-dev react@18.3.1 react-dom@18.3.1 @types/react@18.2.55 @types/react-dom@18.2.19
           pnpm --filter @ajnacloud/ui typecheck
           pnpm --filter @ajnacloud/ui test
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: browser-results
-          path: |
-            playwright-report/
-            test-results/

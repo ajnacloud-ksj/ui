@@ -50,7 +50,6 @@ export default tseslint.config(
     files: [
       "apps/docs/examples/table/table-sticky-example.tsx",
       "apps/docs/examples/tooltip/tooltip-disabled-action.tsx",
-      "tests/consumer/app.tsx",
     ],
     rules: {
       "jsx-a11y/no-noninteractive-tabindex": [

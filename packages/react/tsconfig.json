@@ -7,5 +7,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vitest.config.ts", "vitest.setup.ts", "test-utils"]
+  "include": ["src", "vitest.config.ts", "vitest.setup.ts"]
 }

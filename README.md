@@ -34,7 +34,6 @@ See [AGENTS.md](AGENTS.md) for working conventions.
 | `pnpm format:check`  | Check formatting                        |
 | `pnpm typecheck`     | Check library, docs, and consumer types |
 | `pnpm test`          | Run unit and component tests            |
-| `pnpm test:browser`  | Run component browser tests             |
 | `pnpm test:blocks`   | Run docs and block browser tests        |
 | `pnpm test:package`  | Check packed package with publint/attw  |
 | `pnpm codegen:check` | Check generated Base UI exports         |
