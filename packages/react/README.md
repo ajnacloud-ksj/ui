@@ -66,6 +66,10 @@ Unstyled Base UI components are available through `@ajnacloud/ui/primitives` and
 
 Import `cn` from `@ajnacloud/ui/utils` to merge class names.
 
+## Date input migration
+
+DateInput and Filter Bar date filters now use `YYYY-MM-DD` strings, with `null` for empty values. Replace date-object state, bounds, and callbacks with strings; no date-library import is required. Incoming ISO date-time strings are accepted and keep their written calendar date; callbacks emit dates only. Time editing and internal picker state in styling callbacks are no longer supported.
+
 ## License
 
 [MIT](LICENSE).

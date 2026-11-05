@@ -1,4 +1,3 @@
-import { type CalendarDate, parseDate } from "@internationalized/date";
 import {
   act,
   fireEvent,
@@ -73,8 +72,8 @@ interface Values {
   archived: boolean;
   email: string;
   price: FilterBarNumberRange;
-  delivery: CalendarDate | null;
-  created: FilterBarDateRange<CalendarDate>;
+  delivery: string | null;
+  created: FilterBarDateRange;
   custom: { text: string };
   page: number;
 }
@@ -381,7 +380,7 @@ it("uses semantic custom equality and blocks invalid staged values until correct
   expect(change.mock.calls[0]?.[0].custom).toEqual({ text: "valid" });
 });
 
-it("collects numeric and date ranges without stringifying dates or losing zero", async () => {
+it("collects ISO date ranges and numeric ranges without losing zero", async () => {
   const change = vi.fn();
   render(
     <Example
@@ -389,8 +388,8 @@ it("collects numeric and date ranges without stringifying dates or losing zero",
       onChange={change}
       initial={{
         ...resetValue,
-        delivery: parseDate("2026-10-21"),
-        created: { start: parseDate("2026-10-01"), end: null },
+        delivery: "2026-10-21",
+        created: { start: "2026-10-01", end: null },
       }}
     />,
   );
@@ -418,9 +417,9 @@ it("collects numeric and date ranges without stringifying dates or losing zero",
   await userEvent.click(screen.getByRole("button", { name: "Apply" }));
   const next = change.mock.calls[0]?.[0] as Values;
   expect(next.price).toEqual({ min: 0, max: null });
-  expect(next.delivery?.toString()).toBe("2026-10-22");
+  expect(next.delivery).toBe("2026-10-22");
   expect(next.delivery).not.toBeInstanceOf(Date);
-  expect(next.created.start?.toString()).toBe("2026-10-01");
+  expect(next.created.start).toBe("2026-10-01");
 });
 
 it("keeps invalid instant edits local and commits only their valid correction", async () => {

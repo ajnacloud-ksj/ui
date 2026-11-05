@@ -1,9 +1,10 @@
-import { type DateValue, getLocalTimeZone } from "@internationalized/date";
+import { getLocalTimeZone } from "@internationalized/date";
 import type { ReactNode, RefObject } from "react";
 
 import type { DateInputProps } from "@/components/date-input";
 import type { InputProps } from "@/components/input";
 import type { NumberInputProps } from "@/components/number-input";
+import { parseISODate, serializeDate } from "@/utils/date";
 
 import type {
   FilterBarCustomRenderProps,
@@ -102,14 +103,11 @@ export const defaultMessages: FilterBarMessages = {
           ? `≤ ${end}`
           : "",
 };
-function sameDate(left: DateValue | null, right: DateValue | null) {
-  return (
-    left === right ||
-    (left !== null &&
-      right !== null &&
-      left.calendar.identifier === right.calendar.identifier &&
-      left.toString() === right.toString())
-  );
+function datesEqual(left: string | null, right: string | null) {
+  if (left === right) return true;
+  const a = parseISODate(left);
+  const b = parseISODate(right);
+  return a !== null && b !== null && a.compare(b) === 0;
 }
 export function valuesEqual(
   filter: RuntimeFilter,
@@ -130,11 +128,11 @@ export function valuesEqual(
       return a.min === b.min && a.max === b.max;
     }
     case "date":
-      return sameDate(left as DateValue | null, right as DateValue | null);
+      return datesEqual(left as string | null, right as string | null);
     case "date-range": {
       const a = left as FilterBarDateRange;
       const b = right as FilterBarDateRange;
-      return sameDate(a.start, b.start) && sameDate(a.end, b.end);
+      return datesEqual(a.start, b.start) && datesEqual(a.end, b.end);
     }
     default:
       return false;
@@ -161,15 +159,18 @@ export function getError(
     )
       return messages.invalidValue;
   }
-  const dates =
+  const rawDates =
     filter.type === "date"
-      ? [value as DateValue | null]
+      ? [value as string | null]
       : filter.type === "date-range"
         ? [
             (value as FilterBarDateRange).start,
             (value as FilterBarDateRange).end,
           ]
         : [];
+  const dates = rawDates.map(parseISODate);
+  if (rawDates.some((date, index) => date !== null && dates[index] === null))
+    return messages.invalidValue;
   if (
     filter.type === "date-range" &&
     dates[0] &&
@@ -177,15 +178,15 @@ export function getError(
     dates[0].compare(dates[1]) > 0
   )
     return messages.invalidRange;
+  const minimum = parseISODate(filter.dateProps?.minValue);
+  const maximum = parseISODate(filter.dateProps?.maxValue);
   if (
     dates.some(
       (date) =>
         date !== null &&
-        ((filter.dateProps?.minValue &&
-          date.compare(filter.dateProps.minValue) < 0) ||
-          (filter.dateProps?.maxValue &&
-            date.compare(filter.dateProps.maxValue) > 0) ||
-          filter.dateProps?.isDateUnavailable?.(date)),
+        ((minimum && date.compare(minimum) < 0) ||
+          (maximum && date.compare(maximum) > 0) ||
+          filter.dateProps?.isDateUnavailable?.(serializeDate(date)!)),
     )
   )
     return messages.invalidValue;
@@ -206,19 +207,19 @@ export function activeLabel(
   value: unknown,
   messages: FilterBarMessages,
   locale: string,
-  formatDate?: (value: DateValue) => string,
+  formatDate?: (value: string) => string,
 ): ReactNode {
   if (filter.getActiveLabel) return filter.getActiveLabel(value);
-  const dateLabel =
-    formatDate ??
-    ((date: DateValue) => {
-      const timeZone = "timeZone" in date ? date.timeZone : getLocalTimeZone();
-      return new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        calendar: date.calendar.identifier,
-        timeZone,
-      }).format(date.toDate(timeZone));
-    });
+  const dateLabel = (value: string) => {
+    const date = parseISODate(value);
+    if (!date) return String(value);
+    if (formatDate) return formatDate(serializeDate(date)!);
+    const timeZone = getLocalTimeZone();
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeZone,
+    }).format(date.toDate(timeZone));
+  };
   let label: string;
   switch (filter.type) {
     case "select":
@@ -250,7 +251,7 @@ export function activeLabel(
       break;
     }
     case "date":
-      label = value === null ? "" : dateLabel(value as DateValue);
+      label = value === null ? "" : dateLabel(value as string);
       break;
     case "date-range": {
       const range = value as FilterBarDateRange;

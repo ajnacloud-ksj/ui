@@ -6,13 +6,14 @@ import type { ReactNode } from "react";
 import {
   Button as AriaButton,
   DateInput as AriaDateInput,
-  type DateInputProps as AriaDateInputProps,
   DateSegment,
   I18nProvider,
   useLocale,
 } from "react-aria-components";
 
 import { cn } from "@/utils";
+
+import type { DateInputSegmentProps } from "./date-input";
 
 export const dateControlClasses =
   "box-border flex min-h-9 w-full min-w-0 items-center rounded-ajna-base border border-solid border-ajna-input bg-ajna-input/15 font-ajna text-ajna-foreground shadow-sm transition-[border-color,box-shadow] focus-within:border-ajna-ring focus-within:ring-[3px] focus-within:ring-ajna-ring/50 data-[invalid]:border-ajna-destructive data-[invalid]:ring-[3px] data-[invalid]:ring-ajna-destructive/20 data-[disabled]:cursor-not-allowed data-[disabled]:bg-ajna-muted data-[disabled]:opacity-50 motion-reduce:transition-none";
@@ -42,7 +43,7 @@ export function DateSegments({
   className,
   segmentClassName,
   ...props
-}: Omit<AriaDateInputProps, "children"> & { segmentClassName?: string }) {
+}: DateInputSegmentProps & { segmentClassName?: string }) {
   return (
     <AriaDateInput
       {...props}

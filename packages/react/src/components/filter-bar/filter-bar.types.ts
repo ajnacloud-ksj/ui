@@ -1,4 +1,3 @@
-import type { DateValue } from "@internationalized/date";
 import type {
   ComponentPropsWithoutRef,
   ReactNode,
@@ -25,9 +24,9 @@ export interface FilterBarNumberRange {
   min: number | null;
   max: number | null;
 }
-export interface FilterBarDateRange<Value extends DateValue = DateValue> {
-  start: Value | null;
-  end: Value | null;
+export interface FilterBarDateRange {
+  start: string | null;
+  end: string | null;
 }
 export type FilterBarApplyMode = "instant" | "staged";
 export interface FilterBarCustomRenderProps<Value> {
@@ -59,8 +58,8 @@ interface Choice<Value extends FilterBarOptionValue> {
   isLoading?: boolean;
   getMissingLabel?: (value: Value) => string;
 }
-type DateControls<Value extends DateValue> = Omit<
-  DateInputProps<Value>,
+type DateControls = Omit<
+  DateInputProps,
   | "value"
   | "defaultValue"
   | "onChange"
@@ -122,19 +121,11 @@ type FilterFor<Key extends string, Value> = FilterBase<Key, Value> &
             >;
           }
         : never)
-    | ([Value] extends [DateValue | null]
-        ? { type: "date"; dateProps?: DateControls<Extract<Value, DateValue>> }
+    | ([Value] extends [string | null]
+        ? { type: "date"; dateProps?: DateControls }
         : never)
     | ([Value] extends [FilterBarDateRange]
-        ? {
-            type: "date-range";
-            dateProps?: DateControls<
-              Extract<
-                Value extends FilterBarDateRange<infer Date> ? Date : never,
-                DateValue
-              >
-            >;
-          }
+        ? { type: "date-range"; dateProps?: DateControls }
         : never)
   );
 export type FilterBarDefinition<Values extends object> = {
@@ -222,7 +213,7 @@ export interface FilterBarProps<Values extends object> extends Omit<
     "children" | "disabled" | "type" | "onClick" | "shape"
   >;
   locale?: string;
-  formatDate?: (value: DateValue) => string;
+  formatDate?: (value: string) => string;
   messages?: Partial<FilterBarMessages>;
   classNames?: FilterBarClassNames;
   ref?: Ref<HTMLElement>;

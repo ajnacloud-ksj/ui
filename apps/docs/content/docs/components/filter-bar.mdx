@@ -54,12 +54,6 @@ export function ProjectFilters() {
 
 Filter Bar combines optional search, a filter panel, applied-filter chips, and application actions. Describe the available filters, supply their controlled values, and receive complete value updates. Use it above a table, card collection, catalog, or any other list.
 
-If your application imports date helpers or date types directly, declare that dependency in your application:
-
-```bash
-npm install @internationalized/date
-```
-
 Filter Bar uses the existing DateInput for dates; it does not expose a separate calendar or a range-calendar picker.
 
 Every filter's `id` identifies a property in `value` and `resetValue`. Define the reset values explicitly: a single selection might reset to `null`, a multiple selection to `[]`, and a toggle to `false`. A selected value equal to its reset value is inactive by default.
@@ -82,19 +76,19 @@ Use `applyMode="staged"` to edit a draft before committing the complete value.
 
 <include>../../../examples/filter-bar/filter-bar-all-types.tsx</include>
 
-| Type           | Value shape                                            | Control                                                                    |
-| -------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
-| `toggle`       | `boolean`                                              | An inline Checkbox and clickable label, with Reset alongside when changed. |
-| `select`       | A string/number ID, or `null`                          | Ajna Select with disabled options and optional counts.                     |
-| `multi-select` | An array of string/number IDs                          | A checkbox list, or Ajna Combobox when `searchable` is true.               |
-| `text`         | `string`                                               | Ajna Input.                                                                |
-| `number-range` | `{ min: number \| null; max: number \| null }`         | Two NumberInputs with independently editable boundaries.                   |
-| `date`         | A `DateValue` object or `null`                         | DateInput with its optional calendar.                                      |
-| `date-range`   | `{ start: DateValue \| null; end: DateValue \| null }` | Two DateInputs.                                                            |
+| Type           | Value shape                                      | Control                                                                    |
+| -------------- | ------------------------------------------------ | -------------------------------------------------------------------------- |
+| `toggle`       | `boolean`                                        | An inline Checkbox and clickable label, with Reset alongside when changed. |
+| `select`       | A string/number ID, or `null`                    | Ajna Select with disabled options and optional counts.                     |
+| `multi-select` | An array of string/number IDs                    | A checkbox list, or Ajna Combobox when `searchable` is true.               |
+| `text`         | `string`                                         | Ajna Input.                                                                |
+| `number-range` | `{ min: number \| null; max: number \| null }`   | Two NumberInputs with independently editable boundaries.                   |
+| `date`         | An ISO date string or `null`                     | DateInput with its optional calendar.                                      |
+| `date-range`   | `{ start: string \| null; end: string \| null }` | Two DateInputs.                                                            |
 
 Number-range inputs show visible Minimum and Maximum labels and matching placeholders. A `number-range` or `date-range` can have either boundary empty. Zero is a valid numeric boundary. Ranges represent inclusive intervals; translating a calendar day into database timestamps and choosing a business timezone remains application work.
 
-Date values remain `@internationalized/date` objects throughout editing and callbacks. They are not converted to JavaScript `Date` objects or ISO strings. DateInput preserves the supplied date type and its calendar semantics.
+Date filters use Gregorian `YYYY-MM-DD` strings or `null`, including range endpoints. Incoming ISO date-time strings keep their written calendar date, without timezone conversion. Comparisons, bounds, `formatDate`, and date edits use the normalized date. No date-library import is needed.
 
 ### Instant and staged updates
 
@@ -161,7 +155,7 @@ Use `validate(value)` on any definition for additional synchronous checks. Retur
 
 In staged mode, an invalid editable field disables Apply. In instant mode, an invalid edit stays local to the panel until corrected; it does not replace the last valid committed value. Closing the panel discards those uncommitted invalid edits. Reset values should be valid values for their controls.
 
-`numberProps` supports bounds, step, locale, numeric format, suffix, and optional increment/decrement controls. `dateProps` passes DateInput configuration such as locale, bounds, unavailable dates, granularity, calendar visibility, and localized calendar labels. Filter Bar owns their value, callback, disabled state, and accessible field names.
+`numberProps` supports bounds, step, locale, numeric format, suffix, and optional increment/decrement controls. `dateProps` passes DateInput configuration such as locale, bounds, unavailable dates, calendar visibility, and localized calendar labels. Filter Bar owns their value, callback, disabled state, and accessible field names.
 
 ### Localization
 

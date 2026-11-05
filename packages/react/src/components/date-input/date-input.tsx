@@ -1,23 +1,25 @@
 "use client";
 
-import type { DateValue } from "@internationalized/date";
 import { CalendarDays } from "lucide-react";
 import {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type FocusEvent,
   forwardRef,
+  type KeyboardEvent,
   type ReactElement,
-  type RefAttributes,
+  useMemo,
   useRef,
 } from "react";
 import {
-  type DateInputProps as AriaDateInputProps,
   DatePicker as AriaDatePicker,
-  type DatePickerProps,
   Group,
   useLocale,
 } from "react-aria-components";
 
 import { Popover, type PopoverContentProps } from "@/components/popover";
 import { cn } from "@/utils";
+import { parseISODate, serializeDate } from "@/utils/date";
 
 import { DateInputCalendar } from "./date-input-calendar";
 import {
@@ -27,10 +29,72 @@ import {
   DateSegments,
 } from "./date-input-parts";
 
-export interface DateInputProps<T extends DateValue = DateValue> extends Omit<
-  DatePickerProps<T>,
-  "children"
+export interface DateInputState {
+  isFocusWithin: boolean;
+  isFocusVisible: boolean;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  isInvalid: boolean;
+  isRequired: boolean;
+  isOpen: boolean;
+}
+export interface DateInputSegmentState {
+  isHovered: boolean;
+  isFocusWithin: boolean;
+  isFocusVisible: boolean;
+  isDisabled: boolean;
+  isInvalid: boolean;
+}
+export interface DateInputSegmentProps extends Omit<
+  ComponentPropsWithoutRef<"div">,
+  "children" | "className" | "style"
 > {
+  className?: string | ((state: DateInputSegmentState) => string);
+  style?: CSSProperties | ((state: DateInputSegmentState) => CSSProperties);
+}
+export interface DateInputProps extends Omit<
+  ComponentPropsWithoutRef<"div">,
+  | "children"
+  | "defaultValue"
+  | "onChange"
+  | "className"
+  | "style"
+  | "onFocus"
+  | "onBlur"
+  | "onKeyDown"
+  | "onKeyUp"
+> {
+  value?: string | null;
+  defaultValue?: string | null;
+  onChange?: (value: string | null) => void;
+  minValue?: string | null;
+  maxValue?: string | null;
+  placeholderValue?: string | null;
+  isDateUnavailable?: (value: string) => boolean;
+  validate?: (
+    value: string | null,
+  ) => string | string[] | true | null | undefined;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  isRequired?: boolean;
+  isInvalid?: boolean;
+  validationBehavior?: "native" | "aria";
+  name?: string;
+  form?: string;
+  autoFocus?: boolean;
+  onFocus?: (event: FocusEvent<Element>) => void;
+  onBlur?: (event: FocusEvent<Element>) => void;
+  onFocusChange?: (isFocused: boolean) => void;
+  onKeyDown?: (event: KeyboardEvent<Element>) => void;
+  onKeyUp?: (event: KeyboardEvent<Element>) => void;
+  isOpen?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  shouldCloseOnSelect?: boolean;
+  firstDayOfWeek?: "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+  shouldForceLeadingZeros?: boolean;
+  className?: string | ((state: DateInputState) => string);
+  style?: CSSProperties | ((state: DateInputState) => CSSProperties);
   locale?: string;
   /** Hides the calendar button and popup. @default false */
   hideCalendar?: boolean;
@@ -40,7 +104,7 @@ export interface DateInputProps<T extends DateValue = DateValue> extends Omit<
   calendarLabel?: string;
   todayLabel?: string;
   triggerIcon?: ReactElement;
-  inputProps?: Omit<AriaDateInputProps, "children" | "slot">;
+  inputProps?: DateInputSegmentProps;
   segmentClassName?: string;
   popoverProps?: Omit<
     PopoverContentProps,
@@ -51,6 +115,14 @@ export interface DateInputProps<T extends DateValue = DateValue> extends Omit<
 const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
   function DateInput(
     {
+      value,
+      defaultValue,
+      onChange,
+      minValue,
+      maxValue,
+      placeholderValue,
+      isDateUnavailable,
+      validate,
       locale,
       hideCalendar = false,
       clearable = true,
@@ -69,12 +141,37 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
     },
     ref,
   ) {
+    const date = useMemo(() => parseISODate(value), [value]);
+    const initialDate = useMemo(
+      () => parseISODate(defaultValue),
+      [defaultValue],
+    );
+    const minimum = useMemo(() => parseISODate(minValue), [minValue]);
+    const maximum = useMemo(() => parseISODate(maxValue), [maxValue]);
+    const placeholder = useMemo(
+      () => parseISODate(placeholderValue),
+      [placeholderValue],
+    );
     const groupRef = useRef<HTMLDivElement>(null);
     const { className: popupClassName, ...popupProps } = popoverProps ?? {};
     return (
       <DateLocale locale={locale}>
         <AriaDatePicker
           {...props}
+          value={value === undefined ? undefined : date}
+          defaultValue={initialDate}
+          minValue={minimum ?? undefined}
+          maxValue={maximum ?? undefined}
+          placeholderValue={placeholder ?? undefined}
+          onChange={(next) => onChange?.(serializeDate(next))}
+          isDateUnavailable={
+            isDateUnavailable
+              ? (next) => isDateUnavailable(serializeDate(next)!)
+              : undefined
+          }
+          validate={
+            validate ? (next) => validate(serializeDate(next)) : undefined
+          }
           isOpen={hideCalendar ? false : isOpen}
           defaultOpen={!hideCalendar && defaultOpen}
           ref={ref}
@@ -91,7 +188,7 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
                 ref={groupRef}
                 style={
                   typeof style === "function"
-                    ? style({ ...state, defaultStyle: {} })
+                    ? style(publicDateState(state))
                     : style
                 }
                 data-ajna-component="date-input-group"
@@ -100,7 +197,7 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
                   cn(
                     dateControlClasses,
                     typeof className === "function"
-                      ? className({ ...state, defaultClassName: undefined })
+                      ? className(publicDateState(state))
                       : className,
                   )
                 }
@@ -146,7 +243,6 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
                   {...popupProps}
                   calendarLabel={calendarLabel}
                   todayLabel={todayLabel}
-                  dateValue={state.state.value ?? props.placeholderValue}
                   anchor={groupRef}
                   align={popupProps.align ?? "start"}
                   sideOffset={popupProps.sideOffset ?? 6}
@@ -170,30 +266,32 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
   },
 );
 DateInputRoot.displayName = "DateInput";
-export const DateInput = DateInputRoot as <T extends DateValue = DateValue>(
-  props: DateInputProps<T> & RefAttributes<HTMLDivElement>,
-) => ReactElement;
+export const DateInput = DateInputRoot;
+
+function publicDateState(state: DateInputState): DateInputState {
+  return {
+    isFocusWithin: state.isFocusWithin,
+    isFocusVisible: state.isFocusVisible,
+    isDisabled: state.isDisabled,
+    isReadOnly: state.isReadOnly,
+    isInvalid: state.isInvalid,
+    isRequired: state.isRequired,
+    isOpen: state.isOpen,
+  };
+}
 
 function DateInputPopover({
   calendarLabel,
   todayLabel,
-  dateValue,
   ...props
 }: PopoverContentProps & {
   calendarLabel: string;
   todayLabel: string;
-  dateValue?: DateValue | null;
 }) {
   const { direction } = useLocale();
   return (
     <Popover.Content {...props} dir={direction}>
-      <DateInputCalendar
-        aria-label={calendarLabel}
-        todayLabel={todayLabel}
-        timeZone={
-          dateValue && "timeZone" in dateValue ? dateValue.timeZone : undefined
-        }
-      />
+      <DateInputCalendar aria-label={calendarLabel} todayLabel={todayLabel} />
     </Popover.Content>
   );
 }

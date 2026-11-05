@@ -1,10 +1,4 @@
-import {
-  getLocalTimeZone,
-  parseDate,
-  parseDateTime,
-  parseZonedDateTime,
-  today,
-} from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
@@ -26,7 +20,7 @@ it("opens a labelled calendar, selects a date, submits ISO, and clears", async (
         aria-label="Departure"
         name="departure"
         locale="en-US"
-        defaultValue={parseDate("2026-04-12")}
+        defaultValue="2026-04-12"
         onChange={change}
         clearable
       />
@@ -39,7 +33,7 @@ it("opens a labelled calendar, selects a date, submits ISO, and clears", async (
   await user.click(trigger);
   expect(await screen.findByRole("dialog")).toBeTruthy();
   await user.click(screen.getByRole("button", { name: /April 15, 2026/ }));
-  expect(change.mock.lastCall?.[0].toString()).toBe("2026-04-15");
+  expect(change.mock.lastCall?.[0]).toBe("2026-04-15");
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   expect(
     new FormData(screen.getByRole("form") as HTMLFormElement).get("departure"),
@@ -52,7 +46,7 @@ it("opens a labelled calendar, selects a date, submits ISO, and clears", async (
 it("honors controlled value/open state and closes on Escape", async () => {
   const user = userEvent.setup();
   function Controlled() {
-    const [date, setDate] = useState(parseDate("2026-04-12"));
+    const [date, setDate] = useState<string | null>("2026-04-12");
     const [open, setOpen] = useState(false);
     return (
       <DateInput
@@ -92,10 +86,10 @@ it("passes bounds and unavailable dates to the popup and prevents disabled/read-
     <DateInput
       aria-label="Booking"
       locale="en-US"
-      defaultValue={parseDate("2026-04-12")}
-      minValue={parseDate("2026-04-10")}
-      maxValue={parseDate("2026-04-20")}
-      isDateUnavailable={(date) => date.day === 15}
+      defaultValue="2026-04-12"
+      minValue="2026-04-10"
+      maxValue="2026-04-20"
+      isDateUnavailable={(date) => date.endsWith("-15")}
       onChange={change}
     />,
   );
@@ -117,7 +111,7 @@ it("passes bounds and unavailable dates to the popup and prevents disabled/read-
     <DateInput
       aria-label="Booking"
       isReadOnly
-      defaultValue={parseDate("2026-04-12")}
+      defaultValue="2026-04-12"
       clearable
     />,
   );
@@ -145,7 +139,7 @@ it("chooses a year from the grid with the keyboard and browses months before sel
     <DateInput
       aria-label="Birthday"
       locale="en-US"
-      defaultValue={parseDate("2026-04-12")}
+      defaultValue="2026-04-12"
       onChange={change}
     />,
   );
@@ -172,7 +166,7 @@ it("chooses a year from the grid with the keyboard and browses months before sel
     document.querySelector<HTMLButtonElement>('button[slot="next"]')!,
   );
   await user.click(screen.getByRole("button", { name: /June 18, 1991/ }));
-  expect(change.mock.lastCall?.[0].toString()).toBe("1991-06-18");
+  expect(change.mock.lastCall?.[0]).toBe("1991-06-18");
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
 
@@ -182,9 +176,9 @@ it("constrains the year grid and adjacent-month navigation to the available peri
     <DateInput
       aria-label="Appointment"
       locale="en-US"
-      defaultValue={parseDate("2026-04-12")}
-      minValue={parseDate("2026-04-01")}
-      maxValue={parseDate("2027-06-30")}
+      defaultValue="2026-04-12"
+      minValue="2026-04-01"
+      maxValue="2027-06-30"
     />,
   );
   await user.click(screen.getByRole("button", { name: "Choose date" }));
@@ -210,7 +204,7 @@ it("returns to the day grid when the current year is chosen again", async () => 
     <DateInput
       aria-label="Appointment"
       locale="en-US"
-      defaultValue={parseDate("2026-04-12")}
+      defaultValue="2026-04-12"
     />,
   );
   await user.click(screen.getByRole("button", { name: "Choose date" }));
@@ -227,7 +221,7 @@ it("supports a typing-only input without rendering a trigger or calendar", async
       aria-label="Date only"
       locale="en-US"
       hideCalendar
-      defaultValue={parseDate("2026-04-12")}
+      defaultValue="2026-04-12"
     />,
   );
   expect(screen.queryByRole("button", { name: "Choose date" })).toBeNull();
@@ -238,24 +232,6 @@ it("supports a typing-only input without rendering a trigger or calendar", async
   expect(screen.queryByRole("dialog")).toBeNull();
 });
 
-it("preserves time segments when choosing a different calendar day", async () => {
-  const user = userEvent.setup();
-  const change = vi.fn();
-  render(
-    <DateInput
-      aria-label="Appointment time"
-      locale="en-US"
-      defaultValue={parseDateTime("2026-04-12T09:30")}
-      onChange={change}
-    />,
-  );
-  await user.click(screen.getByRole("button", { name: "Choose date" }));
-  await user.click(
-    await screen.findByRole("button", { name: /April 15, 2026/ }),
-  );
-  expect(change.mock.lastCall?.[0].toString()).toBe("2026-04-15T09:30:00");
-});
-
 it("browses years in the active calendar system without changing the stored date", async () => {
   const user = userEvent.setup();
   const change = vi.fn();
@@ -263,7 +239,7 @@ it("browses years in the active calendar system without changing the stored date
     <DateInput
       aria-label="Hebrew calendar"
       locale="en-US-u-ca-hebrew"
-      defaultValue={parseDate("2024-04-12")}
+      defaultValue="2024-04-12"
       onChange={change}
     />,
   );
@@ -300,7 +276,7 @@ it("selects today from the year view without submitting the form and restores tr
         aria-label="Appointment"
         locale="en-US"
         name="date"
-        defaultValue={parseDate("2020-01-12")}
+        defaultValue="2020-01-12"
         onChange={change}
       />
     </form>,
@@ -310,7 +286,7 @@ it("selects today from the year view without submitting the form and restores tr
   await user.click(await screen.findByRole("button", { name: "January 2020" }));
   await user.click(screen.getByRole("button", { name: "Today" }));
   const expected = today(getLocalTimeZone()).toString();
-  expect(change.mock.lastCall?.[0].toString()).toBe(expected);
+  expect(change.mock.lastCall?.[0]).toBe(expected);
   expect(
     new FormData(screen.getByRole("form") as HTMLFormElement).get("date"),
   ).toBe(expected);
@@ -328,7 +304,7 @@ it("keeps the calendar open on today's month when shouldCloseOnSelect is false",
     <DateInput
       aria-label="Appointment"
       locale="en-US"
-      defaultValue={parseDate("2020-01-12")}
+      defaultValue="2020-01-12"
       shouldCloseOnSelect={false}
       todayLabel="Today's date"
       onChange={change}
@@ -341,9 +317,7 @@ it("keeps the calendar open on today's month when shouldCloseOnSelect is false",
   expect(document.activeElement).toBe(
     screen.getByRole("button", { name: "April 2026" }),
   );
-  expect(change.mock.lastCall?.[0].toString()).toBe(
-    today(getLocalTimeZone()).toString(),
-  );
+  expect(change.mock.lastCall?.[0]).toBe(today(getLocalTimeZone()).toString());
 });
 
 it("disables Today for out-of-bounds, unavailable, read-only, and disabled dates", async () => {
@@ -355,13 +329,11 @@ it("disables Today for out-of-bounds, unavailable, read-only, and disabled dates
   const shared = {
     "aria-label": "Appointment",
     locale: "en-US",
-    defaultValue: current.subtract({ days: 2 }),
+    defaultValue: "2026-04-14",
     isOpen: true,
     onChange: change,
   };
-  const view = render(
-    <DateInput {...shared} minValue={current.add({ days: 1 })} />,
-  );
+  const view = render(<DateInput {...shared} minValue="2026-04-17" />);
   const expectDisabled = () =>
     expect(
       (screen.getByRole("button", { name: "Today" }) as HTMLButtonElement)
@@ -370,14 +342,12 @@ it("disables Today for out-of-bounds, unavailable, read-only, and disabled dates
   expectDisabled();
   await user.click(screen.getByRole("button", { name: "Today" }));
   expect(change).not.toHaveBeenCalled();
-  view.rerender(
-    <DateInput {...shared} maxValue={current.subtract({ days: 1 })} />,
-  );
+  view.rerender(<DateInput {...shared} maxValue="2026-04-15" />);
   expectDisabled();
   view.rerender(
     <DateInput
       {...shared}
-      isDateUnavailable={(date) => date.compare(current) === 0}
+      isDateUnavailable={(date) => date === current.toString()}
     />,
   );
   expectDisabled();
@@ -388,13 +358,13 @@ it("disables Today for out-of-bounds, unavailable, read-only, and disabled dates
 });
 
 it.each(["value", "placeholder"] as const)(
-  "uses the %s's time zone for Today and preserves its time",
+  "uses the local date for Today with an initial %s",
   async (source) => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2026-04-15T00:30:00Z"));
     const user = userEvent.setup();
     const change = vi.fn();
-    const date = parseZonedDateTime("2020-01-12T09:30[America/Los_Angeles]");
+    const date = "2020-01-12";
     const dateProps =
       source === "value" ? { defaultValue: date } : { placeholderValue: date };
     render(
@@ -407,8 +377,8 @@ it.each(["value", "placeholder"] as const)(
     );
     await user.click(screen.getByRole("button", { name: "Choose date" }));
     await user.click(await screen.findByRole("button", { name: "Today" }));
-    expect(change.mock.lastCall?.[0].toString()).toBe(
-      "2026-04-14T09:30:00-07:00[America/Los_Angeles]",
+    expect(change.mock.lastCall?.[0]).toBe(
+      today(getLocalTimeZone()).toString(),
     );
   },
 );
@@ -421,7 +391,7 @@ it("hides Today when the selected date is today even when browsing, and shows it
     <DateInput
       aria-label="Appointment"
       locale="en-US"
-      defaultValue={today(getLocalTimeZone())}
+      defaultValue={today(getLocalTimeZone()).toString()}
     />,
   );
   const trigger = screen.getByRole("button", { name: "Choose date" });

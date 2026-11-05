@@ -1,4 +1,3 @@
-import { parseDate, parseDateTime } from "@internationalized/date";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -27,24 +26,16 @@ describe("filter value rules", () => {
       valuesEqual(range, { min: 0, max: null }, { min: null, max: null }),
     ).toBe(false);
     expect(
-      valuesEqual(
-        { ...range, type: "date" },
-        parseDate("2026-10-01"),
-        parseDate("2026-10-01"),
-      ),
+      valuesEqual({ ...range, type: "date" }, "2026-10-01", "2026-10-01"),
     ).toBe(true);
     expect(
-      valuesEqual(
-        { ...range, type: "date" },
-        parseDate("2026-10-01"),
-        parseDateTime("2026-10-01T00:00"),
-      ),
+      valuesEqual({ ...range, type: "date" }, "2026-10-01", "2026-10-02"),
     ).toBe(false);
     expect(
       valuesEqual(
         { ...range, type: "date-range" },
-        { start: parseDate("2026-10-01"), end: null },
-        { start: parseDate("2026-10-01"), end: null },
+        { start: "2026-10-01", end: null },
+        { start: "2026-10-01", end: null },
       ),
     ).toBe(true);
   });
@@ -68,7 +59,7 @@ describe("filter value rules", () => {
     expect(
       getError(
         { ...range, type: "date-range" },
-        { start: parseDate("2026-10-02"), end: parseDate("2026-10-01") },
+        { start: "2026-10-02", end: "2026-10-01" },
         defaultMessages,
       ),
     ).toBe(defaultMessages.invalidRange);
@@ -77,9 +68,9 @@ describe("filter value rules", () => {
         {
           ...range,
           type: "date",
-          dateProps: { isDateUnavailable: (date) => date.day === 1 },
+          dateProps: { isDateUnavailable: (date) => date.endsWith("-01") },
         },
-        parseDate("2026-10-01"),
+        "2026-10-01",
         defaultMessages,
       ),
     ).toBe(defaultMessages.invalidValue);
@@ -115,6 +106,14 @@ describe("filter value rules", () => {
   });
   it("formats zero, missing option IDs, counts, custom summaries, and date ranges", () => {
     expect(
+      activeLabel(
+        { ...range, type: "date" },
+        "2026-04-12",
+        defaultMessages,
+        "en-US",
+      ),
+    ).toBe("Price: Apr 12, 2026");
+    expect(
       activeLabel(range, { min: 0, max: null }, defaultMessages, "en-US"),
     ).toBe("Price: ≥ 0");
     expect(
@@ -147,7 +146,7 @@ describe("filter value rules", () => {
     expect(
       activeLabel(
         { ...range, type: "date-range" },
-        { start: parseDate("2026-10-01"), end: null },
+        { start: "2026-10-01", end: null },
         defaultMessages,
         "en-US",
         (date) => date.toString(),
@@ -161,5 +160,61 @@ describe("filter value rules", () => {
         "en-US",
       ),
     ).toBe("Custom summary");
+  });
+  it("rejects malformed date filters without invoking formatters or changing external values", () => {
+    const date: RuntimeFilter = { ...range, type: "date" };
+    expect(getError(date, "2026-02-30", defaultMessages)).toBe(
+      defaultMessages.invalidValue,
+    );
+    expect(
+      getError(
+        { ...date, dateProps: { minValue: "bad", maxValue: "bad" } },
+        "2026-04-12",
+        defaultMessages,
+      ),
+    ).toBeUndefined();
+    expect(
+      getError(
+        { ...date, type: "date-range" },
+        { start: "2026-04-12", end: "bad" },
+        defaultMessages,
+      ),
+    ).toBe(defaultMessages.invalidValue);
+    expect(
+      activeLabel(date, "bad", defaultMessages, "en-US", () => {
+        throw new Error("Invalid date reached formatter");
+      }),
+    ).toBe("Price: bad");
+  });
+  it("compares and validates timestamps by their written date and passes normalized dates to callbacks", () => {
+    const date: RuntimeFilter = { ...range, type: "date" };
+    expect(valuesEqual(date, "2026-04-12T23:30:00Z", "2026-04-12")).toBe(true);
+    const bounded = {
+      ...date,
+      dateProps: {
+        minValue: "2026-04-12T23:59:00Z",
+        maxValue: "2026-04-12T00:00:00+14:00",
+        isDateUnavailable: (value: string) => value !== "2026-04-12",
+      },
+    };
+    expect(
+      getError(bounded, "2026-04-12T00:30:00+05:30", defaultMessages),
+    ).toBeUndefined();
+    expect(
+      getError(
+        { ...date, type: "date-range" },
+        { start: "2026-04-12T23:59:00Z", end: "2026-04-12T00:00:00+14:00" },
+        defaultMessages,
+      ),
+    ).toBeUndefined();
+    expect(
+      activeLabel(
+        date,
+        "2026-04-12T23:30:00Z",
+        defaultMessages,
+        "en-US",
+        (value) => value,
+      ),
+    ).toBe("Price: 2026-04-12");
   });
 });

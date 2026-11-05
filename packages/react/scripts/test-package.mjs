@@ -56,6 +56,13 @@ try {
     assert(!/\.(test|spec)\./.test(name), `Test artifact in package: ${name}`);
     if (!/\.(js|d\.ts)$/.test(name)) continue;
     const content = await readFile(join(installed, "dist", name), "utf8");
+    if (name.endsWith(".d.ts")) {
+      assert.doesNotMatch(
+        content,
+        /@internationalized\/date|\b(?:CalendarDate|DateValue|DatePickerState)\b/,
+        `Date-library types leaked into ${name}`,
+      );
+    }
     assert(
       !/vitest|@\/|from ["'](?:\.\.\/)*src\//.test(content),
       `Unresolved or test dependency in ${name}`,
@@ -110,6 +117,13 @@ try {
       'import { createElement } from "react";',
       'import { Button } from "@ajnacloud/ui/button";',
       'import { cn } from "@ajnacloud/ui/utils";',
+      'import { DateInput, type DateInputProps } from "@ajnacloud/ui/date-input";',
+      'import { FilterBar, type FilterBarDefinition, type FilterBarDateRange } from "@ajnacloud/ui/filter-bar";',
+      'const dateProps: DateInputProps = { value: "2026-04-12T23:30:00Z", minValue: "2026-01-01", onChange: (value) => { const date: string | null = value; void date; }, isDateUnavailable: (date) => date.endsWith("-01"), validate: (date) => date === null ? "Required" : null, className: (state) => state.isInvalid ? "invalid" : "" };',
+      "createElement(DateInput, dateProps);",
+      "type DateFilters = { date: string | null; range: FilterBarDateRange };",
+      'const dateFilters: FilterBarDefinition<DateFilters>[] = [{ id: "date", type: "date", label: "Date", dateProps: { minValue: "2026-01-01" } }, { id: "range", type: "date-range", label: "Range" }];',
+      'createElement(FilterBar<DateFilters>, { filters: dateFilters, value: { date: "2026-04-12", range: { start: null, end: null } }, resetValue: { date: null, range: { start: null, end: null } }, onValueChange: (values) => { const date: string | null = values.date; void date; }, formatDate: (date) => date });',
       'import preset from "@ajnacloud/ui/tailwind";',
       'createElement(Button, { variant: "outline", children: cn("px-2", "px-4") });',
       "preset.theme;",

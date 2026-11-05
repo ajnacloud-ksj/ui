@@ -1,7 +1,6 @@
 "use client";
 
 import { DateInput, Field, FieldTitle } from "@ajnacloud/ui";
-import { parseDate } from "@internationalized/date";
 
 export function DateInputLocales() {
   return (
@@ -12,7 +11,7 @@ export function DateInputLocales() {
           <DateInput
             aria-labelledby={`locale-${locale}`}
             locale={locale}
-            defaultValue={parseDate("2026-04-21")}
+            defaultValue="2026-04-21"
           />
         </Field>
       ))}

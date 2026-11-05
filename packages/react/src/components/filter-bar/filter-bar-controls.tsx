@@ -1,6 +1,5 @@
 "use client";
 
-import type { DateValue } from "@internationalized/date";
 import { RotateCcw } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 
@@ -262,7 +261,7 @@ export function FilterControl({
         <DateInput
           {...filter.dateProps}
           locale={filter.dateProps?.locale ?? locale}
-          value={value as DateValue | null}
+          value={value as string | null}
           onChange={onValueChange}
           isDisabled={locked}
           isInvalid={Boolean(error)}

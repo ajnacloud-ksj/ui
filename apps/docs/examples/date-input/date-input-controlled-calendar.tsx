@@ -1,7 +1,6 @@
 "use client";
 
 import { Button, DateInput, Field, FieldTitle } from "@ajnacloud/ui";
-import { parseDate } from "@internationalized/date";
 import { useId, useState } from "react";
 
 export function DateInputControlledCalendar() {
@@ -13,7 +12,7 @@ export function DateInputControlledCalendar() {
       <DateInput
         aria-labelledby={id}
         locale="en-GB"
-        defaultValue={parseDate("2026-04-12")}
+        defaultValue="2026-04-12"
         isOpen={open}
         onOpenChange={setOpen}
       />

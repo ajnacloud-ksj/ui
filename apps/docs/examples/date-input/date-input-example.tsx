@@ -1,7 +1,6 @@
 "use client";
 
 import { DateInput, Field, FieldTitle } from "@ajnacloud/ui";
-import { parseDate } from "@internationalized/date";
 import { useId } from "react";
 
 export function DateInputExample() {
@@ -12,7 +11,7 @@ export function DateInputExample() {
       <DateInput
         aria-labelledby={id}
         locale="en-GB"
-        defaultValue={parseDate("2026-04-12")}
+        defaultValue="2026-04-12"
       />
     </Field>
   );

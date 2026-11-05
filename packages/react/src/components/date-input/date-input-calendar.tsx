@@ -28,12 +28,10 @@ const navigationClasses =
 
 interface CalendarBodyProps {
   todayLabel: string;
-  timeZone?: string;
 }
 
 export function DateInputCalendar({
   todayLabel,
-  timeZone,
   ...props
 }: CalendarBodyProps & { "aria-label": string }) {
   return (
@@ -43,16 +41,16 @@ export function DateInputCalendar({
       data-slot="date-input-calendar"
       className="box-border w-[344px] max-w-full p-4 font-ajna text-base text-ajna-popover-foreground"
     >
-      <CalendarBody todayLabel={todayLabel} timeZone={timeZone} />
+      <CalendarBody todayLabel={todayLabel} />
     </Calendar>
   );
 }
 
-function CalendarBody({ todayLabel, timeZone }: CalendarBodyProps) {
+function CalendarBody({ todayLabel }: CalendarBodyProps) {
   const state = useContext(CalendarStateContext)!;
   const pickerState = useContext(DatePickerStateContext)!;
   const currentDate = toCalendar(
-    today(timeZone ?? state.timeZone),
+    today(state.timeZone),
     state.focusedDate.calendar,
   );
   const todaySelected =

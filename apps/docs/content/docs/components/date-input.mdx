@@ -11,7 +11,6 @@ import { DateInputForm } from "@/examples/date-input/date-input-form";
 import { DateInputWithoutCalendar } from "@/examples/date-input/date-input-without-calendar";
 import { DateInputAvailability } from "@/examples/date-input/date-input-availability";
 import { DateInputControlledCalendar } from "@/examples/date-input/date-input-controlled-calendar";
-import { DateInputTime } from "@/examples/date-input/date-input-time";
 
 <ComponentPreview>
   <DateInputExample />
@@ -65,9 +64,9 @@ The popup opens from the calendar button by default. Use `isOpen` and `onOpenCha
 
 ### Today shortcut
 
-The calendar header includes a Today button between the year switcher and month navigation arrows. It is hidden when the selected date is already today, including while browsing other months or the year view. Otherwise, it selects today's date, preserves any entered time, and closes the popup unless `shouldCloseOnSelect={false}`. When keeping the popup open, it returns to the day grid on today's month, hides Today, and moves focus to the heading. The button is disabled when today is outside the date bounds, unavailable, read-only, or disabled. It never submits the surrounding form.
+The calendar header includes a Today button between the year switcher and month navigation arrows. It is hidden when the selected date is already today, including while browsing other months or the year view. Otherwise, it selects today's date, and closes the popup unless `shouldCloseOnSelect={false}`. When keeping the popup open, it returns to the day grid on today's month, hides Today, and moves focus to the heading. The button is disabled when today is outside the date bounds, unavailable, read-only, or disabled. It never submits the surrounding form.
 
-Today uses the time zone of a zoned value, or a zoned `placeholderValue` when the input is empty. Date-only values use the local time zone. Set `todayLabel` to translate the visible button text; it defaults to Today.
+Today uses the user's local calendar date. Set `todayLabel` to translate the visible button text; it defaults to Today.
 
 ### Hide the calendar
 
@@ -81,7 +80,7 @@ Today uses the time zone of a zoned value, or a zoned `placeholderValue` when th
 
 ### Controlled date and clearing
 
-Use `defaultValue` for uncontrolled state, or `value` and `onChange` for controlled state. Values come from `@internationalized/date`; `parseDate` creates a date without a time zone. The clear date button appears only when a date is present. Clearing emits null and restores focus to the first segment. Set `clearable={false}` to hide it. The clear button is disabled for a read-only or disabled value. A native JavaScript Date is not a supported value.
+Use `defaultValue` for uncontrolled state, or `value` and `onChange` for controlled state. Values accept `YYYY-MM-DD` strings, ISO date-time strings, or `null`. `onChange` always receives a `YYYY-MM-DD` string or `null`. No date-library import is needed. The clear date button appears only when a date is present. Clearing emits null and restores focus to the first segment. Set `clearable={false}` to hide it. The clear button is disabled for a read-only or disabled value. A native JavaScript Date is not a supported value.
 
 <ComponentPreview>
   <DateInputControlled />
@@ -131,27 +130,17 @@ The configurable `calendarLabel` (Choose date), `clearLabel` (Clear date), and `
 
 <include>../../../examples/date-input/date-input-form.tsx</include>
 
-### Date and time values
-
-A CalendarDateTime adds editable time segments; `granularity` controls precision and `hourCycle` chooses 12/24-hour display. Calendar selection changes the date while preserving the time. ZonedDateTime values are also accepted. Choose time zones explicitly in your application rather than applying the browser's implicit zone to a date-only value.
-
-<ComponentPreview>
-  <DateInputTime />
-</ComponentPreview>
-
-<include>../../../examples/date-input/date-input-time.tsx</include>
-
 ## Behavior
 
 ### Popup placement and styling
 
 DateInput uses Ajna's [Popover](/docs/components/popover), including its standard radius and border, anchored to the full bordered input. Day and year cells use the Ajna base radius, and compact navigation controls use the small radius. It defaults to bottom/start alignment with a 6px gap and collision handling. Customize it with `popoverProps={{ side: "top", align: "end", sideOffset: 8 }}`. `popoverProps.container` changes the portal destination. Do not wrap DateInput in another Popover.
 
-`className` and `style` target the bordered input group; the forwarded ref targets the outer root div. Both props accept React Aria state callbacks. `inputProps.className` customizes the segment container, `segmentClassName` customizes segments, and `popoverProps.className` customizes the popup. `triggerIcon` accepts a decorative React element from any icon library. Both styling modes use the existing Ajna theme tokens.
+`className` and `style` target the bordered input group; the forwarded ref targets the outer root div. Both props accept callbacks with Ajna state flags such as `isInvalid`, `isDisabled`, and `isOpen`; internal picker state is not exposed. `inputProps.className` customizes the segment container, `segmentClassName` customizes segments, and `popoverProps.className` customizes the popup. `triggerIcon` accepts a decorative React element from any icon library. Both styling modes use the existing Ajna theme tokens.
 
 ### Storing dates
 
-CalendarDate represents a day without a time zone. Use `date.toString()` for a date column. Avoid converting a date-only ISO string through native Date when you do not intend UTC conversion. Date/time and zoned values have different serialization semantics; keep the chosen value type consistent throughout the form.
+DateInput stores Gregorian date-only strings, independently of locale formatting. It accepts ISO date-time strings with or without `Z` or a numeric UTC offset, validates the complete value, and keeps the date written in the string. For example, `"2026-04-12T23:30:00Z"` displays April 12 in every timezone. Bounds and placeholders follow the same rule. Native Date objects, date-library objects, and ambiguous strings such as `"04/05/2026"` are not accepted. Invalid incoming values display as empty without emitting a change. Invalid bounds are ignored, and invalid placeholder values use the default calendar period. Native form submission uses the ISO string, or an empty string for an empty control.
 
 ## Accessibility
 
@@ -159,23 +148,23 @@ Give the input an accessible name with FieldTitle and `aria-labelledby`, or a co
 
 ## API reference
 
-| Prop                                                                                      | Purpose                                                                      |
-| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `value`, `defaultValue`, `onChange`                                                       | Controlled or initial date; callback receives a date or null.                |
-| `hideCalendar`                                                                            | Hide the built-in calendar button and popup; defaults to false.              |
-| `isOpen`, `defaultOpen`, `onOpenChange`                                                   | Control or initialize popup visibility.                                      |
-| `shouldCloseOnSelect`                                                                     | Close after choosing a day; defaults to true.                                |
-| `clearable`, `clearLabel`                                                                 | Allow clearing populated dates; defaults to true and Clear date.             |
-| `calendarLabel`, `triggerIcon`                                                            | Popup/trigger name and decorative icon; label defaults to Choose date.       |
-| `todayLabel`                                                                              | Text for the calendar header action; defaults to Today.                      |
-| `name`, `isRequired`, `validationBehavior`, `validate`                                    | Native forms and validation.                                                 |
-| `minValue`, `maxValue`, `isDateUnavailable`                                               | Shared editing, navigation, and selection limits.                            |
-| `isDisabled`, `isReadOnly`, `isInvalid`                                                   | Interaction and validation state.                                            |
-| `locale`, `firstDayOfWeek`                                                                | Formatting, calendar system, and week layout.                                |
-| `placeholderValue`, `granularity`, `hourCycle`, `hideTimeZone`, `shouldForceLeadingZeros` | Date/time segment display and initial calendar period.                       |
-| `className`, `style`                                                                      | Bordered group styling, including state callbacks.                           |
-| `inputProps`, `segmentClassName`                                                          | Segment container and segment customization.                                 |
-| `popoverProps`                                                                            | Ajna Popover presentation props; anchoring and focus are managed internally. |
-| `ref`                                                                                     | Outer root div.                                                              |
+| Prop                                                   | Purpose                                                                      |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `value`, `defaultValue`, `onChange`                    | Controlled or initial date; callback receives an ISO string or null.         |
+| `hideCalendar`                                         | Hide the built-in calendar button and popup; defaults to false.              |
+| `isOpen`, `defaultOpen`, `onOpenChange`                | Control or initialize popup visibility.                                      |
+| `shouldCloseOnSelect`                                  | Close after choosing a day; defaults to true.                                |
+| `clearable`, `clearLabel`                              | Allow clearing populated dates; defaults to true and Clear date.             |
+| `calendarLabel`, `triggerIcon`                         | Popup/trigger name and decorative icon; label defaults to Choose date.       |
+| `todayLabel`                                           | Text for the calendar header action; defaults to Today.                      |
+| `name`, `isRequired`, `validationBehavior`, `validate` | Native forms and validation.                                                 |
+| `minValue`, `maxValue`, `isDateUnavailable`            | Shared editing, navigation, and selection limits.                            |
+| `isDisabled`, `isReadOnly`, `isInvalid`                | Interaction and validation state.                                            |
+| `locale`, `firstDayOfWeek`                             | Formatting, calendar system, and week layout.                                |
+| `placeholderValue`, `shouldForceLeadingZeros`          | Date segment display and initial calendar period.                            |
+| `className`, `style`                                   | Bordered group styling, including state callbacks.                           |
+| `inputProps`, `segmentClassName`                       | Segment container and segment customization.                                 |
+| `popoverProps`                                         | Ajna Popover presentation props; anchoring and focus are managed internally. |
+| `ref`                                                  | Outer root div.                                                              |
 
-Other React Aria DatePicker props are forwarded except `children`; DateInput owns its segments and built-in calendar. Only single-date selection is supported.
+DateInput owns its segments and built-in calendar. Only single-date selection is supported. `isDateUnavailable` and `validate` receive ISO strings; `validate` can also receive `null`.

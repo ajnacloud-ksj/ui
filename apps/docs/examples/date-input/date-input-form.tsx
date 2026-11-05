@@ -7,7 +7,6 @@ import {
   FieldDescription,
   FieldTitle,
 } from "@ajnacloud/ui";
-import { parseDate } from "@internationalized/date";
 import { useId, useState } from "react";
 
 export function DateInputForm() {
@@ -30,9 +29,9 @@ export function DateInputForm() {
           locale="en-GB"
           name="departure"
           isRequired
-          defaultValue={parseDate("2026-04-12")}
-          minValue={parseDate("2026-04-01")}
-          maxValue={parseDate("2026-12-31")}
+          defaultValue="2026-04-12"
+          minValue="2026-04-01"
+          maxValue="2026-12-31"
           clearable
         />
         <FieldDescription>

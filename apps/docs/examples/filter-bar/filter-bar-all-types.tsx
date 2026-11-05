@@ -5,7 +5,6 @@ import {
   type FilterBarDateRange,
   type FilterBarNumberRange,
 } from "@ajnacloud/ui";
-import { type DateValue, parseDate } from "@internationalized/date";
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
 
@@ -16,7 +15,7 @@ export function FilterBarAllTypes() {
     categories: string[];
     reference: string;
     price: FilterBarNumberRange;
-    delivery: DateValue | null;
+    delivery: string | null;
     created: FilterBarDateRange;
   };
   const resetValue: Values = {
@@ -90,7 +89,7 @@ export function FilterBarAllTypes() {
             type: "date",
             label: "Delivery date",
             icon: <CalendarDays />,
-            dateProps: { minValue: parseDate("2026-01-01") },
+            dateProps: { minValue: "2026-01-01" },
           },
           {
             id: "created",
@@ -107,18 +106,7 @@ export function FilterBarAllTypes() {
         Committed updates: {updates}
       </p>
       <pre className="max-h-64 overflow-auto rounded-md bg-[hsl(var(--ajna-muted))] p-3 text-xs">
-        {JSON.stringify(
-          {
-            ...value,
-            delivery: value.delivery?.toString() ?? null,
-            created: {
-              start: value.created.start?.toString() ?? null,
-              end: value.created.end?.toString() ?? null,
-            },
-          },
-          null,
-          2,
-        )}
+        {JSON.stringify(value, null, 2)}
       </pre>
     </div>
   );
