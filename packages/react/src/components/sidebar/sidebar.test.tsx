@@ -205,6 +205,59 @@ it("peeks only from the header/content area, without changing the layout rail", 
   expect(screen.getByTestId("state").textContent).toContain("collapsed");
 });
 
+it("closes a hover peek after clicking an item and leaving without clearing focus", async () => {
+  const user = userEvent.setup();
+  const onOpenChange = vi.fn();
+  render(
+    <Layout defaultOpen={false} peekable onOpenChange={onOpenChange}>
+      <Menu>
+        <Sidebar.MenuButton>Settings</Sidebar.MenuButton>
+      </Menu>
+      <State />
+    </Layout>,
+  );
+  const zone = document.querySelector('[data-sidebar="peek-zone"]')!;
+  const item = screen.getByRole("button", { name: "Settings" });
+  await user.hover(zone);
+  expect(screen.getByTestId("state").textContent).toContain("peeking");
+  await user.click(item);
+  expect(document.activeElement).toBe(item);
+  await user.unhover(zone);
+  expect(screen.getByTestId("state").textContent).toContain("collapsed");
+  expect(document.activeElement).toBe(item);
+  expect(onOpenChange).not.toHaveBeenCalled();
+});
+
+it("keeps keyboard peeking open between items and closes when focus leaves", async () => {
+  const user = userEvent.setup();
+  render(
+    <>
+      <Layout defaultOpen={false} peekable>
+        <Menu>
+          <Sidebar.MenuButton>Settings</Sidebar.MenuButton>
+        </Menu>
+        <State />
+      </Layout>
+      <button>Outside</button>
+    </>,
+  );
+  await user.tab();
+  expect(document.activeElement).toBe(
+    screen.getByRole("link", { name: "Home" }),
+  );
+  expect(screen.getByTestId("state").textContent).toContain("peeking");
+  await user.tab();
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Settings" }),
+  );
+  expect(screen.getByTestId("state").textContent).toContain("peeking");
+  await user.tab();
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Outside" }),
+  );
+  expect(screen.getByTestId("state").textContent).toContain("collapsed");
+});
+
 it("makes offcanvas content inert while hidden", () => {
   const { rerender } = render(
     <Layout collapsible="offcanvas" open={false}>

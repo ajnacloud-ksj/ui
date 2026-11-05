@@ -579,7 +579,6 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
 
     const portalContainer = useContext(SidebarPortalContext);
     const isPointerInPeekZoneRef = useRef(false);
-    const peekZoneRef = useRef<HTMLDivElement>(null);
 
     const handlePeekBlur = useCallback(
       (e: React.FocusEvent<HTMLDivElement>) => {
@@ -600,7 +599,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
 
     const handlePeekMouseLeave = useCallback(() => {
       isPointerInPeekZoneRef.current = false;
-      if (!peekZoneRef.current?.contains(document.activeElement)) stopPeek();
+      stopPeek();
     }, [stopPeek]);
 
     if (collapsible === "none") {
@@ -802,7 +801,6 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
                 <div
                   data-ajna-component="sidebar"
                   data-sidebar="peek-zone"
-                  ref={peekZoneRef}
                   className="box-border flex min-h-0 flex-1 flex-col border-solid"
                   onMouseEnter={handlePeekMouseEnter}
                   onMouseLeave={handlePeekMouseLeave}
