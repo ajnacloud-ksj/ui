@@ -67,7 +67,7 @@ const shapes = {
 const defaults = { variant: "primary", size: "base", shape: "base" } as const;
 
 const buttonStyles = cva(
-  "relative m-0 box-border inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap border-0 border-solid py-0 align-middle font-ajna font-medium no-underline shadow-[0_1px_2px_rgb(0_0_0_/_0.05)] outline outline-2 outline-offset-[3px] outline-transparent transition-[background-color,border-color,color,box-shadow] duration-[120ms] ease-linear focus:outline-ajna-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none supports-[selector(:focus-visible)]:[&:focus:not(:focus-visible)]:outline-transparent",
+  "relative m-0 box-border inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap border-0 border-solid py-0 align-middle font-ajna font-medium no-underline shadow-[0_1px_2px_rgb(0_0_0_/_0.05)] outline outline-2 outline-offset-[3px] outline-transparent transition-[background-color,border-color,color,box-shadow] ease-linear [transition-duration:120ms] focus:outline-ajna-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none supports-[selector(:focus-visible)]:[&:focus:not(:focus-visible)]:outline-transparent",
   {
     variants: { variant: variants, size: sizes, shape: shapes },
     defaultVariants: defaults,

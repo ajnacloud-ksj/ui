@@ -152,7 +152,7 @@ Toast.displayName = "Toast";
 export const ToastContent = forwardRef<HTMLDivElement, ToastContentProps>(
   function ToastContent({ className, ...props }, ref) {
     const classes =
-      "box-border flex h-full items-center gap-3 overflow-hidden p-4 transition-opacity duration-[250ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[behind]:opacity-0 data-[expanded]:opacity-100 motion-reduce:transition-none";
+      "box-border flex h-full items-center gap-3 overflow-hidden p-4 transition-opacity [transition-duration:250ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] data-[behind]:opacity-0 data-[expanded]:opacity-100 motion-reduce:transition-none";
     return (
       <BaseToast.Content
         {...props}

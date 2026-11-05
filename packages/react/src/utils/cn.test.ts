@@ -20,4 +20,25 @@ describe("cn", () => {
       cn("text-sm hover:bg-ajna-primary", "text-white hover:bg-red-600"),
     ).toBe("text-sm text-white hover:bg-red-600");
   });
+
+  it("merges explicit transition properties with consumer duration and easing overrides", () => {
+    expect(
+      cn(
+        "[transition-duration:120ms] [transition-timing-function:linear]",
+        "duration-300 ease-out",
+      ),
+    ).toBe("duration-300 ease-out");
+    expect(
+      cn(
+        "duration-300 ease-out",
+        "[transition-duration:120ms] [transition-timing-function:linear]",
+      ),
+    ).toBe("[transition-duration:120ms] [transition-timing-function:linear]");
+    expect(
+      cn(
+        "duration-150 data-[ending-style]:[transition-duration:450ms]",
+        "data-[ending-style]:duration-300",
+      ),
+    ).toBe("duration-150 data-[ending-style]:duration-300");
+  });
 });

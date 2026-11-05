@@ -650,7 +650,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
               data-ajna-component="sidebar"
               data-sidebar-backdrop=""
               className={cn(
-                "inset-0 z-[1000] box-border border-solid bg-ajna-backdrop opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[swiping]:transition-none motion-reduce:transition-none",
+                "inset-0 z-[1000] box-border border-solid bg-ajna-backdrop opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[swiping]:transition-none motion-reduce:transition-none",
                 contained
                   ? "absolute"
                   : "fixed min-h-[100dvh] supports-[-webkit-touch-callout:none]:absolute",
@@ -679,7 +679,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
                 data-mobile="true"
                 data-swipe-axis="x"
                 className={cn(
-                  "group/sidebar inset-y-0 z-[1001] box-border flex flex-col overflow-hidden border-solid bg-ajna-sidebar text-ajna-sidebar-foreground outline-none transition-transform duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)] [transform:translateX(var(--drawer-swipe-movement-x,0px))] data-[swiping]:transition-none data-[ending-style]:duration-[calc(var(--drawer-swipe-strength,1)*var(--sidebar-animation-duration))] motion-reduce:transition-none",
+                  "group/sidebar inset-y-0 z-[1001] box-border flex flex-col overflow-hidden border-solid bg-ajna-sidebar text-ajna-sidebar-foreground outline-none transition-transform [transform:translateX(var(--drawer-swipe-movement-x,0px))] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)] data-[swiping]:transition-none data-[ending-style]:[transition-duration:calc(var(--drawer-swipe-strength,1)*var(--sidebar-animation-duration))] motion-reduce:transition-none",
                   contained ? "absolute" : "fixed",
                   fullScreenOnMobile
                     ? "w-full"
@@ -739,7 +739,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
         className={cn(
           "group/sidebar relative box-border h-full shrink-0 grow-0 border-solid",
           "overflow-visible", // allow content container to overlay when peeking
-          "transition-[width] duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)]",
+          "transition-[width] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
           "motion-reduce:transition-none",
           isResizing && "!transition-none",
           variant === "floating" && "m-2 rounded-ajna-base shadow-lg",
@@ -785,7 +785,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
                   "bg-ajna-sidebar text-ajna-sidebar-foreground",
                   borderClasses,
                   variant === "floating" && "rounded-ajna-base",
-                  "transition-[width] duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)]",
+                  "transition-[width] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
                   "motion-reduce:transition-none",
                   isResizing && "!transition-none",
                   !open &&
@@ -864,7 +864,7 @@ const SidebarContent = forwardRef<
         data-sidebar="viewport"
         className={cn(
           "box-border h-full border-solid px-[11px] py-3 group-[[data-state]:not([data-state=collapsed])]/sidebar:px-3.5",
-          "transition-[padding] duration-[var(--sidebar-animation-duration)] motion-reduce:transition-none",
+          "transition-[padding] [transition-duration:var(--sidebar-animation-duration)] motion-reduce:transition-none",
           "!overflow-x-hidden",
 
           "[mask-image:linear-gradient(to_bottom,transparent_0,black_min(24px,var(--scroll-area-overflow-y-start,24px)),black_calc(100%-min(24px,var(--scroll-area-overflow-y-end,24px))),transparent_100%)]",
@@ -910,7 +910,7 @@ const SidebarFooter = forwardRef<
       "box-border flex h-12 w-full min-w-0 shrink-0 items-center gap-4 overflow-hidden whitespace-nowrap border-t border-solid border-ajna-sidebar-border",
       "px-[11px] group-[[data-state]:not([data-state=collapsed])]/sidebar:px-4",
       "bg-ajna-sidebar",
-      "transition-[padding] duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)]",
+      "transition-[padding] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
       "motion-reduce:transition-none",
       "sticky bottom-0",
       "bg-clip-padding",
@@ -1009,7 +1009,7 @@ const SidebarGroupLabel = forwardRef<
     data-sidebar="group-label"
     className={cn(
       "box-border grid overflow-hidden border-solid",
-      "transition-[grid-template-rows,margin,border-color] duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)]",
+      "transition-[grid-template-rows,margin,border-color] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
 
       "group-data-[mobile=true]/sidebar:transition-none",
 
@@ -1222,7 +1222,7 @@ const SidebarMenuButton = forwardRef<HTMLElement, SidebarMenuButtonProps>(
       size === "sm" && "min-h-7 px-2 py-0 text-sm",
       icon && "group-data-[state=collapsed]/sidebar:px-0",
       "text-ajna-sidebar-foreground",
-      "transition-[color,box-shadow,outline] duration-[var(--sidebar-animation-duration)]",
+      "transition-[color,box-shadow,outline] [transition-duration:var(--sidebar-animation-duration)]",
       !active && "hover:bg-ajna-sidebar-accent",
 
       active && "bg-ajna-sidebar-accent",
@@ -1506,7 +1506,7 @@ function SidebarPanelIcon({ className }: { className?: string }) {
       aria-hidden="true"
       size={18}
       className={cn(
-        "shrink-0 [&>path]:transition-transform [&>path]:duration-[var(--sidebar-animation-duration)] motion-reduce:[&>path]:transition-none",
+        "shrink-0 [&>path]:transition-transform [&>path]:[transition-duration:var(--sidebar-animation-duration)] motion-reduce:[&>path]:transition-none",
         !expanded && "[&>path]:translate-x-[6px]",
         side === "right" && "rotate-180",
         className,
@@ -2022,7 +2022,7 @@ const SidebarCollapsibleContent = forwardRef<
       onTransitionEnd={handleOpenTransitionEnd}
       className={cn(
         "box-border grid border-solid",
-        "transition-[grid-template-rows] duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)]",
+        "transition-[grid-template-rows] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
         "motion-reduce:transition-none",
         isContentShown ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         className,
@@ -2101,7 +2101,7 @@ const SidebarSlidingViews = forwardRef<
         <div
           data-ajna-component="sidebar"
           className={cn(
-            "box-border flex min-h-0 w-full shrink-0 border-solid transition-transform duration-[var(--sidebar-animation-duration)] ease-[var(--sidebar-easing)] motion-reduce:transition-none",
+            "box-border flex min-h-0 w-full shrink-0 border-solid transition-transform [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)] motion-reduce:transition-none",
             direction === "right" && "flex-row-reverse",
           )}
           style={{ transform: `translateX(${translateX})` }}
