@@ -232,6 +232,12 @@ it("updates instant filters and native search independently, with one clear-all 
   );
   expect(change).not.toHaveBeenCalled();
   const dialog = await open();
+  const clear = within(dialog).getByRole("button", {
+    name: "Clear filters",
+  }) as HTMLButtonElement;
+  expect(clear.disabled).toBe(true);
+  await userEvent.click(clear);
+  expect(change).not.toHaveBeenCalled();
   await userEvent.click(within(dialog).getByText("Include archived"));
   await userEvent.click(within(dialog).getByRole("checkbox", { name: "Alex" }));
   await userEvent.type(
@@ -244,6 +250,8 @@ it("updates instant filters and native search independently, with one clear-all 
     email: "a",
   });
   expect(change).toHaveBeenCalledTimes(3);
+  expect(clear.disabled).toBe(false);
+  expect(within(dialog).queryByRole("button", { name: /^Reset / })).toBeNull();
   await userEvent.click(within(dialog).getByRole("button", { name: "Done" }));
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   expect(
@@ -477,8 +485,13 @@ it("preserves an unknown selection until explicitly cleared", async () => {
   expect(
     within(dialog).getByRole("combobox", { name: "Status" }).textContent,
   ).toContain("removed");
+  expect(
+    within(dialog).queryByRole("button", { name: "Reset Status" }),
+  ).toBeNull();
+  await userEvent.click(within(dialog).getByRole("button", { name: "Done" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   await userEvent.click(
-    within(dialog).getByRole("button", { name: "Reset Status" }),
+    screen.getByRole("button", { name: "Remove Status filter" }),
   );
   expect(readValue().status).toBeNull();
 });

@@ -10,7 +10,7 @@ export function SidebarPeeking() {
       mobileBreakpoint={0}
       defaultOpen={false}
       peekable
-      className="h-72"
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
     >
       <Sidebar>
         <Sidebar.Header>
@@ -31,9 +31,11 @@ export function SidebarPeeking() {
           <Sidebar.Trigger />
         </Sidebar.Footer>
       </Sidebar>
-      <main className="min-w-0 flex-1 p-5">
-        Hover or focus the icon rail. The content expands over this page without
-        moving it. The footer does not trigger expansion.
+      <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center [&>p]:max-w-sm">
+        <p className="max-w-sm text-[hsl(var(--ajna-muted-foreground))]">
+          Hover or focus the icon rail. The content expands over this page
+          without moving it. The footer does not trigger expansion.
+        </p>
       </main>
     </Sidebar.Provider>
   );

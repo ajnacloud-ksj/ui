@@ -1,9 +1,7 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
-import { type ReactNode, useRef } from "react";
+import type { ReactNode } from "react";
 
-import { Button } from "@/components/button";
 import { Checkbox } from "@/components/checkbox";
 import { Combobox } from "@/components/combobox";
 import { DateInput } from "@/components/date-input";
@@ -27,12 +25,7 @@ import type {
   FilterBarOption,
   FilterBarOptionValue,
 } from "./filter-bar.types";
-import {
-  type FieldContext,
-  getError,
-  optionLabel,
-  valuesEqual,
-} from "./filter-bar-state";
+import { type FieldContext, getError, optionLabel } from "./filter-bar-state";
 
 function OptionContent({
   option,
@@ -70,7 +63,6 @@ export function FilterControl({
   popupContainer,
   className,
 }: FieldContext) {
-  const controlRef = useRef<HTMLDivElement>(null);
   const error = getError(filter, value, messages);
   const labelId = `${id}-label`;
   const descriptionId = `${id}-description`;
@@ -331,7 +323,6 @@ export function FilterControl({
   const toggle = filter.type === "toggle";
   const controlElement = (
     <div
-      ref={controlRef}
       data-ajna-component="filter-bar-control"
       className={cn("min-w-0", toggle && "flex shrink-0 items-center")}
     >
@@ -387,31 +378,6 @@ export function FilterControl({
         )}
         {filter.isLoading && (
           <Spinner size="sm" aria-label={messages.loading} />
-        )}
-        {!valuesEqual(filter, value, resetValue) && (
-          <Button
-            variant="ghost"
-            size="xs"
-            type="button"
-            disabled={locked}
-            className="ms-auto"
-            onClick={() => {
-              controlRef.current
-                ?.querySelector<HTMLElement>(
-                  'input:not([type="hidden"]):not(:disabled):not([aria-hidden="true"]),button:not(:disabled),[tabindex="0"]',
-                )
-                ?.focus();
-              onValueChange(resetValue);
-            }}
-            aria-label={`${messages.clearField} ${filter.label}`}
-          >
-            <RotateCcw
-              aria-hidden="true"
-              data-ajna-component="filter-bar-reset-icon"
-              className="h-3 w-3"
-            />
-            {messages.clearField}
-          </Button>
         )}
       </div>
       {filter.description && (

@@ -9,7 +9,7 @@ export function SidebarTheme() {
     <Sidebar.Provider
       contained
       mobileBreakpoint={0}
-      className="h-60"
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
       style={
         {
           "--sidebar": "223 62.5% 18.8235%",
@@ -37,8 +37,10 @@ export function SidebarTheme() {
           <Sidebar.Trigger />
         </Sidebar.Footer>
       </Sidebar>
-      <main className="min-w-0 flex-1 p-5 text-[hsl(var(--ajna-foreground))]">
-        Sidebar colors can change independently of the page theme.
+      <main className="flex min-w-0 flex-1 items-center justify-center p-6 text-center text-[hsl(var(--ajna-muted-foreground))]">
+        <p className="max-w-xs">
+          Sidebar colors can change independently of the page theme.
+        </p>
       </main>
     </Sidebar.Provider>
   );

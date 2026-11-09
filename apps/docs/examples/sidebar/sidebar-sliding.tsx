@@ -7,7 +7,11 @@ import { useState } from "react";
 export function SidebarSliding() {
   const [view, setView] = useState("account");
   return (
-    <Sidebar.Provider contained mobileBreakpoint={0} className="h-80">
+    <Sidebar.Provider
+      contained
+      mobileBreakpoint={0}
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
+    >
       <Sidebar>
         <Sidebar.Header>
           <Button
@@ -55,9 +59,11 @@ export function SidebarSliding() {
           <Sidebar.Trigger />
         </Sidebar.Footer>
       </Sidebar>
-      <main className="min-w-0 flex-1 p-5">
-        Switch navigation surfaces from the header. Inactive views retain their
-        state and cannot receive focus.
+      <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center [&>p]:max-w-sm">
+        <p className="max-w-sm text-[hsl(var(--ajna-muted-foreground))]">
+          Switch navigation surfaces from the header. Inactive views retain
+          their state and cannot receive focus.
+        </p>
       </main>
     </Sidebar.Provider>
   );

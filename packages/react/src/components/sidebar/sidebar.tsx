@@ -929,6 +929,9 @@ const SIDEBAR_LOADING_GROUPS: readonly (readonly string[])[] = [
   ["w-24", "w-36", "w-32"],
 ];
 
+const sidebarLoadingSkeletonClasses =
+  "bg-ajna-sidebar-foreground/10 after:bg-[linear-gradient(90deg,transparent,hsl(var(--sidebar-foreground)_/_0.08),transparent)]";
+
 const SidebarLoading = forwardRef<
   HTMLDivElement,
   ComponentPropsWithoutRef<"div"> & {
@@ -954,16 +957,27 @@ const SidebarLoading = forwardRef<
         key={groupIndex}
         className="box-border flex flex-col gap-0.5 border-solid"
       >
-        <Skeleton className="mb-1 ml-2 box-border h-2 w-16 rounded-full border-solid group-data-[state=collapsed]/sidebar:hidden" />
+        <Skeleton
+          className={cn(
+            sidebarLoadingSkeletonClasses,
+            "mb-1 ml-2 box-border h-2 w-16 rounded-full border-solid group-data-[state=collapsed]/sidebar:hidden",
+          )}
+        />
         {widths.map((width, itemIndex) => (
           <div
             data-ajna-component="sidebar"
             key={itemIndex}
             className="box-border flex min-h-[2.125rem] items-center gap-3 rounded-ajna-base border-solid px-3 group-data-[state=collapsed]/sidebar:justify-center group-data-[state=collapsed]/sidebar:px-0"
           >
-            <Skeleton className="box-border size-[1.125rem] shrink-0 rounded-ajna-md border-solid" />
             <Skeleton
               className={cn(
+                sidebarLoadingSkeletonClasses,
+                "box-border size-[1.125rem] shrink-0 rounded-ajna-md border-solid",
+              )}
+            />
+            <Skeleton
+              className={cn(
+                sidebarLoadingSkeletonClasses,
                 "box-border h-2.5 rounded-full border-solid group-data-[state=collapsed]/sidebar:hidden",
                 width,
               )}

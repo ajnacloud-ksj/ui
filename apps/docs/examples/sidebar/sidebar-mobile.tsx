@@ -7,7 +7,7 @@ import { useState } from "react";
 export function SidebarMobile() {
   const [fullScreen, setFullScreen] = useState(false);
   return (
-    <div className="space-y-3">
+    <div className="w-full space-y-3">
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
@@ -16,7 +16,11 @@ export function SidebarMobile() {
         />
         Full-width navigation
       </label>
-      <Sidebar.Provider contained mobileBreakpoint={9999} className="h-80">
+      <Sidebar.Provider
+        contained
+        mobileBreakpoint={9999}
+        className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
+      >
         <Sidebar fullScreenOnMobile={fullScreen} aria-label="Mobile workspace">
           <Sidebar.Header>
             <span className="min-w-0 flex-1 truncate font-semibold">
@@ -35,7 +39,7 @@ export function SidebarMobile() {
             </Sidebar.Menu>
           </Sidebar.Content>
         </Sidebar>
-        <main className="min-w-0 flex-1 p-5">
+        <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center [&>p]:max-w-sm">
           <Sidebar.Trigger />
           <p className="text-sm">
             Open navigation, then swipe left on a touchscreen to close it.

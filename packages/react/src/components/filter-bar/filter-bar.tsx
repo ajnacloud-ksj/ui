@@ -309,6 +309,7 @@ const FilterBarRoot = forwardRef<HTMLElement, RuntimeProps>(function FilterBar(
             variant="ghost"
             size="sm"
             disabled={clearable.length === 0}
+            className={cn(clearable.length > 0 && "text-ajna-destructive-text")}
             onClick={() => {
               trigger.current?.focus();
               const next = { ...value };

@@ -12,7 +12,11 @@ import {
 
 export function SidebarComposition() {
   return (
-    <Sidebar.Provider contained mobileBreakpoint={0} className="h-80">
+    <Sidebar.Provider
+      contained
+      mobileBreakpoint={0}
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
+    >
       <Sidebar>
         <Sidebar.Header>
           <DropdownMenu.Root>
@@ -84,8 +88,10 @@ export function SidebarComposition() {
           </DropdownMenu.Root>
         </Sidebar.Footer>
       </Sidebar>
-      <main className="min-w-0 flex-1 p-5">
-        Compose menus and search controls using the existing components.
+      <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center [&>p]:max-w-sm">
+        <p className="max-w-sm text-[hsl(var(--ajna-muted-foreground))]">
+          Compose menus and search controls using the existing components.
+        </p>
       </main>
     </Sidebar.Provider>
   );

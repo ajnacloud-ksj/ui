@@ -21,7 +21,7 @@ export function SidebarResizable() {
       defaultWidth={220}
       minWidth={180}
       maxWidth={360}
-      className="h-72"
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
     >
       <Sidebar>
         <Sidebar.Header>
@@ -42,7 +42,7 @@ export function SidebarResizable() {
         </Sidebar.Footer>
         <Sidebar.ResizeHandle />
       </Sidebar>
-      <main className="min-w-0 flex-1 space-y-3 p-5">
+      <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center [&>p]:max-w-sm">
         <SidebarWidth />
         <p className="text-sm">
           Drag the edge or focus the resize handle and use arrow keys, Home, or

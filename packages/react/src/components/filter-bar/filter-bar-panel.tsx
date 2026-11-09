@@ -181,6 +181,7 @@ export function FilterBarPanel({
           type="button"
           variant="ghost"
           disabled={!resettable}
+          className={cn(resettable && "text-ajna-destructive-text")}
           onClick={clear}
         >
           {messages.clearAll}
@@ -189,7 +190,14 @@ export function FilterBarPanel({
           data-ajna-component="filter-bar-panel-actions"
           className="flex items-center gap-2"
         >
-          <DrawerClose render={<Button type="button" variant="outline" />}>
+          <DrawerClose
+            render={
+              <Button
+                type="button"
+                variant={applyMode === "staged" ? "outline" : "primary"}
+              />
+            }
+          >
             {applyMode === "staged" ? messages.cancel : messages.done}
           </DrawerClose>
           {applyMode === "staged" && (

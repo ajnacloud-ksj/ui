@@ -30,7 +30,7 @@ export function CardExample() {
         </p>
       </CardContent>
       <CardFooter>
-        <a href="/docs/installation">
+        <a href="/docs/installation" className="inline-flex items-center gap-2">
           Get started <ArrowUpRight aria-hidden="true" size={14} />
         </a>
       </CardFooter>

@@ -1,11 +1,15 @@
 "use client";
 
-import { AjnaLogo, Sidebar } from "@ajnacloud/ui";
+import { AjnaLogo, SearchInput, Sidebar } from "@ajnacloud/ui";
 import { Folder, Home, Inbox, Settings } from "lucide-react";
 
 export function SidebarDemo() {
   return (
-    <Sidebar.Provider contained mobileBreakpoint={0} className="h-[420px]">
+    <Sidebar.Provider
+      contained
+      mobileBreakpoint={0}
+      className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
+    >
       <Sidebar aria-label="Workspace navigation">
         <Sidebar.Header>
           <AjnaLogo variant="glyph" className="size-6 shrink-0" />
@@ -14,6 +18,12 @@ export function SidebarDemo() {
           </span>
         </Sidebar.Header>
         <Sidebar.Content>
+          <div className="mb-3 group-data-[state=collapsed]/sidebar:hidden">
+            <SearchInput
+              aria-label="Search navigation"
+              placeholder="Quick search..."
+            />
+          </div>
           <Sidebar.Group>
             <Sidebar.GroupLabel>Workspace</Sidebar.GroupLabel>
             <Sidebar.Menu>
@@ -72,17 +82,11 @@ export function SidebarDemo() {
         </Sidebar.Content>
         <Sidebar.Footer>
           <Sidebar.Trigger />
-          <span className="truncate text-xs group-data-[state=collapsed]/sidebar:hidden">
-            Workspace settings
-          </span>
         </Sidebar.Footer>
         <Sidebar.Rail />
       </Sidebar>
-      <main className="min-w-0 flex-1 p-5">
-        <h3 className="m-0 font-semibold">Overview</h3>
-        <p className="text-sm text-[hsl(var(--ajna-muted-foreground))]">
-          Collapse the sidebar or open the Projects section.
-        </p>
+      <main className="flex min-w-0 flex-1 items-center justify-center p-5 text-center text-[hsl(var(--ajna-muted-foreground))]">
+        Main content area
       </main>
     </Sidebar.Provider>
   );

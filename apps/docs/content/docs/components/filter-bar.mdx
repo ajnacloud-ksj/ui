@@ -60,7 +60,7 @@ Every filter's `id` identifies a property in `value` and `resetValue`. Define th
 
 FilterBar collects values; your application matches records. Search has its own state and callback, and `actions` accepts application controls.
 
-The Filters button counts active **filter definitions**, so selecting several owners counts as one active filter. Applied chips appear below the toolbar. Removing one restores that filter's reset value. Clear filters resets enabled active filters in one update. Search remains independent and uses its own clear button.
+The Filters button counts active **filter definitions**, so selecting several owners counts as one active filter. Applied chips appear below the toolbar. Removing one restores that filter's reset value. Clear filters resets enabled active filters in one update. It appears red when available and stays neutral when disabled. Done and Apply use the primary button style. Search remains independent and uses its own clear button.
 
 A filter's `disabled` state prevents editing and clearing that filter, including through Clear filters. Its existing active value remains visible. The root's `disabled` prop locks search and all filters. Application action controls receive their disabled state from the application.
 
@@ -76,15 +76,15 @@ Use `applyMode="staged"` to edit a draft before committing the complete value.
 
 <include>../../../examples/filter-bar/filter-bar-all-types.tsx</include>
 
-| Type           | Value shape                                      | Control                                                                    |
-| -------------- | ------------------------------------------------ | -------------------------------------------------------------------------- |
-| `toggle`       | `boolean`                                        | An inline Checkbox and clickable label, with Reset alongside when changed. |
-| `select`       | A string/number ID, or `null`                    | Ajna Select with disabled options and optional counts.                     |
-| `multi-select` | An array of string/number IDs                    | A checkbox list, or Ajna Combobox when `searchable` is true.               |
-| `text`         | `string`                                         | Ajna Input.                                                                |
-| `number-range` | `{ min: number \| null; max: number \| null }`   | Two NumberInputs with independently editable boundaries.                   |
-| `date`         | An ISO date string or `null`                     | DateInput with its optional calendar.                                      |
-| `date-range`   | `{ start: string \| null; end: string \| null }` | Two DateInputs.                                                            |
+| Type           | Value shape                                      | Control                                                      |
+| -------------- | ------------------------------------------------ | ------------------------------------------------------------ |
+| `toggle`       | `boolean`                                        | An inline Checkbox and clickable label.                      |
+| `select`       | A string/number ID, or `null`                    | Ajna Select with disabled options and optional counts.       |
+| `multi-select` | An array of string/number IDs                    | A checkbox list, or Ajna Combobox when `searchable` is true. |
+| `text`         | `string`                                         | Ajna Input.                                                  |
+| `number-range` | `{ min: number \| null; max: number \| null }`   | Two NumberInputs with independently editable boundaries.     |
+| `date`         | An ISO date string or `null`                     | DateInput with its optional calendar.                        |
+| `date-range`   | `{ start: string \| null; end: string \| null }` | Two DateInputs.                                              |
 
 Number-range inputs show visible Minimum and Maximum labels and matching placeholders. A `number-range` or `date-range` can have either boundary empty. Zero is a valid numeric boundary. Ranges represent inclusive intervals; translating a calendar day into database timestamps and choosing a business timezone remains application work.
 
@@ -99,7 +99,6 @@ With `applyMode="staged"`, opening the panel starts a fresh draft. Apply emits o
 | Action                                   | Instant mode                           | Staged mode                            |
 | ---------------------------------------- | -------------------------------------- | -------------------------------------- |
 | Edit a valid field                       | Commit immediately.                    | Update the draft.                      |
-| Reset a field inside the panel           | Commit that reset.                     | Reset that field in the draft.         |
 | Clear filters inside the panel           | Commit enabled field resets together.  | Update the draft; Apply commits it.    |
 | Remove an applied chip outside the panel | Commit that reset immediately.         | Commit that reset immediately.         |
 | Clear filters outside the panel          | Commit enabled active resets together. | Commit enabled active resets together. |
@@ -195,13 +194,13 @@ The underlying [Drawer](/docs/components/drawer) requires `body { position: rela
 
 `onValueChange(nextValue, details)` receives:
 
-| Detail                | Meaning                                                    |
-| --------------------- | ---------------------------------------------------------- |
-| `reason: "change"`    | A valid instant edit or individual reset inside the panel. |
-| `reason: "apply"`     | A changed staged draft was applied.                        |
-| `reason: "clear"`     | An applied chip was removed.                               |
-| `reason: "clear-all"` | Multiple enabled filters were reset together.              |
-| `filterId`            | Present for individual changes and chip removal.           |
+| Detail                | Meaning                                          |
+| --------------------- | ------------------------------------------------ |
+| `reason: "change"`    | A valid instant edit inside the panel.           |
+| `reason: "apply"`     | A changed staged draft was applied.              |
+| `reason: "clear"`     | An applied chip was removed.                     |
+| `reason: "clear-all"` | Multiple enabled filters were reset together.    |
+| `filterId`            | Present for individual changes and chip removal. |
 
 The forwarded ref targets the outer section. `search.ref` targets its native input. `panelProps.ref` targets the Drawer popup. Custom renderers receive an `id`, `labelId`, `describedBy`, and `popupContainer`; forward them to your own controls and popups as shown above.
 

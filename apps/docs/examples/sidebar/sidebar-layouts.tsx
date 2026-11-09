@@ -38,8 +38,8 @@ export function SidebarLayouts() {
     <main
       className={
         variant === "inset"
-          ? "m-2 min-w-0 flex-1 rounded-lg border bg-[hsl(var(--ajna-background))] p-5"
-          : "min-w-0 flex-1 p-5"
+          ? "m-2 flex min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-lg border bg-[hsl(var(--ajna-background))] p-6 text-center"
+          : "flex min-w-0 flex-1 flex-col items-center justify-center gap-4 p-6 text-center"
       }
     >
       <Sidebar.Trigger />
@@ -47,7 +47,7 @@ export function SidebarLayouts() {
     </main>
   );
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-2">
           Layout
@@ -93,7 +93,7 @@ export function SidebarLayouts() {
         variant={variant}
         side={side}
         collapsible={collapsible}
-        className="h-72"
+        className="h-[600px] overflow-hidden rounded-lg border border-[hsl(var(--ajna-border))] bg-[hsl(var(--ajna-background))]"
       >
         {side === "right" && main}
         {panel}
