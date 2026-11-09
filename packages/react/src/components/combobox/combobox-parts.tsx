@@ -8,7 +8,6 @@ import { forwardRef, useRef } from "react";
 import { InputGroup } from "@/components/input-group";
 import { cn } from "@/utils";
 
-export const ComboboxRoot = BaseCombobox.Root;
 export type ComboboxValue = string | number;
 export const ComboboxValue = BaseCombobox.Value;
 export const ComboboxCollection = BaseCombobox.Collection;
@@ -17,6 +16,13 @@ export type ComboboxRootProps<
   Multiple extends boolean | undefined = false,
   Item = Value,
 > = BaseCombobox.Root.Props<Value, Multiple, Item>;
+export function ComboboxRoot<
+  Value,
+  Multiple extends boolean | undefined = false,
+  Item = Value,
+>({ modal = true, ...props }: ComboboxRootProps<Value, Multiple, Item>) {
+  return <BaseCombobox.Root<Value, Multiple, Item> modal={modal} {...props} />;
+}
 export type ComboboxValueProps = BaseCombobox.Value.Props;
 export type ComboboxCollectionProps = BaseCombobox.Collection.Props;
 
@@ -74,7 +80,7 @@ export type ComboboxListProps = BaseCombobox.List.Props;
 export const ComboboxList = forwardRef<HTMLDivElement, ComboboxListProps>(
   function ComboboxList({ className, ...props }, ref) {
     const classes =
-      "box-border min-h-0 flex-1 overflow-y-auto overscroll-contain p-1 outline-none";
+      "box-border min-h-0 flex-1 overflow-y-auto overscroll-contain p-1 outline-none data-[empty]:p-0";
     return (
       <BaseCombobox.List
         {...props}
@@ -475,7 +481,12 @@ export const ComboboxContent = forwardRef<HTMLDivElement, ComboboxContentProps>(
     const classes =
       "relative box-border flex max-h-[min(24rem,var(--available-height))] w-[var(--anchor-width)] min-w-[min(12rem,var(--available-width))] max-w-[var(--available-width)] origin-[var(--transform-origin)] flex-col overflow-hidden rounded-ajna-base border border-solid border-ajna-border bg-ajna-popover font-ajna text-sm leading-5 text-ajna-popover-foreground shadow-md outline-none transition-[opacity,transform] duration-150 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 motion-reduce:transition-none";
     return (
-      <BaseCombobox.Portal container={container} keepMounted={keepMounted}>
+      <BaseCombobox.Portal
+        container={container}
+        keepMounted={keepMounted}
+        data-ajna-component="combobox-portal"
+        className="relative z-[1100]"
+      >
         <BaseCombobox.Positioner
           anchor={anchor}
           side={side}

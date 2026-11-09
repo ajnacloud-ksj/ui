@@ -63,6 +63,7 @@ const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
       <BasePopover.Portal
         container={container}
         keepMounted={keepMounted}
+        data-ajna-component="popover-portal"
         className="relative z-[1100]"
       >
         <BasePopover.Positioner

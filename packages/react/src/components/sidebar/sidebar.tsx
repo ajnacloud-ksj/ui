@@ -741,7 +741,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
         data-sidebar="sidebar"
         style={{ width: railWidth }}
         className={cn(
-          "group/sidebar relative box-border h-full shrink-0 grow-0 border-solid",
+          "group/sidebar relative z-40 box-border h-full shrink-0 grow-0 border-solid",
           "overflow-visible", // allow content container to overlay when peeking
           "transition-[width] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)]",
           "motion-reduce:transition-none",
