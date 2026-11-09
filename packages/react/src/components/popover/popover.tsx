@@ -60,7 +60,11 @@ const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
     ref,
   ) {
     return (
-      <BasePopover.Portal container={container} keepMounted={keepMounted}>
+      <BasePopover.Portal
+        container={container}
+        keepMounted={keepMounted}
+        className="relative z-[1100]"
+      >
         <BasePopover.Positioner
           anchor={anchor}
           side={side}

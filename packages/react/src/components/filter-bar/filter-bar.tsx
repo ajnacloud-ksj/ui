@@ -215,7 +215,8 @@ const FilterBarRoot = forwardRef<HTMLElement, RuntimeProps>(function FilterBar(
               }
             >
               <FilterBarPanel
-                key={`${open}:${applyMode}`}
+                key={applyMode}
+                open={open}
                 filters={filters}
                 value={value}
                 resetValue={resetValue}

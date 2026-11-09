@@ -29,6 +29,7 @@ import {
 } from "./filter-bar-state";
 
 interface PanelProps {
+  open: boolean;
   filters: readonly RuntimeFilter[];
   value: RuntimeValues;
   resetValue: RuntimeValues;
@@ -45,6 +46,7 @@ interface PanelProps {
   ) => void;
 }
 export function FilterBarPanel({
+  open,
   filters,
   value,
   resetValue,
@@ -57,6 +59,11 @@ export function FilterBarPanel({
   onChange,
 }: PanelProps) {
   const [edits, setEdits] = useState<RuntimeValues>({});
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (open) setEdits({});
+  }
   const container = useRef<HTMLDivElement>(null);
   const current = mergeEdits(value, edits, filters, disabled);
   const editable = filters.filter((filter) => !disabled && !filter.disabled);

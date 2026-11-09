@@ -305,7 +305,7 @@ A scoped provider theme also reaches its mobile panel because that panel portals
 
 ### Width and animation variables
 
-Without resizing, the default expanded width is 16.25rem and the icon rail is 57px. Set provider `style` variables to override fixed widths. With `resizable`, use `defaultWidth`, `minWidth`, `maxWidth`, and `onWidthChange`; avoid overriding `--sidebar-width` at the same time because the provider updates that variable from the numeric resize state.
+Without resizing, the default expanded width is 16.25rem on desktop and 18rem on mobile. The desktop icon rail is 57px. Set provider `style` variables to override fixed widths. With `resizable`, use `defaultWidth`, `minWidth`, `maxWidth`, and `onWidthChange` for desktop sizing; avoid overriding `--sidebar-width` at the same time because the provider updates that variable from the numeric resize state.
 
 `Sidebar.Header` uses `--ajna-sidebar-header-height`, which defaults to `3.5rem`. Use `h-[var(--ajna-sidebar-header-height)]` on an adjacent application header to align their borders. In icon mode, hide branding text with `group-data-[state=collapsed]/sidebar:hidden` and give account buttons a compact layout; menu icons center automatically. See [App Shell](/blocks/app-shell) for a complete layout.
 

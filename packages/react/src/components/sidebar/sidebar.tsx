@@ -30,6 +30,7 @@ export type SidebarVariant = "sidebar" | "floating" | "inset";
 export type SidebarCollapsibleType = "icon" | "offcanvas" | "none";
 
 const SIDEBAR_WIDTH = "16.25rem";
+const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "57px";
 const SIDEBAR_EASING = "cubic-bezier(0.77, 0, 0.175, 1)";
 const SIDEBAR_ANIMATION_DURATION_MS = 250;
@@ -324,7 +325,11 @@ function SidebarProvider({
           ? "expanded"
           : "collapsed";
 
-  const sidebarWidthValue = resizable ? `${width}px` : SIDEBAR_WIDTH;
+  const sidebarWidthValue = isMobile
+    ? SIDEBAR_WIDTH_MOBILE
+    : resizable
+      ? `${width}px`
+      : SIDEBAR_WIDTH;
 
   const itemsRef = useRef(new Map<string, HTMLElement>());
 
@@ -649,7 +654,7 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
               data-ajna-component="sidebar"
               data-sidebar-backdrop=""
               className={cn(
-                "inset-0 z-[1000] box-border border-solid bg-ajna-backdrop opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[swiping]:transition-none motion-reduce:transition-none",
+                "inset-0 z-[1000] box-border border-solid bg-ajna-backdrop opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[swiping]:transition-none data-[ending-style]:[transition-duration:calc(var(--drawer-swipe-strength,1)*var(--sidebar-animation-duration))] motion-reduce:transition-none",
                 contained
                   ? "absolute"
                   : "fixed min-h-[100dvh] supports-[-webkit-touch-callout:none]:absolute",
@@ -678,14 +683,14 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
                 data-mobile="true"
                 data-swipe-axis="x"
                 className={cn(
-                  "group/sidebar inset-y-0 z-[1001] box-border flex flex-col overflow-hidden border-solid bg-ajna-sidebar text-ajna-sidebar-foreground outline-none transition-transform [transform:translateX(var(--drawer-swipe-movement-x,0px))] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:var(--sidebar-easing)] data-[swiping]:transition-none data-[ending-style]:[transition-duration:calc(var(--drawer-swipe-strength,1)*var(--sidebar-animation-duration))] motion-reduce:transition-none",
+                  "group/sidebar inset-y-0 z-[1001] box-border flex flex-col overflow-hidden border-solid bg-ajna-sidebar text-ajna-sidebar-foreground outline-none transition-transform will-change-transform [transform:translate3d(var(--drawer-swipe-movement-x,0px),0,0)] [transition-duration:var(--sidebar-animation-duration)] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)] data-[swiping]:transition-none data-[ending-style]:[transition-duration:calc(var(--drawer-swipe-strength,1)*var(--sidebar-animation-duration))] motion-reduce:transition-none",
                   contained ? "absolute" : "fixed",
                   fullScreenOnMobile
                     ? "w-full"
                     : "w-[var(--sidebar-width)] max-w-full",
                   side === "left"
-                    ? "left-0 data-[ending-style]:[transform:translateX(-100%)] data-[starting-style]:[transform:translateX(-100%)]"
-                    : "right-0 data-[ending-style]:[transform:translateX(100%)] data-[starting-style]:[transform:translateX(100%)]",
+                    ? "left-0 data-[ending-style]:[transform:translate3d(-100%,0,0)] data-[starting-style]:[transform:translate3d(-100%,0,0)]"
+                    : "right-0 data-[ending-style]:[transform:translate3d(100%,0,0)] data-[starting-style]:[transform:translate3d(100%,0,0)]",
                   !fullScreenOnMobile &&
                     (side === "left"
                       ? "border-r border-ajna-sidebar-border"

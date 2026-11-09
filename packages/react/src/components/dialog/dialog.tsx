@@ -201,10 +201,7 @@ const DialogHeader = forwardRef<HTMLDivElement, DialogHeaderProps>(
         ref={ref}
         data-ajna-component="dialog-header"
         data-slot="dialog-header"
-        className={cn(
-          "flex flex-col gap-2 text-center sm:text-left",
-          className,
-        )}
+        className={cn("flex flex-col gap-2", className)}
       />
     );
   },

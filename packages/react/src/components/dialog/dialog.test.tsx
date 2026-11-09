@@ -1,9 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
 import { Button } from "@/components/button";
+import { DateInput } from "@/components/date-input";
+import { Select } from "@/components/select";
 
 import {
   Dialog,
@@ -37,6 +39,55 @@ function Example({
 }
 
 describe("Dialog", () => {
+  it.each(["select", "calendar"])(
+    "dismisses a nested %s before its parent dialog",
+    async (kind) => {
+      const user = userEvent.setup();
+      render(
+        <Dialog defaultOpen>
+          <DialogContent>
+            <DialogTitle>Schedule</DialogTitle>
+            <DialogDescription>Choose a date and location.</DialogDescription>
+            {kind === "select" ? (
+              <Select
+                aria-label="Location"
+                options={[{ value: "office", label: "Office" }]}
+              />
+            ) : (
+              <DateInput aria-label="Date" defaultValue="2026-04-12" />
+            )}
+          </DialogContent>
+        </Dialog>,
+      );
+      const dialog = await screen.findByRole("dialog", { name: "Schedule" });
+      if (kind === "select") {
+        act(() => screen.getByRole("combobox").focus());
+        await user.keyboard("{ArrowDown}");
+        await screen.findByRole("listbox");
+      } else {
+        await user.click(screen.getByRole("button", { name: "Choose date" }));
+        await screen.findByRole("dialog", { name: "Choose date" });
+      }
+      const popup = document.querySelector(
+        `[data-ajna-component="${kind === "select" ? "select-positioner" : "popover-positioner"}"]`,
+      );
+      const dismissLayer = popup?.previousElementSibling;
+      expect(dismissLayer?.hasAttribute("data-base-ui-inert")).toBe(true);
+      await user.click(dismissLayer as HTMLElement);
+      await waitFor(() =>
+        expect(
+          kind === "select"
+            ? screen.queryByRole("listbox")
+            : screen.queryByRole("dialog", { name: "Choose date" }),
+        ).toBeNull(),
+      );
+      expect(screen.getByRole("dialog", { name: "Schedule" })).toBe(dialog);
+      await user.click(dialog.parentElement as HTMLElement);
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog", { name: "Schedule" })).toBeNull(),
+      );
+    },
+  );
   it("keeps Base UI class callbacks and forwards popup refs", async () => {
     let panel: HTMLDivElement | null = null;
     render(

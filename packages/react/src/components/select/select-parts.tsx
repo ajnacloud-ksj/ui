@@ -262,7 +262,7 @@ export const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
     const classes =
       "relative box-border flex max-h-[min(24rem,var(--available-height))] w-[var(--anchor-width)] min-w-[min(8rem,var(--available-width))] max-w-[var(--available-width)] origin-[var(--transform-origin)] flex-col overflow-hidden rounded-ajna-base border border-solid border-ajna-border bg-ajna-popover font-ajna text-sm leading-5 text-ajna-popover-foreground shadow-md outline-none transition-[opacity,transform] duration-150 ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 data-[align-trigger=true]:transition-none motion-reduce:transition-none";
     return (
-      <BaseSelect.Portal container={container}>
+      <BaseSelect.Portal container={container} className="relative z-[1100]">
         <BaseSelect.Positioner
           side={side}
           align={align}

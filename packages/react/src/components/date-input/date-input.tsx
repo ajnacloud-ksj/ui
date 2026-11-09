@@ -181,6 +181,7 @@ const DateInputRoot = forwardRef<HTMLDivElement, DateInputProps>(
         >
           {(state) => (
             <Popover.Root
+              modal
               open={!hideCalendar && state.isOpen}
               onOpenChange={(open) => state.state.setOpen(open)}
             >

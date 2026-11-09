@@ -303,6 +303,29 @@ it("stages edits, discards cancellation and Escape, and applies a complete updat
   expect(change.mock.calls[0]?.[1].reason).toBe("apply");
 });
 
+it("preserves mounted fields while closing and clears the draft on reopening", async () => {
+  const props = {
+    filters: filters.filter((filter) => filter.id === "email"),
+    value: resetValue,
+    resetValue,
+    onValueChange: vi.fn(),
+    applyMode: "staged" as const,
+    panelProps: { keepMounted: true },
+  };
+  const view = render(<FilterBar {...props} open />);
+  const input = (await screen.findByRole("textbox", {
+    name: "Email",
+  })) as HTMLInputElement;
+  await userEvent.type(input, "draft");
+  view.rerender(<FilterBar {...props} open={false} />);
+  expect(input.isConnected).toBe(true);
+  expect(input.value).toBe("draft");
+  view.rerender(<FilterBar {...props} open />);
+  expect(await screen.findByRole("textbox", { name: "Email" })).toBe(input);
+  expect(input.value).toBe("");
+  expect(props.onValueChange).not.toHaveBeenCalled();
+});
+
 it("merges edited fields into the latest external values and ignores removed or disabled edits", async () => {
   const change = vi.fn();
   const initial: Values = { ...resetValue, status: "active" };
