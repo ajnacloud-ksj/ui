@@ -4,6 +4,7 @@ import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import { cva } from "class-variance-authority";
 import { createContext, forwardRef, useContext } from "react";
 
+import { ScrollArea } from "@/components/scroll-area";
 import { cn } from "@/utils";
 
 export type TabsVariant = "segmented" | "underline";
@@ -29,7 +30,7 @@ const TabsStyleContext = createContext<{
 });
 
 const listStyles = cva(
-  "relative isolate m-0 box-border inline-flex w-fit min-w-0 max-w-full shrink-0 border-solid font-ajna text-ajna-muted-foreground",
+  "relative isolate m-0 box-border flex w-fit min-w-0 max-w-full shrink-0 border-solid font-ajna text-ajna-muted-foreground",
   {
     variants: {
       variant: {
@@ -38,8 +39,7 @@ const listStyles = cva(
         underline: "gap-1 border-0 border-ajna-border bg-transparent p-0",
       },
       orientation: {
-        horizontal:
-          "items-center overflow-x-auto overflow-y-hidden overscroll-x-contain",
+        horizontal: "items-center",
         vertical: "flex-col items-stretch",
       },
       size: { sm: "text-xs", base: "text-sm" },
@@ -153,40 +153,47 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
   ) {
     return (
       <TabsStyleContext.Provider value={{ variant, size }}>
-        <BaseTabs.List
-          {...props}
-          ref={ref}
-          data-ajna-component="tabs-list"
-          data-slot="tabs-list"
-          data-variant={variant}
-          data-size={size}
-          className={(state) =>
-            cn(
-              listStyles({
-                variant,
-                size,
-                orientation: state.orientation,
-              }),
-              typeof className === "function" ? className(state) : className,
-            )
-          }
+        <ScrollArea
+          orientation="horizontal"
+          scrollbars={false}
+          className="w-fit min-w-0 max-w-full shrink-0"
+          viewportProps={{ tabIndex: -1 }}
         >
-          {children}
-          <BaseTabs.Indicator
-            aria-hidden="true"
-            data-ajna-component="tabs-indicator"
-            data-slot="tabs-indicator"
+          <BaseTabs.List
+            {...props}
+            ref={ref}
+            data-ajna-component="tabs-list"
+            data-slot="tabs-list"
+            data-variant={variant}
+            data-size={size}
             className={(state) =>
               cn(
-                indicatorStyles({
+                listStyles({
                   variant,
+                  size,
                   orientation: state.orientation,
                 }),
-                indicatorClassName,
+                typeof className === "function" ? className(state) : className,
               )
             }
-          />
-        </BaseTabs.List>
+          >
+            {children}
+            <BaseTabs.Indicator
+              aria-hidden="true"
+              data-ajna-component="tabs-indicator"
+              data-slot="tabs-indicator"
+              className={(state) =>
+                cn(
+                  indicatorStyles({
+                    variant,
+                    orientation: state.orientation,
+                  }),
+                  indicatorClassName,
+                )
+              }
+            />
+          </BaseTabs.List>
+        </ScrollArea>
       </TabsStyleContext.Provider>
     );
   },

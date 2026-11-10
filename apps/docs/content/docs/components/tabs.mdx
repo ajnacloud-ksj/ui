@@ -109,7 +109,7 @@ Set `size="sm"` for compact spaces or `size="base"` for the default height. The 
 
 <include>../../../examples/tabs/tabs-sizes.tsx</include>
 
-Horizontal bars are 26px in the small size and 36px in the base size when they fit without a scrollbar. Native scrollbars can add height when tabs overflow. Vertical lists grow with their items.
+Horizontal bars keep their height when tabs overflow. Vertical lists grow with their items.
 
 ### Controlled state
 
@@ -179,7 +179,7 @@ Automatic activation works best for panels that appear immediately. Keep manual 
 
 ### Overflow
 
-Tab labels stay on one row. When the list is narrower than its content, it uses native horizontal scrolling. Touch gestures, trackpads, and keyboard focus can reveal off-screen triggers.
+Tab labels stay on one row. Overflowing lists scroll without a visible scrollbar, with edge fades showing where more tabs are available. Touch gestures, trackpads, and keyboard focus can reveal off-screen triggers.
 
 <ComponentPreview>
   <TabsOverflow />
@@ -187,7 +187,7 @@ Tab labels stay on one row. When the list is narrower than its content, it uses 
 
 <include>../../../examples/tabs/tabs-overflow.tsx</include>
 
-Constrain the root or its containing layout to the available width. The list keeps its labels intact rather than wrapping them into multiple tab rows. Native scrollbar appearance follows the browser and operating system; there are no additional scroll buttons or mouse-drag handlers.
+Constrain the root or its containing layout to the available width. The list keeps its labels intact rather than wrapping them into multiple tab rows.
 
 ## Accessibility
 

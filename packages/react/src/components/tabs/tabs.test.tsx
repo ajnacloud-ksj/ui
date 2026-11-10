@@ -1,10 +1,51 @@
 import { DirectionProvider } from "@base-ui/react/direction-provider";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, useState } from "react";
 import { expect, it, vi } from "vitest";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from ".";
+
+it.each(["ltr", "rtl"] as const)(
+  "tracks overflowing tab edges without scrollbars in %s",
+  (direction) => {
+    const { container } = render(
+      <DirectionProvider direction={direction}>
+        <Tabs defaultValue="overview">
+          <TabsList aria-label="Sections">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </DirectionProvider>,
+    );
+    const viewport = container.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]',
+    )!;
+    Object.defineProperties(viewport, {
+      clientWidth: { value: 200, configurable: true },
+      scrollWidth: { value: 500, configurable: true },
+      clientHeight: { value: 36, configurable: true },
+      scrollHeight: { value: 36, configurable: true },
+    });
+    fireEvent.scroll(viewport);
+    expect(viewport.hasAttribute("data-overflow-x-start")).toBe(false);
+    expect(viewport.hasAttribute("data-overflow-x-end")).toBe(true);
+    viewport.scrollLeft = direction === "rtl" ? -150 : 150;
+    fireEvent.scroll(viewport);
+    expect(viewport.hasAttribute("data-overflow-x-start")).toBe(true);
+    expect(viewport.hasAttribute("data-overflow-x-end")).toBe(true);
+    viewport.scrollLeft = direction === "rtl" ? -300 : 300;
+    fireEvent.scroll(viewport);
+    expect(viewport.hasAttribute("data-overflow-x-start")).toBe(true);
+    expect(viewport.hasAttribute("data-overflow-x-end")).toBe(false);
+    expect(
+      container.querySelector('[data-slot="scroll-area-scrollbar"]'),
+    ).toBeNull();
+    expect(viewport.tabIndex).toBe(-1);
+    expect(screen.getByRole("tablist", { name: "Sections" })).toBeTruthy();
+  },
+);
 
 it("connects named tabs and panels, forwards refs, and supports manual activation", async () => {
   const user = userEvent.setup();

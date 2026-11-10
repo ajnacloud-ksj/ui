@@ -9,6 +9,8 @@ import { cn } from "@/utils";
 export interface ScrollAreaProps extends BaseScrollArea.Root.Props {
   /** Fade overflowing edges. Defaults to true. */
   fade?: boolean;
+  /** Show custom scrollbars. Defaults to true. */
+  scrollbars?: boolean;
   orientation?: "vertical" | "horizontal" | "both";
   viewportProps?: BaseScrollArea.Viewport.Props;
 }
@@ -20,6 +22,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
       className,
       children,
       fade = true,
+      scrollbars = true,
       orientation = "vertical",
       viewportProps,
       ...props
@@ -68,13 +71,19 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
             {children}
           </BaseScrollArea.Content>
         </BaseScrollArea.Viewport>
-        {orientation !== "horizontal" && <ScrollBar />}
-        {orientation !== "vertical" && <ScrollBar orientation="horizontal" />}
-        <BaseScrollArea.Corner
-          data-slot="scroll-area-corner"
-          data-ajna-component="scroll-area-corner"
-          className="bg-ajna-background"
-        />
+        {scrollbars && (
+          <>
+            {orientation !== "horizontal" && <ScrollBar />}
+            {orientation !== "vertical" && (
+              <ScrollBar orientation="horizontal" />
+            )}
+            <BaseScrollArea.Corner
+              data-slot="scroll-area-corner"
+              data-ajna-component="scroll-area-corner"
+              className="bg-ajna-background"
+            />
+          </>
+        )}
       </BaseScrollArea.Root>
     );
   },

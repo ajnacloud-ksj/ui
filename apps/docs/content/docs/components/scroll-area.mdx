@@ -51,6 +51,8 @@ Scroll Area keeps native touch, trackpad, wheel, and keyboard scrolling while st
 
 Give the root a bounded height. The viewport fills it; content remains at its natural height. The vertical scrollbar appears on hover or while scrolling when content overflows. Use `viewportProps` to label the scrollable region.
 
+Set `scrollbars={false}` to hide the scrollbars while keeping native scrolling and edge fades.
+
 ## Examples
 
 ### Horizontal scrolling
@@ -112,6 +114,7 @@ When an area can scroll, Base UI makes its viewport keyboard focusable. Give mea
 | `ScrollArea`                        | Root, viewport, measured content, scrollbars, and corner. Forwards a div ref to the root.                                                                                         |
 | `orientation`                       | `"vertical"` by default; `"horizontal"` or `"both"` selects the custom scrollbars.                                                                                                |
 | `fade`                              | `true` by default. Enables masks that follow the actual overflow distances.                                                                                                       |
+| `scrollbars`                        | `true` by default. Set to false to hide the scrollbars while retaining scrolling and fades.                                                                                       |
 | `viewportProps`                     | Native viewport attributes and events, `ref`, `className`, `style`, `render`, and accessible region labeling.                                                                     |
 | Root native props                   | `className`, `style`, `render`, `overflowEdgeThreshold`, and native div attributes.                                                                                               |
 | `ScrollBar`                         | A styled Base UI scrollbar with a thumb. Exposed for custom compositions using the raw Scroll Area primitives. Accepts `orientation`, `keepMounted`, native props, and a div ref. |
