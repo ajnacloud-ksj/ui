@@ -9,7 +9,7 @@ export function ButtonIcons() {
       <Button icon={<Plus />}>Add member</Button>
       <Button>
         Continue
-        <ArrowRight aria-hidden="true" className="size-4" />
+        <ArrowRight aria-hidden="true" />
       </Button>
       <Button
         variant="secondary"
@@ -18,6 +18,9 @@ export function ButtonIcons() {
         aria-label="Delete item"
       />
       <Button shape="circle" icon={<Plus />} aria-label="Add item" />
+      <Button variant="outline" icon={<Plus className="size-5" />}>
+        Larger icon
+      </Button>
     </div>
   );
 }

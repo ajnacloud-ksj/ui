@@ -99,9 +99,11 @@ Pass a React element to `icon` to place it before the label. Use `shape="square"
 
 <include>../../../examples/button/button-icons.tsx</include>
 
-Give every icon-only button an `aria-label` or `aria-labelledby`. The `icon` slot is decorative and hidden from assistive technology. To put an icon after the label, render it as a child, set its size, and mark it `aria-hidden="true"`.
+Give every icon-only button an `aria-label` or `aria-labelledby`. The `icon` slot is decorative and hidden from assistive technology. To put an icon after the label, render it as a child and mark it `aria-hidden="true"`.
 
-The `icon` slot accepts elements from any icon library and sizes direct SVG children to match the text. See [Icons](/docs/icons) for setup.
+Direct child SVGs and SVGs in the `icon` slot are sized automatically: 12px for `xs`, 14px for `sm`, 16px for `base`, and 20px for `lg`. Nested illustrations are left unchanged. See [Icons](/docs/icons) for setup.
+
+Set `className="size-5"` on an icon to override both dimensions, or use `w-*` and `h-*` independently. Inline `style={{ width: 20, height: 20 }}` also overrides the defaults. SVG `width`/`height` attributes, including Lucide's `size` prop, do not override CSS sizing; use classes or inline styles for exceptions.
 
 ### Disabled
 

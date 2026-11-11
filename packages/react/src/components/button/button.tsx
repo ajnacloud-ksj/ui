@@ -51,11 +51,14 @@ const variants = {
     "border border-ajna-border bg-transparent text-ajna-foreground [&:hover:not(:disabled)]:bg-ajna-accent",
 };
 
+const iconClasses =
+  "[&>svg]:shrink-0 [&>:where(svg:not([class*='size-']):not([class*='h-']))]:h-[var(--ajna-button-icon-size)] [&>:where(svg:not([class*='size-']):not([class*='w-']))]:w-[var(--ajna-button-icon-size)]";
+
 const sizes = {
-  xs: "h-5 gap-1 px-1.5 text-xs leading-4 rounded-ajna-sm",
-  sm: "h-[1.625rem] gap-1 px-2 text-xs leading-4 rounded-ajna-md",
-  base: "h-9 gap-1.5 px-3 text-sm leading-5 rounded-ajna-base",
-  lg: "h-10 gap-2 px-4 text-sm leading-5 rounded-ajna-base",
+  xs: "h-5 gap-1 px-1.5 text-xs leading-4 rounded-ajna-sm [--ajna-button-icon-size:0.75rem]",
+  sm: "h-[1.625rem] gap-1 px-2 text-xs leading-4 rounded-ajna-md [--ajna-button-icon-size:0.875rem]",
+  base: "h-9 gap-1.5 px-3 text-sm leading-5 rounded-ajna-base [--ajna-button-icon-size:1rem]",
+  lg: "h-10 gap-2 px-4 text-sm leading-5 rounded-ajna-base [--ajna-button-icon-size:1.25rem]",
 };
 
 const shapes = {
@@ -67,7 +70,10 @@ const shapes = {
 const defaults = { variant: "primary", size: "base", shape: "base" } as const;
 
 const buttonStyles = cva(
-  "relative m-0 box-border inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap border-0 border-solid py-0 align-middle font-ajna font-medium no-underline shadow-[0_1px_2px_rgb(0_0_0_/_0.05)] outline outline-2 outline-offset-[3px] outline-transparent transition-[background-color,border-color,color,box-shadow] ease-linear [transition-duration:120ms] focus:outline-ajna-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none supports-[selector(:focus-visible)]:[&:focus:not(:focus-visible)]:outline-transparent",
+  [
+    "relative m-0 box-border inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap border-0 border-solid py-0 align-middle font-ajna font-medium no-underline shadow-[0_1px_2px_rgb(0_0_0_/_0.05)] outline outline-2 outline-offset-[3px] outline-transparent transition-[background-color,border-color,color,box-shadow] ease-linear [transition-duration:120ms] focus:outline-ajna-ring disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none supports-[selector(:focus-visible)]:[&:focus:not(:focus-visible)]:outline-transparent",
+    iconClasses,
+  ],
   {
     variants: { variant: variants, size: sizes, shape: shapes },
     defaultVariants: defaults,
@@ -131,7 +137,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : icon ? (
           <span
             data-ajna-component="button-icon"
-            className="inline-flex flex-none items-center justify-center [&>svg]:h-[1em] [&>svg]:w-[1em]"
+            className={cn(
+              "inline-flex flex-none items-center justify-center",
+              iconClasses,
+            )}
             aria-hidden="true"
           >
             {icon}

@@ -40,14 +40,14 @@ Button and Banner hide their icon slots from assistive technology. Input Group a
 
 ## Size and color
 
-| Placement          | Default dimensions                    |
-| ------------------ | ------------------------------------- |
-| Button icon        | `1em`: 12px in xs/sm, 14px in base/lg |
-| Banner icon        | 16px                                  |
-| Checkbox indicator | 14px                                  |
-| Accordion chevron  | 16px                                  |
+| Placement          | Default dimensions                               |
+| ------------------ | ------------------------------------------------ |
+| Button icon        | 12px in xs, 14px in sm, 16px in base, 20px in lg |
+| Banner icon        | 16px                                             |
+| Checkbox indicator | 14px                                             |
+| Accordion chevron  | 16px                                             |
 
-Button and Banner size direct SVG children through their slot styles. For icons placed directly in an add-on or another custom layout, set size on the icon itself. Lucide icons inherit `currentColor`, so they follow component variants, theme colors, and disabled states. No new icon color tokens are required.
+Button sizes direct child SVGs and SVGs in its icon slot. Override its defaults with `size-*`, `w-*`/`h-*`, or inline width/height styles on the icon. Lucide's `size` prop sets SVG attributes, which do not override CSS sizing. Banner sizes direct SVG children through its slot styles. For icons placed directly in an add-on or another custom layout, set size on the icon itself. Lucide icons inherit `currentColor`, so they follow component variants, theme colors, and disabled states. No new icon color tokens are required.
 
 These defaults work in both [styling modes](/docs/installation). For custom standalone styling, use `style` or your application's stylesheet; application-only Tailwind classes require your own Tailwind build.
 
