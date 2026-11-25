@@ -4,6 +4,7 @@ import { createMDX } from "fumadocs-mdx/next";
 
 const withMDX = createMDX();
 export default withMDX({
+  experimental: { agentUpgrade: "security" },
   reactStrictMode: true,
   outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
   outputFileTracingIncludes: {
