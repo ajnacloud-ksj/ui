@@ -1,0 +1,187 @@
+---
+title: QR Code
+description: Generate scannable QR codes with optional logos and image downloads.
+---
+
+import { QrCodeExample } from "@/examples/qr-code/qr-code-example";
+import { QrCodeSizes } from "@/examples/qr-code/qr-code-sizes";
+import { QrCodeLogo } from "@/examples/qr-code/qr-code-logo";
+import { QrCodeFill } from "@/examples/qr-code/qr-code-fill";
+import { QrCodeDownload } from "@/examples/qr-code/qr-code-download";
+import { QrCodeStore } from "@/examples/qr-code/qr-code-store";
+import { QrCodeInput } from "@/examples/qr-code/qr-code-input";
+import { QrCodeSpinner } from "@/examples/qr-code/qr-code-spinner";
+
+<ComponentPreview>
+  <QrCodeExample />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once. Import `QrCode` from `@ajnacloud/ui` or `@ajnacloud/ui/qr-code`.
+
+```tsx
+<QrCode.Root value="https://example.com/menu">
+  <QrCode.Frame aria-label="Scan to view the menu" />
+</QrCode.Root>
+```
+
+`Frame` includes `Pattern` by default. Values can be URLs, authentication URIs, payment links, or plain text.
+
+### Parts
+
+| Part                     | Purpose                                                  |
+| ------------------------ | -------------------------------------------------------- |
+| `QrCode.Root`            | Owns the encoded value and shared sizing.                |
+| `QrCode.RootProvider`    | Uses a store created with `useQrCode`.                   |
+| `QrCode.Frame`           | SVG image; accepts an accessible label, fill, and a ref. |
+| `QrCode.Pattern`         | Generated SVG path, included in Frame by default.        |
+| `QrCode.Overlay`         | Centers a logo or loading indicator over the QR code.    |
+| `QrCode.DownloadTrigger` | Downloads the code as an image.                          |
+| `QrCode.Context`         | Gives a render function access to the store.             |
+
+Compose these parts with [Card](/docs/components/card) for a QR card, or use Root and Frame alone for a label. Use `render` to compose a part with an Ajna component or another element.
+
+## Examples
+
+### Sizes
+
+Choose a size or use `size="full"` to fill a container. Use `className` or `style` on Frame and Overlay for custom dimensions, including physical units for printed labels.
+
+<ComponentPreview>
+  <QrCodeSizes />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-sizes.tsx</include>
+
+### Logo overlay
+
+Place a small logo inside Overlay. Use `encoding={{ ecc: "H" }}` for more error correction, and test the finished code with a scanner. Keep Overlay beside Frame; if Root also contains actions, wrap Frame and Overlay together in a `relative` container.
+
+<ComponentPreview>
+  <QrCodeLogo />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-logo.tsx</include>
+
+### Fill
+
+Set `fill` on Frame to change the pattern color. Keep strong contrast between the pattern and its background. Black on white is recommended for printed codes.
+
+<ComponentPreview>
+  <QrCodeFill />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-fill.tsx</include>
+
+### Download
+
+`mimeType` selects the downloaded file format. Use `"image/png"` for general use or `"image/svg+xml"` for scalable labels and printing.
+
+| Format | `mimeType`        | Filename example | When to use                                             |
+| ------ | ----------------- | ---------------- | ------------------------------------------------------- |
+| PNG    | `"image/png"`     | `"menu.png"`     | Recommended for sharing; keeps QR edges sharp.          |
+| SVG    | `"image/svg+xml"` | `"label.svg"`    | Scalable artwork and printed labels.                    |
+| WebP   | `"image/webp"`    | `"menu.webp"`    | When your image workflow requires WebP.                 |
+| JPEG   | `"image/jpeg"`    | `"menu.jpg"`     | When JPEG is required; compression can soften QR edges. |
+
+Include the matching extension in `fileName`; it is not added automatically. Changing the filename alone does not change the image format.
+
+`quality` accepts a number from `0` to `1` for JPEG and WebP, such as `quality={0.95}`. It has no effect on PNG or SVG.
+
+Downloads include image or SVG logos; arbitrary HTML overlays are not exported. Remote images must allow cross-origin access or the logo may be omitted.
+
+<ComponentPreview>
+  <QrCodeDownload />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-download.tsx</include>
+
+### Error correction
+
+Set `encoding.ecc` to `"L"`, `"M"`, `"Q"`, or `"H"`. Higher levels tolerate more damage but can produce denser codes. `encoding.boostEcc` lets the encoder increase correction when it fits without increasing the QR version.
+
+### Store
+
+Use `useQrCode` and RootProvider when controls outside Root need to update the code or call `getDataUrl`. Inside Root, use `QrCode.Context` or `useQrCodeContext` to access the same API.
+
+<ComponentPreview>
+  <QrCodeStore />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-store.tsx</include>
+
+### Input
+
+Pass `value` to control the content. `defaultValue` supplies an initial value for a store that changes through `setValue`.
+
+<ComponentPreview>
+  <QrCodeInput />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-input.tsx</include>
+
+### Loading
+
+Compose Overlay with [Spinner](/docs/components/spinner) while your application prepares the value.
+
+<ComponentPreview>
+  <QrCodeSpinner />
+</ComponentPreview>
+
+<include>../../../examples/qr-code/qr-code-spinner.tsx</include>
+
+## Accessibility
+
+Give Frame a descriptive `aria-label`; its default label is "QR code". Include a readable link or text alternative so scanning is optional. Keep a clear border around the pattern and verify scanning at the intended display or print size. Decorative logos should have empty alt text or `aria-hidden="true"`.
+
+## API reference
+
+### Root and useQrCode
+
+| Prop            | Type                                   | Default   | Description                                          |
+| --------------- | -------------------------------------- | --------- | ---------------------------------------------------- |
+| `value`         | `string`                               | —         | Controlled content.                                  |
+| `defaultValue`  | `string`                               | `""`      | Initial uncontrolled content.                        |
+| `onValueChange` | `(details: { value: string }) => void` | —         | Called when the store requests a value change.       |
+| `encoding`      | QR encoding options                    | —         | Error correction, version, mask, and border options. |
+| `pixelSize`     | `number`                               | `10`      | SVG units per QR module.                             |
+| `id`            | `string`                               | Generated | Unique identifier.                                   |
+| `ids`           | `{ root?, frame?, overlay? }`          | —         | Custom part IDs.                                     |
+| `dir`           | `"ltr" \| "rtl"`                       | Inherited | Reading direction.                                   |
+| `getRootNode`   | `() => Document \| ShadowRoot \| Node` | —         | Root used to find parts for export.                  |
+
+Root also accepts native div props, `render`, `unstyled`, and `size`. RootProvider accepts these styling props and a required `value` from `useQrCode`.
+
+| Size           | Width and height      |
+| -------------- | --------------------- |
+| `2xs`          | 40px                  |
+| `xs`           | 64px                  |
+| `sm`           | 80px                  |
+| `md` (default) | 120px                 |
+| `lg`           | 160px                 |
+| `xl`           | 200px                 |
+| `2xl`          | 240px                 |
+| `full`         | 100% of the container |
+
+### Frame, Pattern, and Overlay
+
+Frame and Pattern accept native SVG and path props respectively. Overlay accepts native div props. All accept `render`, `className`, `style`, and refs. Frame and Overlay also accept `unstyled` to remove Ajna's default styling. Explicit Frame children replace the default Pattern.
+
+### DownloadTrigger
+
+| Prop       | Type                                                             | Required | Description                                 |
+| ---------- | ---------------------------------------------------------------- | -------- | ------------------------------------------- |
+| `fileName` | `string`                                                         | Yes      | Filename including its extension.           |
+| `mimeType` | `"image/png" \| "image/jpeg" \| "image/webp" \| "image/svg+xml"` | Yes      | File format; see the Download format table. |
+| `quality`  | `number`                                                         | No       | JPEG/WebP quality from 0 to 1.              |
+
+Accepts native button props, including `disabled`, plus `render` and a ref. Use `render={<Button />}` for a styled action. Calling `event.preventDefault()` in `onClick` cancels the download.
+
+### Store API
+
+`useQrCode` returns `value`, `setValue(value)`, `getDataUrl(mimeType, quality?)`, and the part prop getters. `getDataUrl` returns a `Promise<string>` and requires the mounted Frame. SVG rendering works during server rendering; downloads run in the browser.
+
+Named parts, hooks, and their prop types are exported from both `@ajnacloud/ui` and `@ajnacloud/ui/qr-code`.

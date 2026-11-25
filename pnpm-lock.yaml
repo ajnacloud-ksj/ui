@@ -129,6 +129,12 @@ importers:
       '@internationalized/date':
         specifier: ^3.11.0
         version: 3.12.4
+      '@zag-js/qr-code':
+        specifier: ^1.43.3
+        version: 1.49.0
+      '@zag-js/react':
+        specifier: ^1.43.3
+        version: 1.49.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2190,6 +2196,33 @@ packages:
   '@yuku-toolchain/types@0.19.0':
     resolution: {integrity: sha512-tFkNbsP4WXX9UMUC5syJGdK9dPMLK0PPaIuXCcCYH75sZ8MrebfBZ2XvCILRTw8AgLivSSCfDa4R67iYBDa4Kg==}
 
+  '@zag-js/anatomy@1.49.0':
+    resolution: {integrity: sha512-rPx7ejfUsrwmLUSZAA+6YECD03CsL/S4iO/DU9Gy9Q9cY2aw9AQ/4dOjRrkWflfkr/PT++52dwHZQ9nRQUfyVw==}
+
+  '@zag-js/core@1.49.0':
+    resolution: {integrity: sha512-jMGGN9w8578d0q8axWVwHNqxMXXDrSAHOdyHBaxzioFThmCZtumUjqAN4sEeD/6mZgMQ/H2BFgQgHmAqtsPhHg==}
+
+  '@zag-js/dom-query@1.49.0':
+    resolution: {integrity: sha512-2Rm9GfwAIzhjZnwfwls0mXiCZdxaRjExb1aYMMo7pmexCxFlE1bIthokpfG6ZtxlG0HKrYqob41pmGQL/S8nBQ==}
+
+  '@zag-js/qr-code@1.49.0':
+    resolution: {integrity: sha512-x5IIKWS8EH5AftlNnk2v76GhTavLTKauZOdhMqWlW8xMWxGx0gtSWdf2nYaoJz3YxSUX/gbetSBbaXB+v9QuCg==}
+
+  '@zag-js/react@1.49.0':
+    resolution: {integrity: sha512-g/ENdcq9SbllKVKC9Lhy9ILsrZuGP3F1+3xIl/rNY+mgRfYx9GBqTSZdoRbXW6y71+pKxOBGTlWIqU7Pzegy8A==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@zag-js/store@1.49.0':
+    resolution: {integrity: sha512-tGMvebdVC/S/xL1dVN30cPYBeeWnlen+WIBc/DhZIOHmhdEUZFLDlhZff/c2CL/9k8BybLcyRtUPSZQSQPZbMA==}
+
+  '@zag-js/types@1.49.0':
+    resolution: {integrity: sha512-u8L8Y71dUbOpWiFJj2nIpt5AQqHERioOSK574nOX35YaLSVMwg77za2DmdNso0CHIAcCq91+4gGLlQRzz9TeLg==}
+
+  '@zag-js/utils@1.49.0':
+    resolution: {integrity: sha512-3iW5RiJ1GdlYuMdrPy41BYIh7tOj/WNcYECeUd8HtAv+wy8d24v/zk65o3TAjcvXwhYseZszQ+nwVwFxWbcQQQ==}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -4110,6 +4143,12 @@ packages:
   property-information@7.2.0:
     resolution: {integrity: sha512-IAtzIB6sUiWaJYrX9smp3V46pBGbBeLFRGdh25kg1334VcBlD8HzhPeNIWQH9zhGmo2itIe25EHt9dQP7G5hmg==}
 
+  proxy-compare@3.0.1:
+    resolution: {integrity: sha512-V9plBAt3qjMlS1+nC8771KNf6oJ12gExvaxnNzN/9yVRLdTv/lc+oJlnSzrdYDAvBfTStPCoiaCOTmTs0adv7Q==}
+
+  proxy-memoize@3.0.1:
+    resolution: {integrity: sha512-VDdG/VYtOgdGkWJx7y0o7p+zArSf2383Isci8C+BP3YXgMYDoPd3cCBjw0JdWb6YBb9sFiOPbAADDVTPJnh+9g==}
+
   publint@0.3.25:
     resolution: {integrity: sha512-WMMbn/d7JqRlfXQL/JUI4n5skC8cJ5WVr8/wT5mmiYWkUdENkZr1I5rgs2+dQPVRgoJd+JRYtB46MTsuDylw9g==}
     engines: {node: '>=18'}
@@ -4755,6 +4794,9 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  uqr@0.1.3:
+    resolution: {integrity: sha512-0rjE8iEJe4YmT9TOhwsZtqCMRLc5DXZUI2UEYUUg63ikBkqqE5EYWaI0etFe/5KUcmcYwLih2RND1kq+hrUJXA==}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -6756,6 +6798,46 @@ snapshots:
     optional: true
 
   '@yuku-toolchain/types@0.19.0': {}
+
+  '@zag-js/anatomy@1.49.0': {}
+
+  '@zag-js/core@1.49.0':
+    dependencies:
+      '@zag-js/dom-query': 1.49.0
+      '@zag-js/utils': 1.49.0
+
+  '@zag-js/dom-query@1.49.0':
+    dependencies:
+      '@zag-js/types': 1.49.0
+
+  '@zag-js/qr-code@1.49.0':
+    dependencies:
+      '@zag-js/anatomy': 1.49.0
+      '@zag-js/core': 1.49.0
+      '@zag-js/dom-query': 1.49.0
+      '@zag-js/types': 1.49.0
+      '@zag-js/utils': 1.49.0
+      proxy-memoize: 3.0.1
+      uqr: 0.1.3
+
+  '@zag-js/react@1.49.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@zag-js/core': 1.49.0
+      '@zag-js/store': 1.49.0
+      '@zag-js/types': 1.49.0
+      '@zag-js/utils': 1.49.0
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
+  '@zag-js/store@1.49.0':
+    dependencies:
+      proxy-compare: 3.0.1
+
+  '@zag-js/types@1.49.0':
+    dependencies:
+      csstype: 3.2.3
+
+  '@zag-js/utils@1.49.0': {}
 
   acorn-jsx@5.3.2(acorn@8.19.0):
     dependencies:
@@ -8998,6 +9080,12 @@ snapshots:
 
   property-information@7.2.0: {}
 
+  proxy-compare@3.0.1: {}
+
+  proxy-memoize@3.0.1:
+    dependencies:
+      proxy-compare: 3.0.1
+
   publint@0.3.25:
     dependencies:
       '@publint/pack': 0.1.7
@@ -9840,6 +9928,8 @@ snapshots:
       browserslist: 4.29.4
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  uqr@0.1.3: {}
 
   uri-js@4.4.1:
     dependencies:

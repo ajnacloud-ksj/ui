@@ -59,3 +59,4 @@ export * from "./components/input-otp";
 export * from "./components/filter-bar";
 
 export * from "./components/description-list";
+export * from "./components/qr-code";
