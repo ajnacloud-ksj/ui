@@ -106,6 +106,8 @@ The trigger shows selected labels by default. `valueProps.children` receives the
 
 Set it to `false` for an anchored dropdown. `side`, `align`, `sideOffset`, and `alignOffset` then control placement; the defaults are bottom, center, 4px, and 0px. Collision handling keeps the popup within the available space.
 
+Anchored dropdowns use fixed positioning by default. Set `contentProps={{ positionMethod: "absolute" }}` when a custom container requires absolute positioning. Selected-item alignment continues to use Base UI's fixed positioning.
+
 <ComponentPreview>
   <SelectAlignment />
 </ComponentPreview>

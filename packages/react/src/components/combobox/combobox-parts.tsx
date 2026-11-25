@@ -449,6 +449,7 @@ export interface ComboboxContentProps
     BaseCombobox.Popup.Props,
     Pick<
       BaseCombobox.Positioner.Props,
+      | "positionMethod"
       | "side"
       | "align"
       | "sideOffset"
@@ -466,6 +467,7 @@ export const ComboboxContent = forwardRef<HTMLDivElement, ComboboxContentProps>(
       container,
       keepMounted,
       anchor,
+      positionMethod = "fixed",
       side = "bottom",
       align = "start",
       sideOffset = 4,
@@ -488,6 +490,7 @@ export const ComboboxContent = forwardRef<HTMLDivElement, ComboboxContentProps>(
         className="relative z-[1100]"
       >
         <BaseCombobox.Positioner
+          positionMethod={positionMethod}
           anchor={anchor}
           side={side}
           align={align}

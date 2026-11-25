@@ -250,7 +250,9 @@ Value changes retain Base UI event details including reason, event, and cancel()
 
 className and style apply to the outer convenience wrapper. classNames accepts strings for control, input, selectedValues, pill, pillRemove, overflow, clear, trigger, popup, list, option, groupLabel, empty, status, and footer. Use state attributes such as data-highlighted, data-selected, data-disabled, and aria-invalid for state-dependent rules.
 
-popupProps accepts container, keepMounted, side, align, sideOffset, alignOffset, collisionBoundary, and collisionPadding. Positioning defaults to bottom/start with a 4px gap and collision handling. The popup follows the full control width, has a bounded height, and scrolls its list separately from the footer.
+popupProps accepts container, keepMounted, positionMethod, side, align, sideOffset, alignOffset, collisionBoundary, and collisionPadding. Positioning defaults to bottom/start with a 4px gap and collision handling. The popup follows the full control width, has a bounded height, and scrolls its list separately from the footer.
+
+Popups use fixed positioning by default. Set `popupProps={{ positionMethod: "absolute" }}` when a custom container requires absolute positioning.
 
 The popup portals to `document.body`. Use a document theme or supply a themed portal container; see [Theming](/docs/theming).
 

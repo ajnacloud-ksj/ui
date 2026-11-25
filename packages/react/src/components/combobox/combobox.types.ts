@@ -98,6 +98,7 @@ export type ComboboxPopupProps = Pick<
   ComboboxContentProps,
   | "container"
   | "keepMounted"
+  | "positionMethod"
   | "side"
   | "align"
   | "sideOffset"

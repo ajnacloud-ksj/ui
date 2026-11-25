@@ -27,6 +27,7 @@ export interface PopoverContentProps
     Pick<
       BasePopover.Positioner.Props,
       | "anchor"
+      | "positionMethod"
       | "side"
       | "align"
       | "sideOffset"
@@ -46,6 +47,7 @@ const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
   function PopoverContent(
     {
       anchor,
+      positionMethod = "fixed",
       side = "bottom",
       align = "center",
       sideOffset = 8,
@@ -67,6 +69,7 @@ const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
         className="relative z-[1100]"
       >
         <BasePopover.Positioner
+          positionMethod={positionMethod}
           anchor={anchor}
           side={side}
           align={align}

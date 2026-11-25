@@ -7,6 +7,30 @@ import { DirectionProvider } from "@/primitives/direction-provider";
 
 import { Select } from ".";
 
+it.each([undefined, "absolute"] as const)(
+  "positions an anchored selected value with the requested strategy (%s)",
+  async (positionMethod) => {
+    const user = userEvent.setup();
+    render(
+      <Select
+        aria-label="Selected fruit"
+        options={options}
+        value="banana"
+        contentProps={{ alignItemWithTrigger: false, positionMethod }}
+      />,
+    );
+    await openSelect(user);
+    const positioner = document.querySelector<HTMLElement>(
+      '[data-ajna-component="select-positioner"]',
+    )!;
+    await waitFor(() => {
+      expect(positioner.style.opacity).not.toBe("0");
+      expect(positioner.style.position).toBe(positionMethod ?? "fixed");
+    });
+    expect(screen.getByRole("combobox").textContent).toContain("Banana");
+  },
+);
+
 const options = [
   { label: "Apple", value: "apple", group: "Fresh" },
   { label: "Banana", value: "banana", group: "Fresh" },

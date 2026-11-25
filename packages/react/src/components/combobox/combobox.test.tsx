@@ -5,6 +5,32 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { Combobox } from ".";
 
+it.each([undefined, "absolute"] as const)(
+  "opens a selected value with viewport positioning or an explicit override (%s)",
+  async (positionMethod) => {
+    const change = vi.fn();
+    render(
+      <Combobox
+        aria-label="Selected fruit"
+        options={options}
+        value="banana"
+        onValueChange={change}
+        popupProps={{ positionMethod }}
+      />,
+    );
+    await userEvent.click(screen.getByRole("combobox"));
+    await screen.findByRole("listbox");
+    const positioner = document.querySelector<HTMLElement>(
+      '[data-ajna-component="combobox-positioner"]',
+    )!;
+    await waitFor(() => {
+      expect(positioner.style.opacity).not.toBe("0");
+      expect(positioner.style.position).toBe(positionMethod ?? "fixed");
+    });
+    expect(change).not.toHaveBeenCalled();
+  },
+);
+
 const options = [
   { label: "Apple", value: "apple" },
   { label: "Banana", value: "banana" },

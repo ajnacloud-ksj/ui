@@ -8,6 +8,30 @@ import { Input } from "@/components/input";
 
 import { Popover } from ".";
 
+it.each([undefined, "absolute"] as const)(
+  "positions focused content with the requested strategy (%s)",
+  async (positionMethod) => {
+    render(
+      <Popover.Root>
+        <Popover.Trigger>Open details</Popover.Trigger>
+        <Popover.Content aria-label="Details" positionMethod={positionMethod}>
+          <Input aria-label="Name" />
+        </Popover.Content>
+      </Popover.Root>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Open details" }));
+    await screen.findByRole("dialog", { name: "Details" });
+    const positioner = document.querySelector<HTMLElement>(
+      '[data-ajna-component="popover-positioner"]',
+    )!;
+    await waitFor(() => {
+      expect(positioner.style.opacity).not.toBe("0");
+      expect(positioner.style.position).toBe(positionMethod ?? "fixed");
+      expect(document.activeElement).toBe(screen.getByRole("textbox"));
+    });
+  },
+);
+
 it("associates its title and description, focuses a control, and restores trigger focus", async () => {
   const ref = createRef<HTMLDivElement>();
   render(

@@ -227,6 +227,7 @@ export interface SelectContentProps
     BaseSelect.Popup.Props,
     Pick<
       BaseSelect.Positioner.Props,
+      | "positionMethod"
       | "side"
       | "align"
       | "sideOffset"
@@ -243,6 +244,7 @@ export const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
   function SelectContent(
     {
       container,
+      positionMethod = "fixed",
       side = "bottom",
       align = "center",
       sideOffset = 4,
@@ -268,6 +270,7 @@ export const SelectContent = forwardRef<HTMLDivElement, SelectContentProps>(
         className="relative z-[1100]"
       >
         <BaseSelect.Positioner
+          positionMethod={positionMethod}
           side={side}
           align={align}
           sideOffset={sideOffset}

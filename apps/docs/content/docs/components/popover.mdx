@@ -81,6 +81,8 @@ This example's Done button closes the panel; it does not save to an API. For app
 
 Content prefers the bottom of the trigger with an 8px gap and center alignment. Set `side`, `align`, `sideOffset`, and `alignOffset` on Content. Available sides include `top`, `bottom`, `left`, `right`, `inline-start`, and `inline-end`. Logical sides follow the writing direction.
 
+Content uses fixed positioning by default. Set `positionMethod="absolute"` when a custom container requires absolute positioning.
+
 For RTL, set HTML `dir` and use Base UI's DirectionProvider for directional positioning. If only a local section is RTL, set `dir="rtl"` on its portaled Content too.
 
 `anchor` accepts an element or element ref to position Content against a larger control instead of its trigger button. DateInput uses this to align its popup with the full input.
