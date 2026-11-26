@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { membersApi, MembersError, membersErrorMessage } from "./members-api";
+import {
+  MEMBERS_ERROR_CODES,
+  membersApi,
+  MembersError,
+  membersErrorMessage,
+} from "./members-api";
 
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -208,6 +213,56 @@ describe("membersApi: errors (the ONE H3 map, codes unchanged)", () => {
       "members_not_enabled",
     ] as const) {
       expect(membersErrorMessage(code)).not.toBe("");
+    }
+  });
+});
+
+// Spec v1.6 section C, "The ONE error map": the codes the platform can return, unchanged.
+const SPEC_C_ERROR_MAP = [
+  "invites_disabled",
+  "org_admin_required",
+  "org_invite_cap",
+  "last_admin",
+  "last_org_admin",
+  "reason_required",
+  "not_suspended",
+  "password_not_accepted",
+  "invite_pending",
+  "not_admin",
+  "members_not_enabled",
+  "tenant_without_org",
+  "self_action",
+  "target_outranks_caller",
+  "shared_account",
+  "invalid_role",
+  "user_not_found",
+  "already_member",
+  "invite_domain_not_allowed",
+  "other_app",
+  "role_not_declared",
+  "idempotency_key_reused",
+  "temporary_password_not_allowed",
+  "login_handle_taken",
+  "already_signed_in",
+  "already_confirmed",
+  "rate_limited",
+  "outcome_unknown",
+  "change_applied",
+  "unavailable",
+  "managed_by_cockpit",
+  "not_org_admin",
+];
+
+describe("the error map", () => {
+  it("is exactly spec C's list", () => {
+    expect([...MEMBERS_ERROR_CODES].sort()).toEqual(
+      [...SPEC_C_ERROR_MAP].sort(),
+    );
+  });
+
+  it("passes a spec code through and has a message for every code", () => {
+    for (const code of MEMBERS_ERROR_CODES) {
+      expect(membersErrorMessage(code)).toMatch(/\S/);
     }
   });
 });

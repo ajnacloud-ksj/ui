@@ -98,6 +98,8 @@ export const MEMBERS_ERROR_CODES = [
   "not_admin",
   "members_not_enabled",
   "managed_by_cockpit",
+  "not_org_admin",
+  "tenant_without_org",
   "rate_limited",
   "outcome_unknown",
   "change_applied",
@@ -160,6 +162,9 @@ const MESSAGES: Readonly<Record<MembersErrorCode, string>> = {
   not_admin: "Only an admin of this app can manage its members.",
   members_not_enabled: "Member management is not switched on for this app yet.",
   managed_by_cockpit: "Members of this app are managed by the platform team.",
+  not_org_admin: "Only an organisation admin can do this.",
+  tenant_without_org:
+    "This app is not linked to an organisation yet. Contact the platform team.",
   rate_limited: "Too many changes. Wait a moment, then try again.",
   outcome_unknown:
     "The change may have been made. Refresh the list to see the current state.",
