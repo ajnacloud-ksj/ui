@@ -37,11 +37,14 @@ export interface ConfigPins {
 /** "" or one or more plain path segments with one leading "/" and no trailing "/". */
 const API_BASE = /^(?:\/[A-Za-z0-9_-]+)*$/;
 
-function apiBaseOf(pins: ConfigPins): string {
-  const base = pins.apiBase ?? "";
+function checkedApiBase(base: string): string {
   if (!API_BASE.test(base))
     throw new ConfigError('config: apiBase must be "" or a path like /api');
   return base;
+}
+
+function apiBaseOf(pins: ConfigPins): string {
+  return checkedApiBase(pins.apiBase ?? "");
 }
 
 export interface AuthConfig {
@@ -313,11 +316,13 @@ export function httpSessionClient(
   options: SessionClientOptions,
   fetchImpl: FetchLike = fetch,
 ): SessionClient {
+  // Validated here too, not only in parseAuthConfig: a host can build this client itself.
+  const apiBase = checkedApiBase(options.apiBase ?? "");
   return {
     async postSession(tokens: SessionTokens) {
       let response: Response;
       try {
-        response = await fetchImpl(`${options.apiBase ?? ""}/v1/auth/session`, {
+        response = await fetchImpl(`${apiBase}/v1/auth/session`, {
           method: "POST",
           credentials: "same-origin",
           // Never re-send the tokens to wherever a redirect points.

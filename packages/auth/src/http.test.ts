@@ -400,3 +400,25 @@ describe("apiBase (a host that routes its backend under a path, e.g. the portal'
     );
   });
 });
+
+describe("httpSessionClient apiBase", () => {
+  it.each([
+    "https://evil.example",
+    "//evil.example",
+    "/api/",
+    "api",
+    "/a/../b",
+    "/a?x",
+  ])("refuses a bad apiBase %j when it is built", (apiBase) => {
+    expect(() =>
+      httpSessionClient({ doorZone: null, apiBase }, vi.fn()),
+    ).toThrow();
+  });
+
+  it("accepts the root and a plain path", () => {
+    expect(() => httpSessionClient({ doorZone: null }, vi.fn())).not.toThrow();
+    expect(() =>
+      httpSessionClient({ doorZone: null, apiBase: "/api" }, vi.fn()),
+    ).not.toThrow();
+  });
+});
