@@ -352,3 +352,51 @@ describe("httpSessionClient (spec A2)", () => {
     ).rejects.toMatchObject({ code: "unavailable" });
   });
 });
+
+describe("apiBase (a host that routes its backend under a path, e.g. the portal's /api)", () => {
+  it("reads the config and posts the session under the pinned base", async () => {
+    const pins = { ...PINS, apiBase: "/api" };
+    const cfgFetch = vi.fn(async () => json(200, GOOD));
+    const cfg = await fetchAuthConfig(pins, cfgFetch);
+    expect((cfgFetch.mock.calls[0] as unknown as [string])[0]).toBe(
+      "/api/v1/auth/config",
+    );
+    expect(cfg.apiBase).toBe("/api");
+
+    const sessionFetch = vi.fn(async () =>
+      json(200, { next: "/api/v1/oidc/authorize/continue?request=r1" }),
+    );
+    await httpSessionClient(
+      { doorZone: "example.test", apiBase: cfg.apiBase },
+      sessionFetch,
+    ).postSession({
+      id_token: "i",
+      access_token: "a",
+      refresh_token: "r",
+    });
+    expect((sessionFetch.mock.calls[0] as unknown as [string])[0]).toBe(
+      "/api/v1/auth/session",
+    );
+  });
+
+  it("defaults to the site root", async () => {
+    const cfgFetch = vi.fn(async () => json(200, GOOD));
+    expect((await fetchAuthConfig(PINS, cfgFetch)).apiBase).toBe("");
+    expect((cfgFetch.mock.calls[0] as unknown as [string])[0]).toBe(
+      "/v1/auth/config",
+    );
+  });
+
+  it.each([
+    "api",
+    "/api/",
+    "//evil.example",
+    "/a b",
+    "https://x.example/api",
+    "/api/../x",
+  ])("refuses the base %j", (apiBase) => {
+    expect(() => parseAuthConfig(GOOD, { ...PINS, apiBase })).toThrow(
+      ConfigError,
+    );
+  });
+});

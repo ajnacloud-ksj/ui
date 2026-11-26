@@ -11,6 +11,7 @@ const CONFIG: AuthConfig = {
   region: "ap-south-1",
   clientId: "testclient0",
   doorZone: "example.test",
+  apiBase: "",
   forgotPassword: true,
   mfaMode: "OPTIONAL",
   orgSlug: "acme",

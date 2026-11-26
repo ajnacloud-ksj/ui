@@ -108,7 +108,10 @@ function defaultMachine(config: AuthConfig): SignInMachine {
       issuer: config.branding.displayName,
     },
     transport: awsTransport(config.region),
-    session: httpSessionClient({ doorZone: config.doorZone }),
+    session: httpSessionClient({
+      doorZone: config.doorZone,
+      apiBase: config.apiBase,
+    }),
     // The collector script is loaded by the host page only when config.collectorUrl is set (S1).
     userContextData: config.collectorUrl
       ? (username) =>

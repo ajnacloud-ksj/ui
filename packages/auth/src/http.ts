@@ -30,6 +30,18 @@ export interface ConfigPins {
   logoHosts: readonly string[];
   /** Org doors must be on this zone or one of its subdomains; null = show no door links. */
   doorZone: string | null;
+  /** Where the host routes its backend, e.g. "/api" on the portal's doors. Default "" (root). */
+  apiBase?: string;
+}
+
+/** "" or one or more plain path segments with one leading "/" and no trailing "/". */
+const API_BASE = /^(?:\/[A-Za-z0-9_-]+)*$/;
+
+function apiBaseOf(pins: ConfigPins): string {
+  const base = pins.apiBase ?? "";
+  if (!API_BASE.test(base))
+    throw new ConfigError('config: apiBase must be "" or a path like /api');
+  return base;
 }
 
 export interface AuthConfig {
@@ -41,6 +53,8 @@ export interface AuthConfig {
   orgSlug: string | null;
   /** From the pins: the zone the not-a-member page's org doors must be on. */
   doorZone: string | null;
+  /** From the pins: the path the host's backend is under ("" or e.g. "/api"). */
+  apiBase: string;
   passwordPolicy: {
     minLength: number;
     requireUpper: boolean;
@@ -124,6 +138,7 @@ function minLength(value: unknown): number {
 export function parseAuthConfig(value: unknown, pins: ConfigPins): AuthConfig {
   if (pins.poolIds.length === 0)
     throw new ConfigError("config: no pool is pinned");
+  const apiBase = apiBaseOf(pins);
   if (!isObject(value)) throw new ConfigError("config: not an object");
   const pool = isObject(value.pool) ? value.pool : {};
   const poolId = str(pool.id);
@@ -184,6 +199,7 @@ export function parseAuthConfig(value: unknown, pins: ConfigPins): AuthConfig {
     mfaMode,
     orgSlug: org === null ? null : (org as string),
     doorZone: pins.doorZone,
+    apiBase,
     passwordPolicy: {
       minLength: minLength(policy.min_length),
       requireUpper: policy.require_upper === true,
@@ -211,7 +227,7 @@ export async function fetchAuthConfig(
 ): Promise<AuthConfig> {
   let response: Response;
   try {
-    response = await fetchImpl("/v1/auth/config", {
+    response = await fetchImpl(`${apiBaseOf(pins)}/v1/auth/config`, {
       credentials: "same-origin",
       cache: "no-store",
       redirect: "error",
@@ -289,6 +305,8 @@ function orgLinks(value: unknown, zone: string | null): OrgLink[] {
 export interface SessionClientOptions {
   /** The zone org doors must be on (from the pins); null = no door links. */
   doorZone: string | null;
+  /** The backend's path on this host, from AuthConfig.apiBase. Default "" (root). */
+  apiBase?: string;
 }
 
 export function httpSessionClient(
@@ -299,7 +317,7 @@ export function httpSessionClient(
     async postSession(tokens: SessionTokens) {
       let response: Response;
       try {
-        response = await fetchImpl("/v1/auth/session", {
+        response = await fetchImpl(`${options.apiBase ?? ""}/v1/auth/session`, {
           method: "POST",
           credentials: "same-origin",
           // Never re-send the tokens to wherever a redirect points.
