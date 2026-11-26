@@ -25,7 +25,9 @@ export interface SdkClient {
 // The SDK's input types are stricter than the transport's Record; the machine builds each input to
 // the Cognito API shape, and the tests pin those shapes.
 type AnyInput = never;
-const COMMANDS: Readonly<Record<CognitoOperation, new (input: AnyInput) => unknown>> = {
+const COMMANDS: Readonly<
+  Record<CognitoOperation, new (input: AnyInput) => unknown>
+> = {
   InitiateAuth: InitiateAuthCommand,
   RespondToAuthChallenge: RespondToAuthChallengeCommand,
   AssociateSoftwareToken: AssociateSoftwareTokenCommand,
@@ -34,15 +36,23 @@ const COMMANDS: Readonly<Record<CognitoOperation, new (input: AnyInput) => unkno
   ConfirmForgotPassword: ConfirmForgotPasswordCommand,
 };
 
-export function awsTransport(region: string, client?: SdkClient): CognitoTransport {
-  if (!REGION.test(region)) throw new Error("awsTransport: not an AWS region name");
-  const sdk: SdkClient = client ?? (new CognitoIdentityProviderClient({ region }) as unknown as SdkClient);
+export function awsTransport(
+  region: string,
+  client?: SdkClient,
+): CognitoTransport {
+  if (!REGION.test(region))
+    throw new Error("awsTransport: not an AWS region name");
+  const sdk: SdkClient =
+    client ??
+    (new CognitoIdentityProviderClient({ region }) as unknown as SdkClient);
   return {
     async send(operation, input) {
       const Command = COMMANDS[operation];
       const output = await sdk.send(new Command(input as AnyInput));
-      const { $metadata: _metadata, ...rest } = output;
-      return rest;
+      // Drop the SDK's request metadata; the machine reads only Cognito's own fields.
+      return Object.fromEntries(
+        Object.entries(output).filter(([key]) => key !== "$metadata"),
+      );
     },
   };
 }

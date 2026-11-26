@@ -13,8 +13,19 @@ const CONFIG: AuthConfig = {
   forgotPassword: true,
   mfaMode: "OPTIONAL",
   orgSlug: "acme",
-  passwordPolicy: { minLength: 8, requireUpper: true, requireLower: true, requireDigit: true, requireSymbol: false },
-  branding: { displayName: "Acme", appDisplayName: "Plant Manager", logoUrl: null, primaryColor: null },
+  passwordPolicy: {
+    minLength: 8,
+    requireUpper: true,
+    requireLower: true,
+    requireDigit: true,
+    requireSymbol: false,
+  },
+  branding: {
+    displayName: "Acme",
+    appDisplayName: "Plant Manager",
+    logoUrl: null,
+    primaryColor: null,
+  },
   collectorUrl: null,
   bundleVersion: "test",
 };
@@ -59,7 +70,10 @@ describe("password step", () => {
     await user.type(screen.getByTestId("signin-email"), "ravi@example.com");
     await user.type(screen.getByTestId("signin-password"), "Correct-Horse-9");
     await user.click(screen.getByTestId("signin-submit"));
-    expect(machine.submitPassword).toHaveBeenCalledWith("ravi@example.com", "Correct-Horse-9");
+    expect(machine.submitPassword).toHaveBeenCalledWith(
+      "ravi@example.com",
+      "Correct-Horse-9",
+    );
   });
 
   it("shows one plain message for a failed sign-in", async () => {
@@ -68,7 +82,9 @@ describe("password step", () => {
     await user.type(screen.getByTestId("signin-email"), "x@example.com");
     await user.type(screen.getByTestId("signin-password"), "nope-nope-1");
     await user.click(screen.getByTestId("signin-submit"));
-    expect((await screen.findByTestId("signin-error")).textContent).toContain("The email, Login ID or password is not correct.");
+    expect((await screen.findByTestId("signin-error")).textContent).toContain(
+      "The email, Login ID or password is not correct.",
+    );
   });
 
   it("explains a threat-protection block", async () => {
@@ -77,14 +93,18 @@ describe("password step", () => {
     await user.type(screen.getByTestId("signin-email"), "x@example.com");
     await user.type(screen.getByTestId("signin-password"), "Correct-Horse-9");
     await user.click(screen.getByTestId("signin-submit"));
-    expect((await screen.findByTestId("signin-error")).textContent).toMatch(/blocked.*Reset your password/);
+    expect((await screen.findByTestId("signin-error")).textContent).toMatch(
+      /blocked.*Reset your password/,
+    );
   });
 
   it("does not submit an empty form", async () => {
     const { user, machine } = renderPage();
     await user.click(screen.getByTestId("signin-submit"));
     expect(machine.submitPassword).not.toHaveBeenCalled();
-    expect((screen.getByTestId("signin-error")).textContent).toContain("Enter your email or your Login ID, and your password.");
+    expect(screen.getByTestId("signin-error").textContent).toContain(
+      "Enter your email or your Login ID, and your password.",
+    );
   });
 
   it("hides Forgot password when the config turns it off", () => {
@@ -94,7 +114,9 @@ describe("password step", () => {
 
   it("confirms a password reset", () => {
     renderPage({ step: "password", notice: "password_reset" });
-    expect(screen.getByTestId("signin-notice").textContent).toContain("Your password is changed. Sign in with the new one.");
+    expect(screen.getByTestId("signin-notice").textContent).toContain(
+      "Your password is changed. Sign in with the new one.",
+    );
   });
 });
 
@@ -103,16 +125,29 @@ describe("branding", () => {
     renderPage();
     expect(screen.getByText("Acme")).toBeTruthy();
     expect(screen.getByText("Plant Manager")).toBeTruthy();
-    expect((screen.getByTestId("signin-secured")).textContent).toContain("Secured by Ajna · acme");
+    expect(screen.getByTestId("signin-secured").textContent).toContain(
+      "Secured by Ajna · acme",
+    );
   });
 
   it("shows a logo only from an https URL, with the org name as its text", () => {
-    renderPage(undefined, { ...CONFIG, branding: { ...CONFIG.branding, logoUrl: "https://static.example.test/a.png" } });
-    expect((screen.getByRole("img", { name: "Acme" })).getAttribute("src")).toBe("https://static.example.test/a.png");
+    renderPage(undefined, {
+      ...CONFIG,
+      branding: {
+        ...CONFIG.branding,
+        logoUrl: "https://static.example.test/a.png",
+      },
+    });
+    expect(screen.getByRole("img", { name: "Acme" }).getAttribute("src")).toBe(
+      "https://static.example.test/a.png",
+    );
   });
 
   it("renders a display name as text, never as HTML", () => {
-    renderPage(undefined, { ...CONFIG, branding: { ...CONFIG.branding, displayName: "<b>Evil</b>" } });
+    renderPage(undefined, {
+      ...CONFIG,
+      branding: { ...CONFIG.branding, displayName: "<b>Evil</b>" },
+    });
     expect(screen.getByText("<b>Evil</b>")).toBeTruthy();
     expect(document.querySelector("b")).toBeNull();
   });
@@ -132,8 +167,14 @@ describe("TOTP step", () => {
 
 describe("MFA setup", () => {
   it("shows a QR code and the secret as text", () => {
-    renderPage({ step: "mfa_setup", otpauthUri: "otpauth://totp/Acme:r?secret=JBSWY3DPEHPK3PXP&issuer=Acme", secret: "JBSWY3DPEHPK3PXP" });
-    expect(screen.getByTestId("signin-mfa-qr").querySelector("svg")).not.toBeNull();
+    renderPage({
+      step: "mfa_setup",
+      otpauthUri: "otpauth://totp/Acme:r?secret=JBSWY3DPEHPK3PXP&issuer=Acme",
+      secret: "JBSWY3DPEHPK3PXP",
+    });
+    expect(
+      screen.getByTestId("signin-mfa-qr").querySelector("svg"),
+    ).not.toBeNull();
     expect(screen.getByText("JBSWY3DPEHPK3PXP")).toBeTruthy();
   });
 });
@@ -141,11 +182,19 @@ describe("MFA setup", () => {
 describe("first sign-in (new password)", () => {
   it("refuses two different passwords without calling the machine", async () => {
     const { user, machine } = renderPage({ step: "new_password" });
-    await user.type(screen.getByTestId("signin-new-password"), "A-Strong-Pass-1");
-    await user.type(screen.getByTestId("signin-new-password-again"), "A-Strong-Pass-2");
+    await user.type(
+      screen.getByTestId("signin-new-password"),
+      "A-Strong-Pass-1",
+    );
+    await user.type(
+      screen.getByTestId("signin-new-password-again"),
+      "A-Strong-Pass-2",
+    );
     await user.click(screen.getByTestId("signin-submit"));
     expect(machine.submitNewPassword).not.toHaveBeenCalled();
-    expect((screen.getByTestId("signin-error")).textContent).toContain("The two passwords are not the same.");
+    expect(screen.getByTestId("signin-error").textContent).toContain(
+      "The two passwords are not the same.",
+    );
   });
 
   it("shows the pool's password rules", () => {
@@ -162,26 +211,45 @@ describe("forgot password", () => {
     await user.type(screen.getByTestId("signin-email"), "ravi@example.com");
     await user.click(screen.getByTestId("signin-submit"));
     expect(machine.startForgot).toHaveBeenCalledWith("ravi@example.com");
-    expect(await screen.findByText(/If the account exists, we sent a code/)).toBeTruthy();
+    expect(
+      await screen.findByText(/If the account exists, we sent a code/),
+    ).toBeTruthy();
   });
 });
 
 describe("not a member of this org", () => {
   it("lists the person's own orgs as links to their doors", () => {
-    renderPage({ step: "not_member", orgs: [{ slug: "beta", display_name: "Beta", door: "https://beta.example.test/" }] });
+    renderPage({
+      step: "not_member",
+      orgs: [
+        {
+          slug: "beta",
+          display_name: "Beta",
+          door: "https://beta.example.test/",
+        },
+      ],
+    });
     expect(screen.getByText(/You are not a member of Acme/)).toBeTruthy();
-    expect((screen.getByRole("link", { name: "Beta" })).getAttribute("href")).toBe("https://beta.example.test/");
+    expect(
+      screen.getByRole("link", { name: "Beta" }).getAttribute("href"),
+    ).toBe("https://beta.example.test/");
   });
 });
 
 describe("done", () => {
   it("hands the next address to the host once", async () => {
     const { user, queue, onDone } = renderPage();
-    queue({ state: { step: "done", next: "/v1/oidc/authorize/continue?request=r1" } });
+    queue({
+      state: { step: "done", next: "/v1/oidc/authorize/continue?request=r1" },
+    });
     await user.type(screen.getByTestId("signin-email"), "ravi@example.com");
     await user.type(screen.getByTestId("signin-password"), "Correct-Horse-9");
     await user.click(screen.getByTestId("signin-submit"));
-    await waitFor(() => expect(onDone).toHaveBeenCalledWith("/v1/oidc/authorize/continue?request=r1"));
+    await waitFor(() =>
+      expect(onDone).toHaveBeenCalledWith(
+        "/v1/oidc/authorize/continue?request=r1",
+      ),
+    );
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 });
@@ -194,7 +262,10 @@ describe("secrets never reach the page or the console", () => {
     await user.type(screen.getByTestId("signin-email"), "ravi@example.com");
     await user.type(screen.getByTestId("signin-password"), "Correct-Horse-9");
     await user.click(screen.getByTestId("signin-submit"));
-    const all = [...logs.mock.calls, ...errors.mock.calls].flat().map(String).join(" ");
+    const all = [...logs.mock.calls, ...errors.mock.calls]
+      .flat()
+      .map(String)
+      .join(" ");
     expect(all).not.toContain("Correct-Horse-9");
   });
 });

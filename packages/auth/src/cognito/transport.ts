@@ -13,5 +13,8 @@ export type CognitoOperation =
   | "ConfirmForgotPassword";
 
 export interface CognitoTransport {
-  send(operation: CognitoOperation, input: Record<string, unknown>): Promise<Record<string, unknown>>;
+  send(
+    operation: CognitoOperation,
+    input: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
 }

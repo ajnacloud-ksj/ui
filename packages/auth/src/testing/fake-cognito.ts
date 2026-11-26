@@ -5,8 +5,15 @@
  * only if the client's SRP is right. It is never part of the published package (build excludes
  * src/testing).
  */
-import { computeK, G, modPow, N, padHex, passwordClaimSignature } from "../srp/srp";
 import type { CognitoOperation, CognitoTransport } from "../cognito/transport";
+import {
+  computeK,
+  G,
+  modPow,
+  N,
+  padHex,
+  passwordClaimSignature,
+} from "../srp/srp";
 
 export interface FakeUser {
   password: string;
@@ -54,25 +61,42 @@ function fail(name: string, message: string): never {
 
 const hexBytes = (hex: string): Uint8Array<ArrayBuffer> =>
   Uint8Array.from(hex.match(/../g) ?? [], (h) => Number.parseInt(h, 16));
-const toHex = (b: Uint8Array): string => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+const toHex = (b: Uint8Array): string =>
+  Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
 async function sha256Hex(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
   return toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)));
 }
-async function hmac(key: Uint8Array<ArrayBuffer>, data: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
-  const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+async function hmac(
+  key: Uint8Array<ArrayBuffer>,
+  data: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const k = await crypto.subtle.importKey(
+    "raw",
+    key,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
   return new Uint8Array(await crypto.subtle.sign("HMAC", k, data));
 }
 
 export class FakeCognito implements CognitoTransport {
   readonly calls: FakeCall[] = [];
-  private readonly opts: Required<Omit<FakePoolOptions, "users">> & { users: Record<string, FakeUser> };
+  private readonly opts: Required<Omit<FakePoolOptions, "users">> & {
+    users: Record<string, FakeUser>;
+  };
   private readonly srp = new Map<string, PendingSrp>();
   private readonly challenges = new Map<string, PendingChallenge>();
   private readonly resetCodes = new Map<string, string>();
   private counter = 0;
 
   constructor(options: FakePoolOptions) {
-    this.opts = { mfa: "OPTIONAL", totpCode: "123456", ...options, users: { ...options.users } };
+    this.opts = {
+      mfa: "OPTIONAL",
+      totpCode: "123456",
+      ...options,
+      users: { ...options.users },
+    };
   }
 
   get poolName(): string {
@@ -95,12 +119,19 @@ export class FakeCognito implements CognitoTransport {
   private async verifier(username: string, salt: bigint): Promise<bigint> {
     const user = this.opts.users[username];
     if (!user) return 0n;
-    const inner = await sha256Hex(new TextEncoder().encode(`${this.poolName}${this.userId(username)}:${user.password}`));
+    const inner = await sha256Hex(
+      new TextEncoder().encode(
+        `${this.poolName}${this.userId(username)}:${user.password}`,
+      ),
+    );
     const x = BigInt("0x" + (await sha256Hex(hexBytes(padHex(salt) + inner))));
     return modPow(G, x, N);
   }
 
-  async send(operation: CognitoOperation, input: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async send(
+    operation: CognitoOperation,
+    input: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     this.calls.push({ operation, input });
     if (input.ClientId !== undefined && input.ClientId !== this.opts.clientId) {
       fail("ResourceNotFoundException", "User pool client does not exist.");
@@ -119,12 +150,18 @@ export class FakeCognito implements CognitoTransport {
       case "ConfirmForgotPassword":
         return this.confirmForgot(input);
       default:
-        return fail("InvalidParameterException", `unsupported ${String(operation)}`);
+        return fail(
+          "InvalidParameterException",
+          `unsupported ${String(operation)}`,
+        );
     }
   }
 
-  private async initiateAuth(input: Record<string, unknown>): Promise<Record<string, unknown>> {
-    if (input.AuthFlow !== "USER_SRP_AUTH") fail("InvalidParameterException", "USER_SRP_AUTH only");
+  private async initiateAuth(
+    input: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    if (input.AuthFlow !== "USER_SRP_AUTH")
+      fail("InvalidParameterException", "USER_SRP_AUTH only");
     const params = input.AuthParameters as Record<string, string>;
     const username = params.USERNAME ?? "";
     const A = BigInt("0x" + (params.SRP_A ?? "0"));
@@ -149,22 +186,36 @@ export class FakeCognito implements CognitoTransport {
   }
 
   private async serverKey(p: PendingSrp, v: bigint): Promise<Uint8Array> {
-    const u = BigInt("0x" + (await sha256Hex(hexBytes(padHex(p.A) + padHex(p.B)))));
+    const u = BigInt(
+      "0x" + (await sha256Hex(hexBytes(padHex(p.A) + padHex(p.B)))),
+    );
     const S = modPow((p.A * modPow(v, u, N)) % N, p.b, N);
     const prk = await hmac(hexBytes(padHex(u)), hexBytes(padHex(S)));
-    return (await hmac(prk, new TextEncoder().encode("Caldera Derived Key\u0001"))).slice(0, 16);
+    return (
+      await hmac(prk, new TextEncoder().encode("Caldera Derived Key\u0001"))
+    ).slice(0, 16);
   }
 
-  private async respond(input: Record<string, unknown>): Promise<Record<string, unknown>> {
+  private async respond(
+    input: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     const name = input.ChallengeName as string;
-    const responses = (input.ChallengeResponses ?? {}) as Record<string, string>;
+    const responses = (input.ChallengeResponses ?? {}) as Record<
+      string,
+      string
+    >;
     if (name === "PASSWORD_VERIFIER") return this.passwordVerifier(responses);
     const session = input.Session as string;
     const pending = this.challenges.get(session);
-    if (!pending || pending.name !== name) fail("NotAuthorizedException", "Invalid session for the user, session is expired.");
+    if (!pending || pending.name !== name)
+      fail(
+        "NotAuthorizedException",
+        "Invalid session for the user, session is expired.",
+      );
     this.challenges.delete(session);
     const user = this.opts.users[pending.username];
-    if (!user) return fail("NotAuthorizedException", "Incorrect username or password.");
+    if (!user)
+      return fail("NotAuthorizedException", "Incorrect username or password.");
     if (name === "SOFTWARE_TOKEN_MFA") {
       if (responses.SOFTWARE_TOKEN_MFA_CODE !== this.opts.totpCode) {
         fail("CodeMismatchException", "Invalid code received for user");
@@ -173,25 +224,38 @@ export class FakeCognito implements CognitoTransport {
     }
     if (name === "NEW_PASSWORD_REQUIRED") {
       const next = responses.NEW_PASSWORD ?? "";
-      if (next.length < 8) fail("InvalidPasswordException", "Password does not conform to policy");
+      if (next.length < 8)
+        fail("InvalidPasswordException", "Password does not conform to policy");
       user.password = next;
       user.status = "CONFIRMED";
       return this.afterPassword(pending.username);
     }
     // MFA_SETUP
-    if (!pending.verified) fail("NotAuthorizedException", "Invalid session for the user, session is expired.");
+    if (!pending.verified)
+      fail(
+        "NotAuthorizedException",
+        "Invalid session for the user, session is expired.",
+      );
     user.totp = true;
     return this.tokens(pending.username);
   }
 
-  private async passwordVerifier(responses: Record<string, string>): Promise<Record<string, unknown>> {
+  private async passwordVerifier(
+    responses: Record<string, string>,
+  ): Promise<Record<string, unknown>> {
     const p = this.srp.get(responses.USERNAME ?? "");
-    if (!p) return fail("NotAuthorizedException", "Incorrect username or password.");
+    if (!p)
+      return fail("NotAuthorizedException", "Incorrect username or password.");
     this.srp.delete(p.userId);
     const user = this.opts.users[p.username];
-    if (!user) return fail("NotAuthorizedException", "Incorrect username or password.");
-    if (responses.PASSWORD_CLAIM_SECRET_BLOCK !== p.secretBlock) fail("NotAuthorizedException", "Incorrect username or password.");
-    const key = await this.serverKey(p, await this.verifier(p.username, p.salt));
+    if (!user)
+      return fail("NotAuthorizedException", "Incorrect username or password.");
+    if (responses.PASSWORD_CLAIM_SECRET_BLOCK !== p.secretBlock)
+      fail("NotAuthorizedException", "Incorrect username or password.");
+    const key = await this.serverKey(
+      p,
+      await this.verifier(p.username, p.salt),
+    );
     const expected = await passwordClaimSignature({
       key,
       poolName: this.poolName,
@@ -199,28 +263,46 @@ export class FakeCognito implements CognitoTransport {
       secretBlock: p.secretBlock,
       timestamp: responses.TIMESTAMP ?? "",
     });
-    if (expected !== responses.PASSWORD_CLAIM_SIGNATURE) fail("NotAuthorizedException", "Incorrect username or password.");
-    if (user.blocked) fail("NotAuthorizedException", "Unable to login because of security reasons.");
-    if (user.status === "FORCE_CHANGE_PASSWORD") return this.challenge(p.username, "NEW_PASSWORD_REQUIRED");
+    if (expected !== responses.PASSWORD_CLAIM_SIGNATURE)
+      fail("NotAuthorizedException", "Incorrect username or password.");
+    if (user.blocked)
+      fail(
+        "NotAuthorizedException",
+        "Unable to login because of security reasons.",
+      );
+    if (user.status === "FORCE_CHANGE_PASSWORD")
+      return this.challenge(p.username, "NEW_PASSWORD_REQUIRED");
     return this.afterPassword(p.username);
   }
 
   private afterPassword(username: string): Record<string, unknown> {
     const user = this.opts.users[username];
-    if (user?.totp && this.opts.mfa !== "OFF") return this.challenge(username, "SOFTWARE_TOKEN_MFA");
+    if (user?.totp && this.opts.mfa !== "OFF")
+      return this.challenge(username, "SOFTWARE_TOKEN_MFA");
     if (this.opts.mfa === "ON") return this.challenge(username, "MFA_SETUP");
     return this.tokens(username);
   }
 
-  private challenge(username: string, name: PendingChallenge["name"]): Record<string, unknown> {
+  private challenge(
+    username: string,
+    name: PendingChallenge["name"],
+  ): Record<string, unknown> {
     const session = this.nextSession();
     this.challenges.set(session, { username, name });
-    return { ChallengeName: name, Session: session, ChallengeParameters: { USER_ID_FOR_SRP: this.userId(username) } };
+    return {
+      ChallengeName: name,
+      Session: session,
+      ChallengeParameters: { USER_ID_FOR_SRP: this.userId(username) },
+    };
   }
 
   private associate(input: Record<string, unknown>): Record<string, unknown> {
     const old = this.challenges.get(input.Session as string);
-    if (!old || old.name !== "MFA_SETUP") return fail("NotAuthorizedException", "Invalid session for the user, session is expired.");
+    if (!old || old.name !== "MFA_SETUP")
+      return fail(
+        "NotAuthorizedException",
+        "Invalid session for the user, session is expired.",
+      );
     this.challenges.delete(input.Session as string);
     const session = this.nextSession();
     this.challenges.set(session, { ...old, associated: true });
@@ -229,8 +311,13 @@ export class FakeCognito implements CognitoTransport {
 
   private verify(input: Record<string, unknown>): Record<string, unknown> {
     const old = this.challenges.get(input.Session as string);
-    if (!old?.associated) return fail("NotAuthorizedException", "Invalid session for the user, session is expired.");
-    if (input.UserCode !== this.opts.totpCode) fail("CodeMismatchException", "Invalid code received for user");
+    if (!old?.associated)
+      return fail(
+        "NotAuthorizedException",
+        "Invalid session for the user, session is expired.",
+      );
+    if (input.UserCode !== this.opts.totpCode)
+      fail("CodeMismatchException", "Invalid code received for user");
     this.challenges.delete(input.Session as string);
     const session = this.nextSession();
     this.challenges.set(session, { ...old, verified: true });
@@ -241,17 +328,28 @@ export class FakeCognito implements CognitoTransport {
     const username = input.Username as string;
     if (this.opts.users[username]) this.resetCodes.set(username, "654321");
     // PreventUserExistenceErrors: the same answer for an unknown user.
-    return { CodeDeliveryDetails: { DeliveryMedium: "EMAIL", Destination: "x***@e***" } };
+    return {
+      CodeDeliveryDetails: {
+        DeliveryMedium: "EMAIL",
+        Destination: "x***@e***",
+      },
+    };
   }
 
-  private confirmForgot(input: Record<string, unknown>): Record<string, unknown> {
+  private confirmForgot(
+    input: Record<string, unknown>,
+  ): Record<string, unknown> {
     const username = input.Username as string;
     const user = this.opts.users[username];
     if (!user || this.resetCodes.get(username) !== input.ConfirmationCode) {
-      fail("CodeMismatchException", "Invalid code provided, please request a code again.");
+      fail(
+        "CodeMismatchException",
+        "Invalid code provided, please request a code again.",
+      );
     }
     const next = (input.Password as string) ?? "";
-    if (next.length < 8) fail("InvalidPasswordException", "Password does not conform to policy");
+    if (next.length < 8)
+      fail("InvalidPasswordException", "Password does not conform to policy");
     user.password = next;
     this.resetCodes.delete(username);
     return {};
@@ -269,4 +367,3 @@ export class FakeCognito implements CognitoTransport {
     };
   }
 }
-

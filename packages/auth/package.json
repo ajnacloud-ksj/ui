@@ -24,8 +24,11 @@
     }
   },
   "scripts": {
+    "build": "tsdown --config-loader native",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:package": "pnpm build && node scripts/test-package.mjs",
+    "prepack": "pnpm build"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "3.1167.0"
@@ -37,14 +40,17 @@
   },
   "devDependencies": {
     "@ajnacloud/ui": "workspace:*",
+    "@arethetypeswrong/cli": "^0.18.5",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "amazon-cognito-identity-js": "6.3.22",
     "jsdom": "^29.1.1",
+    "publint": "^0.3.25",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "tsdown": "^0.23.4",
     "typescript": "5.9.3",
     "vite": "^6.4.3",
     "vitest": "^3.2.4"

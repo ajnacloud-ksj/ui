@@ -31,20 +31,38 @@ const INFO_BITS = new TextEncoder().encode("Caldera Derived Key\u0001");
 const SMALL_A_BYTES = 128;
 const DERIVED_KEY_BYTES = 16;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
 
 export type RandomBytes = (count: number) => Uint8Array;
 
 /** Even-length hex, with "00" prepended when the most significant bit is set. */
 export function padHex(value: bigint): string {
-  if (value < 0n) throw new SrpError("padHex: negative values are not used by SRP");
+  if (value < 0n)
+    throw new SrpError("padHex: negative values are not used by SRP");
   let hex = value.toString(16);
   if (hex.length % 2 !== 0) hex = "0" + hex;
   return /^[89a-f]/.test(hex) ? "00" + hex : hex;
 }
 
 /** b^e mod m, by square and multiply. */
-export function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
+export function modPow(
+  base: bigint,
+  exponent: bigint,
+  modulus: bigint,
+): bigint {
   if (modulus === 1n) return 0n;
   let result = 1n;
   let b = ((base % modulus) + modulus) % modulus;
@@ -88,7 +106,9 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes));
 }
 
-async function sha256(bytes: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
+async function sha256(
+  bytes: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
 }
 
@@ -100,9 +120,13 @@ async function hmacSha256(
   key: Uint8Array<ArrayBuffer>,
   data: Uint8Array<ArrayBuffer>,
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const cryptoKey = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, [
-    "sign",
-  ]);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
   return new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, data));
 }
 
@@ -124,9 +148,12 @@ export function poolNameOf(poolId: string): string {
 }
 
 /** The private value a: 128 random bytes as a positive integer. */
-export function generateSmallA(randomBytes: RandomBytes = defaultRandomBytes): bigint {
+export function generateSmallA(
+  randomBytes: RandomBytes = defaultRandomBytes,
+): bigint {
   const bytes = randomBytes(SMALL_A_BYTES);
-  if (bytes.length !== SMALL_A_BYTES) throw new SrpError("generateSmallA: wrong random length");
+  if (bytes.length !== SMALL_A_BYTES)
+    throw new SrpError("generateSmallA: wrong random length");
   const a = BigInt("0x" + bytesToHex(bytes));
   if (a === 0n) throw new SrpError("generateSmallA: the random value is zero");
   return a;
@@ -154,14 +181,19 @@ export interface PasswordKeyInput {
 }
 
 /** The 16-byte key: HKDF(S, u) with Cognito's info string. */
-export async function passwordAuthenticationKey(input: PasswordKeyInput): Promise<Uint8Array> {
+export async function passwordAuthenticationKey(
+  input: PasswordKeyInput,
+): Promise<Uint8Array> {
   const { poolName, userId, password, serverB, salt, smallA } = input;
-  if (serverB % N === 0n) throw new SrpError("passwordAuthenticationKey: B mod N is 0");
+  if (serverB % N === 0n)
+    throw new SrpError("passwordAuthenticationKey: B mod N is 0");
   const A = calculateA(smallA);
   const u = BigInt("0x" + (await hexHash(padHex(A) + padHex(serverB))));
   if (u === 0n) throw new SrpError("passwordAuthenticationKey: u is 0");
 
-  const inner = bytesToHex(await sha256(new TextEncoder().encode(`${poolName}${userId}:${password}`)));
+  const inner = bytesToHex(
+    await sha256(new TextEncoder().encode(`${poolName}${userId}:${password}`)),
+  );
   const x = BigInt("0x" + (await hexHash(padHex(salt) + inner)));
   const base = serverB - (await computeK()) * modPow(G, x, N);
   const S = modPow(base, smallA + u * x, N);
@@ -181,7 +213,9 @@ export interface ClaimInput {
 }
 
 /** PASSWORD_CLAIM_SIGNATURE = base64(HMAC-SHA256(key, poolName | userId | secretBlock | timestamp)). */
-export async function passwordClaimSignature(input: ClaimInput): Promise<string> {
+export async function passwordClaimSignature(
+  input: ClaimInput,
+): Promise<string> {
   const encoder = new TextEncoder();
   const message = concat(
     encoder.encode(input.poolName),

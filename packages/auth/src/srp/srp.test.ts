@@ -6,10 +6,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   calculateA,
+  computeK,
   formatTimestamp,
   G,
   generateSmallA,
-  computeK,
   modPow,
   N,
   padHex,
@@ -38,12 +38,13 @@ interface ReferenceHelperInstance {
   ): void;
 }
 const require = createRequire(import.meta.url);
-const ReferenceHelper: new (poolName: string) => ReferenceHelperInstance = require(
-  "amazon-cognito-identity-js/lib/AuthenticationHelper.js",
-).default;
-const ReferenceBigInteger: new (value: string, radix: number) => ReferenceBigInteger = require(
-  "amazon-cognito-identity-js/lib/BigInteger.js",
-).default;
+const ReferenceHelper: new (poolName: string) => ReferenceHelperInstance =
+  require("amazon-cognito-identity-js/lib/AuthenticationHelper.js").default;
+const ReferenceBigInteger: new (
+  value: string,
+  radix: number,
+) => ReferenceBigInteger =
+  require("amazon-cognito-identity-js/lib/BigInteger.js").default;
 
 /** A reference helper with OUR fixed a. Its constructor caches A from a random a, so clear it. */
 function referenceWithFixedA(): ReferenceHelperInstance {
@@ -64,13 +65,24 @@ const SMALL_B = BigInt("0x" + "5c".repeat(32));
 
 const hex = (n: bigint): string => n.toString(16);
 const sha256Hex = async (bytes: Uint8Array): Promise<string> =>
-  Buffer.from(await crypto.subtle.digest("SHA-256", new Uint8Array(bytes))).toString("hex");
+  Buffer.from(
+    await crypto.subtle.digest("SHA-256", new Uint8Array(bytes)),
+  ).toString("hex");
 
 // An independent SRP server for the same user: v = g^x, B = k*v + g^b (mod N).
-async function fakeServer(): Promise<{ B: bigint; salt: bigint; v: bigint; x: bigint }> {
+async function fakeServer(): Promise<{
+  B: bigint;
+  salt: bigint;
+  v: bigint;
+  x: bigint;
+}> {
   const salt = BigInt("0x" + SALT_HEX);
-  const inner = await sha256Hex(new TextEncoder().encode(`${POOL_NAME}${USER_ID}:${PASSWORD}`));
-  const x = BigInt("0x" + (await sha256Hex(Buffer.from(padHex(salt) + inner, "hex"))));
+  const inner = await sha256Hex(
+    new TextEncoder().encode(`${POOL_NAME}${USER_ID}:${PASSWORD}`),
+  );
+  const x = BigInt(
+    "0x" + (await sha256Hex(Buffer.from(padHex(salt) + inner, "hex"))),
+  );
   const v = modPow(G, x, N);
   const k = await computeK();
   const B = (k * v + modPow(G, SMALL_B, N)) % N;
@@ -128,9 +140,12 @@ describe("poolNameOf", () => {
     expect(poolNameOf(POOL_ID)).toBe(POOL_NAME);
   });
 
-  it.each(["", "nounderscore", "ap-south-1_", "_abc", "a_b_c"])("refuses %j", (bad) => {
-    expect(() => poolNameOf(bad)).toThrow(SrpError);
-  });
+  it.each(["", "nounderscore", "ap-south-1_", "_abc", "a_b_c"])(
+    "refuses %j",
+    (bad) => {
+      expect(() => poolNameOf(bad)).toThrow(SrpError);
+    },
+  );
 });
 
 describe("generateSmallA", () => {
@@ -149,7 +164,9 @@ describe("generateSmallA", () => {
   });
 
   it("refuses a zero value", () => {
-    expect(() => generateSmallA((n: number) => new Uint8Array(n))).toThrow(SrpError);
+    expect(() => generateSmallA((n: number) => new Uint8Array(n))).toThrow(
+      SrpError,
+    );
   });
 });
 
@@ -157,7 +174,9 @@ describe("calculateA", () => {
   it("matches the reference A for the same a", async () => {
     const helper = referenceWithFixedA();
     const refA = await new Promise<string>((resolve, reject) =>
-      helper.getLargeAValue((err, value) => (err ? reject(err) : resolve(value.toString(16)))),
+      helper.getLargeAValue((err, value) =>
+        err ? reject(err) : resolve(value.toString(16)),
+      ),
     );
     expect(hex(calculateA(BigInt("0x" + SMALL_A_HEX)))).toBe(refA);
   });
@@ -185,14 +204,21 @@ describe("passwordAuthenticationKey", () => {
     const { B, salt, v } = await fakeServer();
     const a = BigInt("0x" + SMALL_A_HEX);
     const A = calculateA(a);
-    const u = BigInt("0x" + (await sha256Hex(Buffer.from(padHex(A) + padHex(B), "hex"))));
+    const u = BigInt(
+      "0x" + (await sha256Hex(Buffer.from(padHex(A) + padHex(B), "hex"))),
+    );
     // Server side: S = (A * v^u)^b mod N, then the same HKDF.
     const serverS = modPow((A * modPow(v, u, N)) % N, SMALL_B, N);
     const prk = createHmac("sha256", Buffer.from(padHex(u), "hex"))
       .update(Buffer.from(padHex(serverS), "hex"))
       .digest();
     const serverKey = createHmac("sha256", prk)
-      .update(Buffer.concat([Buffer.from("Caldera Derived Key", "utf8"), Buffer.from([1])]))
+      .update(
+        Buffer.concat([
+          Buffer.from("Caldera Derived Key", "utf8"),
+          Buffer.from([1]),
+        ]),
+      )
       .digest()
       .subarray(0, 16);
 
@@ -209,9 +235,21 @@ describe("passwordAuthenticationKey", () => {
 
   it("gives a different key for a wrong password", async () => {
     const { B, salt } = await fakeServer();
-    const args = { poolName: POOL_NAME, userId: USER_ID, serverB: B, salt, smallA: BigInt("0x" + SMALL_A_HEX) };
-    const right = await passwordAuthenticationKey({ ...args, password: PASSWORD });
-    const wrong = await passwordAuthenticationKey({ ...args, password: PASSWORD + "x" });
+    const args = {
+      poolName: POOL_NAME,
+      userId: USER_ID,
+      serverB: B,
+      salt,
+      smallA: BigInt("0x" + SMALL_A_HEX),
+    };
+    const right = await passwordAuthenticationKey({
+      ...args,
+      password: PASSWORD,
+    });
+    const wrong = await passwordAuthenticationKey({
+      ...args,
+      password: PASSWORD + "x",
+    });
     expect(Buffer.from(right).equals(Buffer.from(wrong))).toBe(false);
   });
 
@@ -232,7 +270,9 @@ describe("passwordAuthenticationKey", () => {
 describe("passwordClaimSignature", () => {
   it("is base64(HMAC-SHA256(key, poolName | userId | secretBlock | timestamp))", async () => {
     const key = new Uint8Array(16).map((_, i) => i * 7);
-    const secretBlock = Buffer.from("opaque-secret-block-bytes").toString("base64");
+    const secretBlock = Buffer.from("opaque-secret-block-bytes").toString(
+      "base64",
+    );
     const timestamp = "Thu Nov 26 05:04:03 UTC 2026";
     const expected = createHmac("sha256", key)
       .update(
@@ -245,7 +285,13 @@ describe("passwordClaimSignature", () => {
       )
       .digest("base64");
     await expect(
-      passwordClaimSignature({ key, poolName: POOL_NAME, userId: USER_ID, secretBlock, timestamp }),
+      passwordClaimSignature({
+        key,
+        poolName: POOL_NAME,
+        userId: USER_ID,
+        secretBlock,
+        timestamp,
+      }),
     ).resolves.toBe(expected);
   });
 });

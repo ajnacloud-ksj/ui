@@ -2,7 +2,12 @@
  * The sign-in page's two calls to its own backend (spec v1.1): GET /v1/auth/config (A1) and
  * POST /v1/auth/session (A2). Both are same-origin; the answers are validated, never trusted.
  */
-import { SessionError, type OrgLink, type SessionClient, type SessionTokens } from "./machine";
+import {
+  type OrgLink,
+  type SessionClient,
+  SessionError,
+  type SessionTokens,
+} from "./machine";
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -56,7 +61,8 @@ const SESSION_CODES = new Set<SessionError["code"]>([
   "rate_limited",
 ]);
 
-const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
 function httpsUrl(value: unknown): string | null {
@@ -81,9 +87,11 @@ export function parseAuthConfig(value: unknown): AuthConfig {
   const match = POOL_ID.exec(poolId);
   if (!match) throw new ConfigError("config: pool.id");
   const region = str(pool.region);
-  if (region !== match[1]) throw new ConfigError("config: pool.region does not match pool.id");
+  if (region !== match[1])
+    throw new ConfigError("config: pool.region does not match pool.id");
   const clientId = str(pool.client_id);
-  if (!CLIENT_ID.test(clientId)) throw new ConfigError("config: pool.client_id");
+  if (!CLIENT_ID.test(clientId))
+    throw new ConfigError("config: pool.client_id");
 
   const mfa = isObject(value.mfa) ? value.mfa : {};
   const mfaMode = str(mfa.mode) as MfaMode;
@@ -91,12 +99,19 @@ export function parseAuthConfig(value: unknown): AuthConfig {
 
   const branding = isObject(value.branding) ? value.branding : {};
   const org = branding.org_slug;
-  if (org !== null && !(typeof org === "string" && ORG_SLUG.test(org))) throw new ConfigError("config: org_slug");
+  if (org !== null && !(typeof org === "string" && ORG_SLUG.test(org)))
+    throw new ConfigError("config: org_slug");
   const logoRaw = branding.logo_url;
-  const logoUrl = logoRaw === null || logoRaw === undefined ? null : httpsUrl(logoRaw);
-  if (logoRaw !== null && logoRaw !== undefined && logoUrl === null) throw new ConfigError("config: logo_url");
+  const logoUrl =
+    logoRaw === null || logoRaw === undefined ? null : httpsUrl(logoRaw);
+  if (logoRaw !== null && logoRaw !== undefined && logoUrl === null)
+    throw new ConfigError("config: logo_url");
   const colourRaw = branding.primary_color;
-  if (colourRaw !== null && colourRaw !== undefined && !(typeof colourRaw === "string" && COLOUR.test(colourRaw))) {
+  if (
+    colourRaw !== null &&
+    colourRaw !== undefined &&
+    !(typeof colourRaw === "string" && COLOUR.test(colourRaw))
+  ) {
     throw new ConfigError("config: primary_color");
   }
   const app = isObject(branding.app) ? branding.app : null;
@@ -104,7 +119,8 @@ export function parseAuthConfig(value: unknown): AuthConfig {
   const collector = isObject(value.collector) ? value.collector : {};
   let collectorUrl: string | null = null;
   if (collector.enabled === true) {
-    if (collector.url !== collectorUrlFor(region)) throw new ConfigError("config: collector.url");
+    if (collector.url !== collectorUrlFor(region))
+      throw new ConfigError("config: collector.url");
     collectorUrl = collectorUrlFor(region);
   }
 
@@ -126,29 +142,43 @@ export function parseAuthConfig(value: unknown): AuthConfig {
     },
     branding: {
       displayName: str(branding.display_name).slice(0, MAX_NAME) || "Ajna",
-      appDisplayName: app ? str(app.display_name).slice(0, MAX_NAME) || null : null,
+      appDisplayName: app
+        ? str(app.display_name).slice(0, MAX_NAME) || null
+        : null,
       logoUrl,
-      primaryColor: typeof colourRaw === "string" ? colourRaw.toLowerCase() : null,
+      primaryColor:
+        typeof colourRaw === "string" ? colourRaw.toLowerCase() : null,
     },
     collectorUrl,
     bundleVersion: str(value.bundle_version),
   };
 }
 
-export async function fetchAuthConfig(fetchImpl: FetchLike = fetch): Promise<AuthConfig> {
+export async function fetchAuthConfig(
+  fetchImpl: FetchLike = fetch,
+): Promise<AuthConfig> {
   let response: Response;
   try {
-    response = await fetchImpl("/v1/auth/config", { credentials: "same-origin", headers: { Accept: "application/json" } });
+    response = await fetchImpl("/v1/auth/config", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    });
   } catch {
     throw new ConfigError("config: unreachable");
   }
-  if (response.status !== 200) throw new ConfigError(`config: HTTP ${response.status}`);
+  if (response.status !== 200)
+    throw new ConfigError(`config: HTTP ${response.status}`);
   return parseAuthConfig(await response.json());
 }
 
 /** A same-origin path: one leading "/", never "//" or "/\" (no scheme, no host). */
 function isSameOriginPath(value: unknown): value is string {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
+  return (
+    typeof value === "string" &&
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.startsWith("/\\")
+  );
 }
 
 function orgLinks(value: unknown): OrgLink[] {
@@ -157,7 +187,9 @@ function orgLinks(value: unknown): OrgLink[] {
     if (!isObject(o)) return [];
     const door = httpsUrl(o.door);
     const slug = str(o.slug);
-    return door && ORG_SLUG.test(slug) ? [{ slug, display_name: str(o.display_name).slice(0, MAX_NAME), door }] : [];
+    return door && ORG_SLUG.test(slug)
+      ? [{ slug, display_name: str(o.display_name).slice(0, MAX_NAME), door }]
+      : [];
   });
 }
 
@@ -169,7 +201,10 @@ export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
         response = await fetchImpl("/v1/auth/session", {
           method: "POST",
           credentials: "same-origin",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
           body: JSON.stringify(tokens),
         });
       } catch {
@@ -177,13 +212,19 @@ export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
       }
       const body: unknown = await response.json().catch(() => null);
       if (response.status === 200) {
-        if (isObject(body) && isSameOriginPath(body.next)) return { next: body.next };
+        if (isObject(body) && isSameOriginPath(body.next))
+          return { next: body.next };
         throw new SessionError("unavailable");
       }
       const code = isObject(body) ? str(body.code) : "";
       if (response.status === 429) throw new SessionError("rate_limited");
       if (SESSION_CODES.has(code as SessionError["code"])) {
-        throw new SessionError(code as SessionError["code"], code === "not_org_member" && isObject(body) ? orgLinks(body.orgs) : []);
+        throw new SessionError(
+          code as SessionError["code"],
+          code === "not_org_member" && isObject(body)
+            ? orgLinks(body.orgs)
+            : [],
+        );
       }
       throw new SessionError("unavailable");
     },

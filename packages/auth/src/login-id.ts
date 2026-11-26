@@ -30,7 +30,10 @@ export function expandLoginId(typed: string, orgSlug: string | null): string {
   const value = typed.trim().toLowerCase();
   if (value.includes("@")) return value;
   if (!value || value.length > MAX_HANDLE || !HANDLE.test(value)) {
-    throw new LoginIdError("login_id_invalid", "Enter your email or your Login ID.");
+    throw new LoginIdError(
+      "login_id_invalid",
+      "Enter your email or your Login ID.",
+    );
   }
   if (orgSlug === null) {
     throw new LoginIdError(
@@ -39,7 +42,10 @@ export function expandLoginId(typed: string, orgSlug: string | null): string {
     );
   }
   if (!ORG_SLUG.test(orgSlug)) {
-    throw new LoginIdError("login_id_invalid", "This organisation address is not valid.");
+    throw new LoginIdError(
+      "login_id_invalid",
+      "This organisation address is not valid.",
+    );
   }
   return `${value}.${orgSlug}@${NO_EMAIL_DOMAIN}`;
 }

@@ -5,7 +5,7 @@
  * password stays in this browser: only SRP values reach Cognito, and nothing reaches our backend
  * but the final tokens, which are handed over once and never kept in the returned state.
  */
-import { toAuthErrorCode, type AuthErrorCode } from "./cognito/errors";
+import { type AuthErrorCode, toAuthErrorCode } from "./cognito/errors";
 import type { CognitoOperation, CognitoTransport } from "./cognito/transport";
 import { expandLoginId, LoginIdError, type LoginIdErrorCode } from "./login-id";
 import {
@@ -127,27 +127,42 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
 
   const set = (next: SignInState, error?: FlowErrorCode): StepResult => {
     state = next;
-    if (next.step === "password" || next.step === "done" || next.step === "not_member") pending = undefined;
+    if (
+      next.step === "password" ||
+      next.step === "done" ||
+      next.step === "not_member"
+    )
+      pending = undefined;
     return error === undefined ? { state } : { state, error };
   };
   const stay = (error: FlowErrorCode): StepResult => ({ state, error });
 
-  async function call(operation: CognitoOperation, input: Record<string, unknown>, username: string) {
+  async function call(
+    operation: CognitoOperation,
+    input: Record<string, unknown>,
+    username: string,
+  ) {
     const context = deps.userContextData?.(username);
     const body =
-      context && CONTEXT_OPERATIONS.has(operation) ? { ...input, UserContextData: { EncodedData: context } } : input;
+      context && CONTEXT_OPERATIONS.has(operation)
+        ? { ...input, UserContextData: { EncodedData: context } }
+        : input;
     return transport.send(operation, body);
   }
 
   /** Map a thrown Cognito error; an expired challenge session restarts at the password step. */
   function fromCognito(err: unknown): StepResult {
     const code = toAuthErrorCode(err);
-    return code === "session_expired" ? set({ step: "password" }, code) : stay(code);
+    return code === "session_expired"
+      ? set({ step: "password" }, code)
+      : stay(code);
   }
 
   async function finish(result: Record<string, unknown>): Promise<StepResult> {
-    const auth = result.AuthenticationResult as Record<string, string> | undefined;
-    if (!auth?.IdToken || !auth.AccessToken || !auth.RefreshToken) return stay("unavailable");
+    const auth = result.AuthenticationResult as
+      Record<string, string> | undefined;
+    if (!auth?.IdToken || !auth.AccessToken || !auth.RefreshToken)
+      return stay("unavailable");
     try {
       const { next } = await session.postSession({
         id_token: auth.IdToken,
@@ -157,15 +172,24 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
       return set({ step: "done", next });
     } catch (err: unknown) {
       if (err instanceof SessionError) {
-        if (err.code === "not_org_member") return set({ step: "not_member", orgs: err.orgs });
+        if (err.code === "not_org_member")
+          return set({ step: "not_member", orgs: err.orgs });
         return set({ step: "password" }, err.code);
       }
       return set({ step: "password" }, "unavailable");
     }
   }
 
-  async function mfaSetup(username: string, userId: string, challengeSession: string): Promise<StepResult> {
-    const associated = await call("AssociateSoftwareToken", { Session: challengeSession }, username);
+  async function mfaSetup(
+    username: string,
+    userId: string,
+    challengeSession: string,
+  ): Promise<StepResult> {
+    const associated = await call(
+      "AssociateSoftwareToken",
+      { Session: challengeSession },
+      username,
+    );
     const secret = String(associated.SecretCode ?? "");
     if (!secret) return stay("unavailable");
     pending = { username, userId, session: String(associated.Session ?? "") };
@@ -175,7 +199,11 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
   }
 
   /** Route Cognito's answer: tokens, or the next challenge. */
-  async function next(result: Record<string, unknown>, username: string, userId: string): Promise<StepResult> {
+  async function next(
+    result: Record<string, unknown>,
+    username: string,
+    userId: string,
+  ): Promise<StepResult> {
     if (result.AuthenticationResult) return finish(result);
     const challengeSession = String(result.Session ?? "");
     switch (result.ChallengeName) {
@@ -194,7 +222,10 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
             ChallengeName: "SELECT_MFA_TYPE",
             ClientId: config.clientId,
             Session: challengeSession,
-            ChallengeResponses: { USERNAME: userId, ANSWER: "SOFTWARE_TOKEN_MFA" },
+            ChallengeResponses: {
+              USERNAME: userId,
+              ANSWER: "SOFTWARE_TOKEN_MFA",
+            },
           },
           username,
         );
@@ -205,7 +236,10 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
     }
   }
 
-  async function submitPassword(loginId: string, password: string): Promise<StepResult> {
+  async function submitPassword(
+    loginId: string,
+    password: string,
+  ): Promise<StepResult> {
     let username: string;
     try {
       username = expandLoginId(loginId, config.orgSlug);
@@ -219,11 +253,15 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
         {
           AuthFlow: "USER_SRP_AUTH",
           ClientId: config.clientId,
-          AuthParameters: { USERNAME: username, SRP_A: calculateA(smallA).toString(16) },
+          AuthParameters: {
+            USERNAME: username,
+            SRP_A: calculateA(smallA).toString(16),
+          },
         },
         username,
       );
-      if (init.ChallengeName !== "PASSWORD_VERIFIER") return next(init, username, username);
+      if (init.ChallengeName !== "PASSWORD_VERIFIER")
+        return next(init, username, username);
       const params = init.ChallengeParameters as Record<string, string>;
       const userId = params.USER_ID_FOR_SRP ?? username;
       const key = await passwordAuthenticationKey({
@@ -292,15 +330,24 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
     },
     submitPassword,
     submitTotp(code) {
-      if (state.step !== "totp") return Promise.resolve(stay("session_expired"));
-      if (!SIX_DIGITS.test(code.trim())) return Promise.resolve(stay("code_mismatch"));
-      return respond("SOFTWARE_TOKEN_MFA", { SOFTWARE_TOKEN_MFA_CODE: code.trim() });
+      if (state.step !== "totp")
+        return Promise.resolve(stay("session_expired"));
+      if (!SIX_DIGITS.test(code.trim()))
+        return Promise.resolve(stay("code_mismatch"));
+      return respond("SOFTWARE_TOKEN_MFA", {
+        SOFTWARE_TOKEN_MFA_CODE: code.trim(),
+      });
     },
     async submitMfaSetupCode(code) {
-      if (state.step !== "mfa_setup" || !pending) return stay("session_expired");
+      if (state.step !== "mfa_setup" || !pending)
+        return stay("session_expired");
       if (!SIX_DIGITS.test(code.trim())) return stay("code_mismatch");
       try {
-        const verified = await call("VerifySoftwareToken", { Session: pending.session, UserCode: code.trim() }, pending.username);
+        const verified = await call(
+          "VerifySoftwareToken",
+          { Session: pending.session, UserCode: code.trim() },
+          pending.username,
+        );
         if (verified.Status !== "SUCCESS") return stay("code_mismatch");
         return await respond("MFA_SETUP", {}, String(verified.Session ?? ""));
       } catch (err: unknown) {
@@ -308,7 +355,8 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
       }
     },
     submitNewPassword(password) {
-      if (state.step !== "new_password") return Promise.resolve(stay("session_expired"));
+      if (state.step !== "new_password")
+        return Promise.resolve(stay("session_expired"));
       return respond("NEW_PASSWORD_REQUIRED", { NEW_PASSWORD: password });
     },
     async startForgot(loginId) {
@@ -316,24 +364,37 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
       try {
         username = expandLoginId(loginId, config.orgSlug);
       } catch (err: unknown) {
-        return stay(err instanceof LoginIdError ? err.code : "login_id_invalid");
+        return stay(
+          err instanceof LoginIdError ? err.code : "login_id_invalid",
+        );
       }
       try {
-        await call("ForgotPassword", { ClientId: config.clientId, Username: username }, username);
+        await call(
+          "ForgotPassword",
+          { ClientId: config.clientId, Username: username },
+          username,
+        );
       } catch (err: unknown) {
         const code = toAuthErrorCode(err);
         // Never reveal whether the account exists: only a real throttle or outage is shown.
-        if (code === "rate_limited" || code === "unavailable") return stay(code);
+        if (code === "rate_limited" || code === "unavailable")
+          return stay(code);
       }
       forgotUsername = username;
       return set({ step: "forgot_code" });
     },
     async confirmForgot(code, newPassword) {
-      if (state.step !== "forgot_code" || !forgotUsername) return stay("session_expired");
+      if (state.step !== "forgot_code" || !forgotUsername)
+        return stay("session_expired");
       try {
         await call(
           "ConfirmForgotPassword",
-          { ClientId: config.clientId, Username: forgotUsername, ConfirmationCode: code.trim(), Password: newPassword },
+          {
+            ClientId: config.clientId,
+            Username: forgotUsername,
+            ConfirmationCode: code.trim(),
+            Password: newPassword,
+          },
           forgotUsername,
         );
       } catch (err: unknown) {
