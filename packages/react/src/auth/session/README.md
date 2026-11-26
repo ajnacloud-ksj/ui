@@ -1,7 +1,7 @@
-# @ajnacloud/auth/session
+# @ajnacloud/ui/session
 
 The app's complete sign-in and session. The app imports it only from
-`@ajnacloud/auth/session`, and calls `configureAppSession()` once at start-up.
+`@ajnacloud/ui/session`, and calls `configureAppSession()` once at start-up.
 
 > Follow-up: this folder moves into a tiny shared package in the
 > ajnacloud-ksj/ui repo (proposed `@ajnacloud/app-session`) so apps stop

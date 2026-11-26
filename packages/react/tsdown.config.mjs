@@ -9,6 +9,8 @@ const manifest = JSON.parse(
   readFileSync(new URL("./package.json", import.meta.url), "utf8"),
 );
 const packageRoot = fileURLToPath(new URL(".", import.meta.url));
+// The platform sign-in code (src/auth): separable, published as three subpaths only.
+const AUTH_ENTRIES = new Set(["signin", "session", "members"]);
 const entry = Object.fromEntries(
   Object.keys(manifest.exports)
     .filter(
@@ -20,11 +22,13 @@ const entry = Object.fromEntries(
       const source =
         name === "index"
           ? "src/index.ts"
-          : name === "utils" || name === "primitives"
-            ? `src/${name}/index.ts`
-            : name.startsWith("primitives/")
-              ? `src/${name}.ts`
-              : `src/components/${name}/index.ts`;
+          : AUTH_ENTRIES.has(name)
+            ? `src/auth/${name}/index.ts`
+            : name === "utils" || name === "primitives"
+              ? `src/${name}/index.ts`
+              : name.startsWith("primitives/")
+                ? `src/${name}.ts`
+                : `src/components/${name}/index.ts`;
       return [name, source];
     }),
 );

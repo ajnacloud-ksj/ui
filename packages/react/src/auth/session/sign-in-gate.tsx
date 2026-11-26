@@ -1,5 +1,6 @@
-import { Button } from "@ajnacloud/ui/button";
 import { type ReactNode, useEffect, useState } from "react";
+
+import { Button } from "@/components/button";
 
 import { beginBffLogin, currentPath, signInDecision } from "./bff-signin";
 import { useSessionUser } from "./session-provider";

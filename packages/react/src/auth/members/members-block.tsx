@@ -1,8 +1,9 @@
-import { Badge } from "@ajnacloud/ui/badge";
-import { Banner } from "@ajnacloud/ui/banner";
-import { Button } from "@ajnacloud/ui/button";
-import { Table } from "@ajnacloud/ui/table";
 import { type ReactNode, useEffect, useState } from "react";
+
+import { Badge } from "@/components/badge";
+import { Banner } from "@/components/banner";
+import { Button } from "@/components/button";
+import { Table } from "@/components/table";
 
 import {
   type InviteBody,
@@ -177,7 +178,7 @@ export function MembersBlock({ api, title = "Members" }: MembersBlockProps) {
           <div className="flex items-center gap-3">
             {!caps.invites_enabled && (
               <span
-                className="text-ajna-muted-foreground text-xs"
+                className="text-xs text-ajna-muted-foreground"
                 data-testid="members-invite-reason"
               >
                 {membersErrorMessage("invites_disabled")}
@@ -232,7 +233,7 @@ export function MembersBlock({ api, title = "Members" }: MembersBlockProps) {
                 {m.no_email ? (
                   <Badge variant="outline">No email</Badge>
                 ) : (
-                  <div className="text-ajna-muted-foreground text-xs">
+                  <div className="text-xs text-ajna-muted-foreground">
                     {m.email}
                   </div>
                 )}
@@ -264,7 +265,7 @@ export function MembersBlock({ api, title = "Members" }: MembersBlockProps) {
                 </Badge>
               </Table.Cell>
               <Table.Cell>
-                <span className="text-ajna-muted-foreground text-xs">
+                <span className="text-xs text-ajna-muted-foreground">
                   {m.invited_by ? `${m.invited_by}` : ""}
                   {m.invited_at
                     ? ` · ${new Date(m.invited_at).toLocaleDateString()}`

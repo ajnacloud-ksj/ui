@@ -1,5 +1,7 @@
-import { Button } from "@ajnacloud/ui/button";
-import { CopyButton } from "@ajnacloud/ui/copy-button";
+import { type FormEvent, useId, useState } from "react";
+
+import { Button } from "@/components/button";
+import { CopyButton } from "@/components/copy-button";
 import {
   Dialog,
   DialogContent,
@@ -7,15 +9,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@ajnacloud/ui/dialog";
+} from "@/components/dialog";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldLabel,
-} from "@ajnacloud/ui/field";
-import { Input } from "@ajnacloud/ui/input";
-import { type FormEvent, useId, useState } from "react";
+} from "@/components/field";
+import { Input } from "@/components/input";
 
 import type { InviteBody, RoleOption } from "./members-api";
 
@@ -300,14 +301,14 @@ export function SecretDialog({ secret, onDone }: SecretDialogProps) {
             {secret.loginId && (
               <p>
                 Login ID:{" "}
-                <code className="bg-ajna-muted rounded px-1">
+                <code className="rounded bg-ajna-muted px-1">
                   {secret.loginId}
                 </code>
               </p>
             )}
             <p className="flex items-center gap-2">
               Password:{" "}
-              <code className="bg-ajna-muted rounded px-1">
+              <code className="rounded bg-ajna-muted px-1">
                 {secret.password}
               </code>
               <CopyButton
