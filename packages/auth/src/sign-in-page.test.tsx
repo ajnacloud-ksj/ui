@@ -10,6 +10,7 @@ const CONFIG: AuthConfig = {
   poolId: "ap-south-1_TESTPOOL0",
   region: "ap-south-1",
   clientId: "testclient0",
+  doorZone: "example.test",
   forgotPassword: true,
   mfaMode: "OPTIONAL",
   orgSlug: "acme",
@@ -83,7 +84,7 @@ describe("password step", () => {
     await user.type(screen.getByTestId("signin-password"), "nope-nope-1");
     await user.click(screen.getByTestId("signin-submit"));
     expect((await screen.findByTestId("signin-error")).textContent).toContain(
-      "The email, Login ID or password is not correct.",
+      "The email, Login ID or password is not correct. If you must reset your password, use Forgot password.",
     );
   });
 
@@ -123,7 +124,9 @@ describe("password step", () => {
 describe("branding", () => {
   it("shows the org, the app, the org slug and the Ajna mark that branding cannot change", () => {
     renderPage();
-    expect(screen.getByText("Acme")).toBeTruthy();
+    expect(screen.getByTestId("signin-org").textContent).toBe(
+      "Organisation: Acme",
+    );
     expect(screen.getByText("Plant Manager")).toBeTruthy();
     expect(screen.getByTestId("signin-secured").textContent).toContain(
       "Secured by Ajna · acme",
@@ -148,7 +151,9 @@ describe("branding", () => {
       ...CONFIG,
       branding: { ...CONFIG.branding, displayName: "<b>Evil</b>" },
     });
-    expect(screen.getByText("<b>Evil</b>")).toBeTruthy();
+    expect(screen.getByTestId("signin-org").textContent).toBe(
+      "Organisation: <b>Evil</b>",
+    );
     expect(document.querySelector("b")).toBeNull();
   });
 });
@@ -267,5 +272,27 @@ describe("secrets never reach the page or the console", () => {
       .map(String)
       .join(" ");
     expect(all).not.toContain("Correct-Horse-9");
+  });
+});
+
+describe("review fixes (plant-ea, ui#1)", () => {
+  it("M5: labels the name as the organisation's name", () => {
+    renderPage();
+    expect(screen.getByTestId("signin-org").textContent).toBe(
+      "Organisation: Acme",
+    );
+  });
+
+  it("LOW: loads the logo without a referrer", () => {
+    renderPage(undefined, {
+      ...CONFIG,
+      branding: {
+        ...CONFIG.branding,
+        logoUrl: "https://static.example.test/a.png",
+      },
+    });
+    expect(
+      screen.getByRole("img", { name: "Acme" }).getAttribute("referrerpolicy"),
+    ).toBe("no-referrer");
   });
 });

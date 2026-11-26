@@ -2,20 +2,23 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   ConfigError,
+  type ConfigPins,
   fetchAuthConfig,
   httpSessionClient,
   parseAuthConfig,
   safeNextPath,
-  trustedZoneOf,
 } from "./http";
 import { SessionError } from "./machine";
 
+const POOL = "ap-south-1_TESTPOOL0";
+const PINS: ConfigPins = {
+  poolIds: [POOL],
+  logoHosts: ["static.example.test"],
+  doorZone: "example.test",
+};
+
 const GOOD = {
-  pool: {
-    id: "ap-south-1_TESTPOOL0",
-    region: "ap-south-1",
-    client_id: "testclient0",
-  },
+  pool: { id: POOL, region: "ap-south-1", client_id: "testclient0" },
   flows: { srp: true, forgot_password: true, sign_up: false, federation: [] },
   mfa: { mode: "OPTIONAL", types: ["TOTP"] },
   password_policy: {
@@ -43,16 +46,21 @@ function json(status: number, body: unknown): Response {
   });
 }
 
+const withBranding = (patch: Record<string, unknown>) => ({
+  ...GOOD,
+  branding: { ...GOOD.branding, ...patch },
+});
+
 describe("parseAuthConfig (spec A1)", () => {
   it("accepts the spec shape and keeps what the page needs", () => {
-    const cfg = parseAuthConfig(GOOD);
-    expect(cfg).toMatchObject({
-      poolId: "ap-south-1_TESTPOOL0",
+    expect(parseAuthConfig(GOOD, PINS)).toMatchObject({
+      poolId: POOL,
       region: "ap-south-1",
       clientId: "testclient0",
       forgotPassword: true,
       mfaMode: "OPTIONAL",
       orgSlug: "acme",
+      doorZone: "example.test",
       branding: {
         displayName: "Acme",
         appDisplayName: "Plant Manager",
@@ -62,13 +70,14 @@ describe("parseAuthConfig (spec A1)", () => {
     });
   });
 
-  it("accepts a page with no org context", () => {
+  it("accepts a page with no org context (null or missing)", () => {
     expect(
-      parseAuthConfig({
-        ...GOOD,
-        branding: { ...GOOD.branding, org_slug: null },
-      }).orgSlug,
+      parseAuthConfig(withBranding({ org_slug: null }), PINS).orgSlug,
     ).toBeNull();
+    const branding = Object.fromEntries(
+      Object.entries(GOOD.branding).filter(([key]) => key !== "org_slug"),
+    );
+    expect(parseAuthConfig({ ...GOOD, branding }, PINS).orgSlug).toBeNull();
   });
 
   it.each([
@@ -86,86 +95,159 @@ describe("parseAuthConfig (spec A1)", () => {
     ],
     [
       "an http logo",
-      {
-        ...GOOD,
-        branding: { ...GOOD.branding, logo_url: "http://x.test/a.png" },
-      },
+      withBranding({ logo_url: "http://static.example.test/a.png" }),
     ],
-    [
-      "a javascript: logo",
-      {
-        ...GOOD,
-        branding: { ...GOOD.branding, logo_url: "javascript:alert(1)" },
-      },
-    ],
-    [
-      "a colour that is not #rrggbb",
-      { ...GOOD, branding: { ...GOOD.branding, primary_color: "red" } },
-    ],
+    ["a javascript: logo", withBranding({ logo_url: "javascript:alert(1)" })],
+    ["a colour that is not #rrggbb", withBranding({ primary_color: "red" })],
     ["an unknown MFA mode", { ...GOOD, mfa: { ...GOOD.mfa, mode: "MAYBE" } }],
     [
       "a collector outside Cognito",
-      { ...GOOD, collector: { enabled: true, url: "https://evil.test/c.js" } },
+      {
+        ...GOOD,
+        collector: { enabled: true, url: "https://evil.example/c.js" },
+      },
     ],
     ["not an object", "nope"],
   ])("refuses %s", (_label, value) => {
-    expect(() => parseAuthConfig(value)).toThrow(ConfigError);
+    expect(() => parseAuthConfig(value, PINS)).toThrow(ConfigError);
   });
 
   it("accepts the Cognito collector URL for the pool's region only", () => {
     const url =
       "https://amazon-cognito-assets.ap-south-1.amazoncognito.com/amazon-cognito-advanced-security-data.min.js";
     expect(
-      parseAuthConfig({ ...GOOD, collector: { enabled: true, url } })
+      parseAuthConfig({ ...GOOD, collector: { enabled: true, url } }, PINS)
         .collectorUrl,
     ).toBe(url);
     expect(() =>
-      parseAuthConfig({
-        ...GOOD,
-        collector: {
-          enabled: true,
-          url: url.replace("ap-south-1", "us-east-1"),
+      parseAuthConfig(
+        {
+          ...GOOD,
+          collector: {
+            enabled: true,
+            url: url.replace("ap-south-1", "us-east-1"),
+          },
         },
-      }),
+        PINS,
+      ),
     ).toThrow(ConfigError);
   });
 
   it("keeps the display name as plain text, cut to 40 characters", () => {
-    const cfg = parseAuthConfig({
-      ...GOOD,
-      branding: { ...GOOD.branding, display_name: "<b>" + "x".repeat(60) },
-    });
+    const cfg = parseAuthConfig(
+      withBranding({ display_name: "<b>" + "x".repeat(60) }),
+      PINS,
+    );
     expect(cfg.branding.displayName).toHaveLength(40);
-    expect(cfg.branding.displayName.startsWith("<b>")).toBe(true); // rendered as text, never as HTML
+    expect(cfg.branding.displayName.startsWith("<b>")).toBe(true);
   });
 });
 
+describe("pinning (review M3, M4)", () => {
+  it("fails closed when no pool is pinned", () => {
+    expect(() => parseAuthConfig(GOOD, { ...PINS, poolIds: [] })).toThrow(
+      ConfigError,
+    );
+  });
+
+  it("refuses a pool that is not pinned, even a well-formed one", () => {
+    const other = {
+      ...GOOD,
+      pool: { ...GOOD.pool, id: "ap-south-1_OTHERPOOL" },
+    };
+    expect(() => parseAuthConfig(other, PINS)).toThrow(ConfigError);
+  });
+
+  it("accepts a logo only on a pinned host, exactly", () => {
+    expect(
+      parseAuthConfig(
+        withBranding({ logo_url: "https://static.example.test/a.png" }),
+        PINS,
+      ).branding.logoUrl,
+    ).toBe("https://static.example.test/a.png");
+    for (const bad of [
+      "https://cdn.example.test/a.png",
+      "https://static.example.test.evil.example/a.png",
+      "https://u:p@static.example.test/a.png",
+      "https://evil.example/a.png",
+    ]) {
+      expect(() =>
+        parseAuthConfig(withBranding({ logo_url: bad }), PINS),
+      ).toThrow(ConfigError);
+    }
+  });
+
+  it.each([5, 100, 7.5, "8", -1])(
+    "refuses a password min_length of %j",
+    (min_length) => {
+      expect(() =>
+        parseAuthConfig(
+          { ...GOOD, password_policy: { ...GOOD.password_policy, min_length } },
+          PINS,
+        ),
+      ).toThrow(ConfigError);
+    },
+  );
+});
+
 describe("fetchAuthConfig", () => {
-  it("reads GET /v1/auth/config on the same origin", async () => {
+  it("reads GET /v1/auth/config same-origin, uncached, without following a redirect", async () => {
     const fetchImpl = vi.fn(async () => json(200, GOOD));
-    await fetchAuthConfig(fetchImpl);
+    await fetchAuthConfig(PINS, fetchImpl);
     expect(fetchImpl).toHaveBeenCalledWith(
       "/v1/auth/config",
-      expect.objectContaining({ credentials: "same-origin" }),
+      expect.objectContaining({
+        credentials: "same-origin",
+        cache: "no-store",
+        redirect: "error",
+      }),
     );
   });
 
   it("refuses a non-200 answer", async () => {
     await expect(
-      fetchAuthConfig(async () => json(503, { code: "unavailable" })),
+      fetchAuthConfig(PINS, async () => json(503, { code: "unavailable" })),
     ).rejects.toThrow(ConfigError);
+  });
+});
+
+describe("safeNextPath (review H1)", () => {
+  it.each([
+    "/\t/evil.example",
+    "/\n/evil.example",
+    "/\r/evil.example",
+    "/\\evil.example",
+    "/x\\y",
+    "https://evil.example/",
+    "//evil.example",
+    "/.//evil.example",
+    "/a/..//evil.example",
+    "/%2e//evil.example",
+    "/%2E%2E//evil.example",
+    "/a/./b",
+    "/a/../b",
+    "",
+  ])("refuses %j", (value) => {
+    expect(safeNextPath(value)).toBeNull();
+  });
+
+  it("keeps a real path, query and hash unchanged", () => {
+    expect(safeNextPath("/v1/oidc/authorize/continue?request=r1#x")).toBe(
+      "/v1/oidc/authorize/continue?request=r1#x",
+    );
   });
 });
 
 describe("httpSessionClient (spec A2)", () => {
   const tokens = { id_token: "i", access_token: "a", refresh_token: "r" };
+  const client = (fetchImpl: Parameters<typeof httpSessionClient>[1]) =>
+    httpSessionClient({ doorZone: "example.test" }, fetchImpl);
 
-  it("POSTs the tokens to /v1/auth/session, same origin, as JSON", async () => {
+  it("POSTs the tokens as JSON, same origin, never following a redirect", async () => {
     const fetchImpl = vi.fn(async () =>
       json(200, { next: "/v1/oidc/authorize/continue?request=r1", user: {} }),
     );
-    const client = httpSessionClient(fetchImpl);
-    await expect(client.postSession(tokens)).resolves.toEqual({
+    await expect(client(fetchImpl).postSession(tokens)).resolves.toEqual({
       next: "/v1/oidc/authorize/continue?request=r1",
     });
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [
@@ -173,7 +255,11 @@ describe("httpSessionClient (spec A2)", () => {
       RequestInit,
     ];
     expect(url).toBe("/v1/auth/session");
-    expect(init).toMatchObject({ method: "POST", credentials: "same-origin" });
+    expect(init).toMatchObject({
+      method: "POST",
+      credentials: "same-origin",
+      redirect: "error",
+    });
     expect(JSON.parse(String(init.body))).toEqual(tokens);
     expect((init.headers as Record<string, string>)["Content-Type"]).toBe(
       "application/json",
@@ -181,31 +267,45 @@ describe("httpSessionClient (spec A2)", () => {
   });
 
   it.each([
-    "https://evil.test/",
-    "//evil.test/x",
-    "/\\evil.test",
+    "https://evil.example/",
+    "//evil.example/x",
+    "/\\evil.example",
+    "/.//evil.example",
     "javascript:alert(1)",
     "",
   ])(
     "refuses a next value that is not a same-origin path: %j",
     async (next) => {
-      const client = httpSessionClient(async () => json(200, { next }));
-      await expect(client.postSession(tokens)).rejects.toMatchObject({
+      await expect(
+        client(async () => json(200, { next })).postSession(tokens),
+      ).rejects.toMatchObject({
         code: "unavailable",
       });
     },
   );
 
-  it("passes not_org_member through with the person's orgs", async () => {
+  it("keeps only org doors on the pinned zone, https and without userinfo", async () => {
     const orgs = [
       { slug: "beta", display_name: "Beta", door: "https://beta.example.test" },
+      { slug: "evil", display_name: "Evil", door: "https://beta.evil.example" },
+      {
+        slug: "look",
+        display_name: "Look",
+        door: "https://beta.example.test.evil.example",
+      },
+      {
+        slug: "user",
+        display_name: "User",
+        door: "https://u:p@beta.example.test",
+      },
+      { slug: "js", display_name: "Js", door: "javascript:alert(1)" },
     ];
-    const client = httpSessionClient(async () =>
+    const err = await client(async () =>
       json(403, { code: "not_org_member", orgs }),
-    );
-    const err = await client.postSession(tokens).catch((e: unknown) => e);
+    )
+      .postSession(tokens)
+      .catch((e: unknown) => e);
     expect(err).toBeInstanceOf(SessionError);
-    // The door is normalised by the URL parser (a trailing "/").
     expect(err).toMatchObject({
       code: "not_org_member",
       orgs: [
@@ -218,16 +318,15 @@ describe("httpSessionClient (spec A2)", () => {
     });
   });
 
-  it("drops an org door that is not https", async () => {
+  it("drops every org door when no door zone is pinned", async () => {
     const orgs = [
-      { slug: "beta", display_name: "Beta", door: "javascript:alert(1)" },
+      { slug: "beta", display_name: "Beta", door: "https://beta.example.test" },
     ];
-    const client = httpSessionClient(async () =>
-      json(403, { code: "not_org_member", orgs }),
-    );
-    await expect(client.postSession(tokens)).rejects.toMatchObject({
-      orgs: [],
-    });
+    await expect(
+      httpSessionClient({ doorZone: null }, async () =>
+        json(403, { code: "not_org_member", orgs }),
+      ).postSession(tokens),
+    ).rejects.toMatchObject({ orgs: [] });
   });
 
   it.each([
@@ -238,121 +337,18 @@ describe("httpSessionClient (spec A2)", () => {
     [500, "anything", "unavailable"],
     [403, "made_up_code", "unavailable"],
   ])("maps %i %s to %s", async (status, code, expected) => {
-    const client = httpSessionClient(async () => json(status, { code }));
-    await expect(client.postSession(tokens)).rejects.toMatchObject({
+    await expect(
+      client(async () => json(status, { code })).postSession(tokens),
+    ).rejects.toMatchObject({
       code: expected,
     });
   });
 
   it("maps a network failure to unavailable", async () => {
-    const client = httpSessionClient(async () => {
-      throw new TypeError("Failed to fetch");
-    });
-    await expect(client.postSession(tokens)).rejects.toMatchObject({
-      code: "unavailable",
-    });
-  });
-});
-
-describe("review fixes (security review, 2026-11-26)", () => {
-  const ZONE = "example.test";
-  const tokens = { id_token: "i", access_token: "a", refresh_token: "r" };
-
-  it.each([
-    "/\t/evil.example",
-    "/\n/evil.example",
-    "/\r/evil.example",
-    "/\\evil.example",
-    "/x\\y",
-    "/%09/evil.example".replace("%09", "\t"),
-    "https://evil.example/",
-  ])("safeNextPath refuses %j", (value) => {
-    expect(safeNextPath(value)).toBeNull();
-  });
-
-  it("safeNextPath keeps a real path and re-serialises it", () => {
-    expect(safeNextPath("/v1/oidc/authorize/continue?request=r1#x")).toBe(
-      "/v1/oidc/authorize/continue?request=r1#x",
-    );
-  });
-
-  it("trustedZoneOf drops the first label of the sign-in host", () => {
-    expect(trustedZoneOf("signin.example.test")).toBe(ZONE);
-    expect(trustedZoneOf("acme.example.test")).toBe(ZONE);
-    expect(trustedZoneOf("localhost")).toBeNull();
-  });
-
-  it("accepts a logo only on the trusted zone, never with userinfo", () => {
-    const withLogo = (logo_url: string) => ({
-      ...GOOD,
-      branding: { ...GOOD.branding, logo_url },
-    });
-    expect(
-      parseAuthConfig(withLogo("https://static.example.test/a.png"), {
-        trustedZone: ZONE,
-      }).branding.logoUrl,
-    ).toBe("https://static.example.test/a.png");
-    expect(() =>
-      parseAuthConfig(withLogo("https://cdn.evil.example/a.png"), {
-        trustedZone: ZONE,
-      }),
-    ).toThrow(ConfigError);
-    expect(() =>
-      parseAuthConfig(withLogo("https://example.test.evil.example/a.png"), {
-        trustedZone: ZONE,
-      }),
-    ).toThrow(ConfigError);
-    expect(() =>
-      parseAuthConfig(withLogo("https://u:p@static.example.test/a.png"), {
-        trustedZone: ZONE,
-      }),
-    ).toThrow(ConfigError);
-  });
-
-  it("treats a missing org_slug as no org context", () => {
-    const branding = Object.fromEntries(
-      Object.entries(GOOD.branding).filter(([key]) => key !== "org_slug"),
-    );
-    expect(parseAuthConfig({ ...GOOD, branding }).orgSlug).toBeNull();
-  });
-
-  it("keeps only org doors on the trusted zone", async () => {
-    const orgs = [
-      { slug: "beta", display_name: "Beta", door: "https://beta.example.test" },
-      { slug: "evil", display_name: "Evil", door: "https://beta.evil.example" },
-      {
-        slug: "user",
-        display_name: "User",
-        door: "https://u:p@beta.example.test",
-      },
-    ];
-    const client = httpSessionClient(
-      async () => json(403, { code: "not_org_member", orgs }),
-      { trustedZone: ZONE },
-    );
-    await expect(client.postSession(tokens)).rejects.toMatchObject({
-      orgs: [
-        {
-          slug: "beta",
-          display_name: "Beta",
-          door: "https://beta.example.test/",
-        },
-      ],
-    });
-  });
-
-  it("never follows a redirect with the tokens or the config", async () => {
-    const fetchImpl = vi.fn(async () => json(200, { next: "/x" }));
-    await httpSessionClient(fetchImpl).postSession(tokens);
-    expect(fetchImpl).toHaveBeenCalledWith(
-      "/v1/auth/session",
-      expect.objectContaining({ redirect: "error" }),
-    );
-    const cfgFetch = vi.fn(async () => json(200, GOOD));
-    await fetchAuthConfig(cfgFetch);
-    expect(cfgFetch).toHaveBeenCalledWith(
-      "/v1/auth/config",
-      expect.objectContaining({ redirect: "error" }),
-    );
+    await expect(
+      client(async () => {
+        throw new TypeError("Failed to fetch");
+      }).postSession(tokens),
+    ).rejects.toMatchObject({ code: "unavailable" });
   });
 });

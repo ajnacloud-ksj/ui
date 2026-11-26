@@ -10,7 +10,8 @@ export type CognitoOperation =
   | "AssociateSoftwareToken"
   | "VerifySoftwareToken"
   | "ForgotPassword"
-  | "ConfirmForgotPassword";
+  | "ConfirmForgotPassword"
+  | "RevokeToken";
 
 export interface CognitoTransport {
   send(

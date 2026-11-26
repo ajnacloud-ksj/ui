@@ -8,7 +8,6 @@
 export const AUTH_ERROR_CODES = [
   "invalid_credentials",
   "SIGN_IN_BLOCKED",
-  "password_reset_required",
   "code_mismatch",
   "code_expired",
   "password_policy",
@@ -29,7 +28,9 @@ const CLOCK_TEXT = "timestamp";
 const BY_NAME: Readonly<Record<string, AuthErrorCode>> = {
   UserNotFoundException: "invalid_credentials",
   UserNotConfirmedException: "invalid_credentials",
-  PasswordResetRequiredException: "password_reset_required",
+  // Review M2: Cognito says "reset required" before it checks the password, so this would
+  // reveal that the account exists. It gets the generic answer; the text points to Forgot password.
+  PasswordResetRequiredException: "invalid_credentials",
   CodeMismatchException: "code_mismatch",
   ExpiredCodeException: "code_expired",
   InvalidPasswordException: "password_policy",

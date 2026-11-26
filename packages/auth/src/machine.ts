@@ -171,12 +171,25 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
       });
       return set({ step: "done", next });
     } catch (err: unknown) {
+      // The hand-over failed, so no session uses this refresh token: revoke it (best effort).
+      await revoke(auth.RefreshToken);
       if (err instanceof SessionError) {
         if (err.code === "not_org_member")
           return set({ step: "not_member", orgs: err.orgs });
         return set({ step: "password" }, err.code);
       }
       return set({ step: "password" }, "unavailable");
+    }
+  }
+
+  async function revoke(refreshToken: string): Promise<void> {
+    try {
+      await transport.send("RevokeToken", {
+        Token: refreshToken,
+        ClientId: config.clientId,
+      });
+    } catch {
+      // Nothing to show: the token also expires on its own.
     }
   }
 
@@ -375,10 +388,12 @@ export function createSignIn(deps: SignInDeps): SignInMachine {
           username,
         );
       } catch (err: unknown) {
-        const code = toAuthErrorCode(err);
-        // Never reveal whether the account exists: only a real throttle or outage is shown.
-        if (code === "rate_limited" || code === "unavailable")
-          return stay(code);
+        // Never reveal whether the account exists, or that it has no email (a Login ID account
+        // answers InvalidParameterException): every Cognito answer moves on, except a throttle.
+        // Only a network failure shows an outage (review M1).
+        if (err instanceof TypeError) return stay("unavailable");
+        if (toAuthErrorCode(err) === "rate_limited")
+          return stay("rate_limited");
       }
       forgotUsername = username;
       return set({ step: "forgot_code" });

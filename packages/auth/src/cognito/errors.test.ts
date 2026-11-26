@@ -26,10 +26,11 @@ describe("toAuthErrorCode (spec v1.1, section B)", () => {
       "Invalid session for the user, session is expired.",
       "session_expired",
     ],
+    // Review M2: reset-required must not reveal that the account exists.
     [
       "PasswordResetRequiredException",
       "Password reset required for the user",
-      "password_reset_required",
+      "invalid_credentials",
     ],
     [
       "CodeMismatchException",

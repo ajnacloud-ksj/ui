@@ -50,11 +50,10 @@ export interface SignInPageProps {
 type FormErrorCode = FlowErrorCode | "empty" | "passwords_differ";
 
 const MESSAGES: Readonly<Record<FormErrorCode, string>> = {
-  invalid_credentials: "The email, Login ID or password is not correct.",
+  invalid_credentials:
+    "The email, Login ID or password is not correct. If you must reset your password, use Forgot password.",
   SIGN_IN_BLOCKED:
     "This sign-in was blocked to protect your account. Reset your password, or contact your administrator.",
-  password_reset_required:
-    "You must set a new password first. Use Forgot password.",
   code_mismatch: "That code is not correct. Try again.",
   code_expired: "That code has expired. Ask for a new one.",
   password_policy: "The new password does not meet the rules below.",
@@ -93,7 +92,7 @@ function defaultMachine(config: AuthConfig): SignInMachine {
       issuer: config.branding.displayName,
     },
     transport: awsTransport(config.region),
-    session: httpSessionClient(),
+    session: httpSessionClient({ doorZone: config.doorZone }),
     // The collector script is loaded by the host page only when config.collectorUrl is set (S1).
     userContextData: config.collectorUrl
       ? (username) =>
@@ -426,13 +425,21 @@ export function SignInPage({
             <img
               src={brand.logoUrl}
               alt={brand.displayName}
+              referrerPolicy="no-referrer"
               className="size-8 object-contain"
             />
           ) : (
             <AjnaLogo variant="glyph" color="current" width={32} />
           )}
           <div className="min-w-0">
-            <p className="truncate text-base font-semibold">
+            {/* Review M5: the name is the org's own text, so it is labelled as such. */}
+            <p
+              className="truncate text-base font-semibold"
+              data-testid="signin-org"
+            >
+              <span className="text-ajna-muted-foreground font-normal">
+                Organisation:{" "}
+              </span>
               {brand.displayName}
             </p>
             {brand.appDisplayName && (

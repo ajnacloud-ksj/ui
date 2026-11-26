@@ -20,6 +20,10 @@ export interface FakeUser {
   status?: "CONFIRMED" | "FORCE_CHANGE_PASSWORD";
   totp?: boolean;
   blocked?: boolean;
+  /** RESET_REQUIRED: Cognito refuses the sign-in before checking the password. */
+  resetRequired?: boolean;
+  /** No verified email (a Login ID account): ForgotPassword is refused. */
+  noEmail?: boolean;
 }
 
 export interface FakePoolOptions {
@@ -82,6 +86,7 @@ async function hmac(
 
 export class FakeCognito implements CognitoTransport {
   readonly calls: FakeCall[] = [];
+  readonly revoked: string[] = [];
   private readonly opts: Required<Omit<FakePoolOptions, "users">> & {
     users: Record<string, FakeUser>;
   };
@@ -149,6 +154,9 @@ export class FakeCognito implements CognitoTransport {
         return this.forgot(input);
       case "ConfirmForgotPassword":
         return this.confirmForgot(input);
+      case "RevokeToken":
+        this.revoked.push(String(input.Token ?? ""));
+        return {};
       default:
         return fail(
           "InvalidParameterException",
@@ -164,6 +172,12 @@ export class FakeCognito implements CognitoTransport {
       fail("InvalidParameterException", "USER_SRP_AUTH only");
     const params = input.AuthParameters as Record<string, string>;
     const username = params.USERNAME ?? "";
+    if (this.opts.users[username]?.resetRequired) {
+      fail(
+        "PasswordResetRequiredException",
+        "Password reset required for the user",
+      );
+    }
     const A = BigInt("0x" + (params.SRP_A ?? "0"));
     if (A % N === 0n) fail("InvalidParameterException", "SRP_A");
     // PreventUserExistenceErrors: an unknown user still gets a challenge; it fails later.
@@ -326,6 +340,12 @@ export class FakeCognito implements CognitoTransport {
 
   private forgot(input: Record<string, unknown>): Record<string, unknown> {
     const username = input.Username as string;
+    if (this.opts.users[username]?.noEmail) {
+      fail(
+        "InvalidParameterException",
+        "Cannot reset password for the user as there is no registered/verified email or phone_number",
+      );
+    }
     if (this.opts.users[username]) this.resetCodes.set(username, "654321");
     // PreventUserExistenceErrors: the same answer for an unknown user.
     return {

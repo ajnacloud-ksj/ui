@@ -10,6 +10,7 @@ import {
   ForgotPasswordCommand,
   InitiateAuthCommand,
   RespondToAuthChallengeCommand,
+  RevokeTokenCommand,
   VerifySoftwareTokenCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 
@@ -34,6 +35,7 @@ const COMMANDS: Readonly<
   VerifySoftwareToken: VerifySoftwareTokenCommand,
   ForgotPassword: ForgotPasswordCommand,
   ConfirmForgotPassword: ConfirmForgotPasswordCommand,
+  RevokeToken: RevokeTokenCommand,
 };
 
 export function awsTransport(

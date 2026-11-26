@@ -29,7 +29,11 @@ function setup(
         status: "FORCE_CHANGE_PASSWORD",
       },
       "blocked@example.com": { password: "Correct-Horse-9", blocked: true },
-      [`picker07.acme@${NO_EMAIL_DOMAIN}`]: { password: "Correct-Horse-9" },
+      [`picker07.acme@${NO_EMAIL_DOMAIN}`]: {
+        password: "Correct-Horse-9",
+        noEmail: true,
+      },
+      "reset@example.com": { password: "Correct-Horse-9", resetRequired: true },
     },
     ...opts,
   });
@@ -372,5 +376,76 @@ describe("UserContextData (threat protection)", () => {
     await machine.submitPassword("ravi@example.com", "Correct-Horse-9");
     for (const call of cognito.calls)
       expect(call.input).not.toHaveProperty("UserContextData");
+  });
+});
+
+describe("review fixes (plant-ea, ui#1)", () => {
+  it("M1: forgot password answers the same for a no-email account as for any other", async () => {
+    const noEmail = await setup().machine.startForgot("picker07");
+    const known = await setup().machine.startForgot("ravi@example.com");
+    expect(noEmail).toEqual({ state: { step: "forgot_code" } });
+    expect(noEmail).toEqual(known);
+  });
+
+  it("M1: forgot password shows only a throttle, or an outage for a network failure", async () => {
+    const throttled = setup();
+    vi.spyOn(throttled.cognito, "send").mockRejectedValueOnce(
+      Object.assign(new Error("Attempt limit exceeded"), {
+        name: "LimitExceededException",
+      }),
+    );
+    expect(
+      (await throttled.machine.startForgot("ravi@example.com")).error,
+    ).toBe("rate_limited");
+
+    const offline = setup();
+    vi.spyOn(offline.cognito, "send").mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
+    expect((await offline.machine.startForgot("ravi@example.com")).error).toBe(
+      "unavailable",
+    );
+
+    const internal = setup();
+    vi.spyOn(internal.cognito, "send").mockRejectedValueOnce(
+      Object.assign(new Error("x"), { name: "InternalErrorException" }),
+    );
+    expect(await internal.machine.startForgot("ravi@example.com")).toEqual({
+      state: { step: "forgot_code" },
+    });
+  });
+
+  it("M2: a reset-required account gets the same answer as a wrong password", async () => {
+    const { machine } = setup();
+    const reset = await machine.submitPassword(
+      "reset@example.com",
+      "anything-1",
+    );
+    const wrong = await machine.submitPassword(
+      "ravi@example.com",
+      "nope-nope-1",
+    );
+    expect(reset).toEqual(wrong);
+    expect(reset.error).toBe("invalid_credentials");
+  });
+
+  it("LOW: revokes the refresh token when the hand-over fails", async () => {
+    const { machine, session, cognito } = setup();
+    vi.mocked(session.postSession).mockRejectedValueOnce(
+      new SessionError("MEMBERSHIP_SUSPENDED"),
+    );
+    await machine.submitPassword("ravi@example.com", "Correct-Horse-9");
+    expect(cognito.revoked).toEqual(["refresh.ravi@example.com"]);
+    const revoke = cognito.calls.find((c) => c.operation === "RevokeToken");
+    expect(revoke?.input).toEqual({
+      Token: "refresh.ravi@example.com",
+      ClientId: CLIENT_ID,
+    });
+  });
+
+  it("LOW: does not revoke after a successful hand-over", async () => {
+    const { machine, cognito } = setup();
+    await machine.submitPassword("ravi@example.com", "Correct-Horse-9");
+    expect(cognito.revoked).toEqual([]);
   });
 });

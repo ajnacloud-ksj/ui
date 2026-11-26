@@ -1,6 +1,10 @@
 /**
  * The sign-in page's two calls to its own backend (spec v1.1): GET /v1/auth/config (A1) and
  * POST /v1/auth/session (A2). Both are same-origin; the answers are validated, never trusted.
+ *
+ * Trust is PINNED by the host page from its build constants (review M3, M4): the pool ids it may
+ * use, the exact hosts a logo may come from, and the zone the org doors must be on. Nothing is
+ * derived from the page's own host name.
  */
 import {
   type OrgLink,
@@ -18,6 +22,16 @@ export class ConfigError extends Error {
 
 export type MfaMode = "OFF" | "OPTIONAL" | "ON";
 
+/** What the sign-in bundle trusts, from its build constants. Fails closed when empty. */
+export interface ConfigPins {
+  /** The Cognito pool ids this sign-in page may use (the region is part of each id). */
+  poolIds: readonly string[];
+  /** The exact hosts a logo may come from (the platform static host). */
+  logoHosts: readonly string[];
+  /** Org doors must be on this zone or one of its subdomains; null = show no door links. */
+  doorZone: string | null;
+}
+
 export interface AuthConfig {
   poolId: string;
   region: string;
@@ -25,6 +39,8 @@ export interface AuthConfig {
   forgotPassword: boolean;
   mfaMode: MfaMode;
   orgSlug: string | null;
+  /** From the pins: the zone the not-a-member page's org doors must be on. */
+  doorZone: string | null;
   passwordPolicy: {
     minLength: number;
     requireUpper: boolean;
@@ -51,6 +67,9 @@ const ORG_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const COLOUR = /^#[0-9a-f]{6}$/i;
 const MFA_MODES: readonly MfaMode[] = ["OFF", "OPTIONAL", "ON"];
 const MAX_NAME = 40;
+/** Cognito's own bounds for a pool's minimum password length. */
+const MIN_PASSWORD_LENGTH = 6;
+const MAX_PASSWORD_LENGTH = 99;
 const SESSION_CODES = new Set<SessionError["code"]>([
   "MEMBERSHIP_SUSPENDED",
   "not_org_member",
@@ -65,13 +84,14 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
-function httpsUrl(value: unknown, trustedZone?: string | null): string | null {
+/** An https URL with no userinfo, or null. */
+function httpsUrl(value: unknown): URL | null {
   if (typeof value !== "string" || !value) return null;
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.username || url.password) return null;
-    if (trustedZone && !onZone(url.hostname, trustedZone)) return null;
-    return url.toString();
+    return url.protocol === "https:" && !url.username && !url.password
+      ? url
+      : null;
   } catch {
     return null;
   }
@@ -83,42 +103,34 @@ function onZone(hostname: string, zone: string): boolean {
   return host === zone || host.endsWith(`.${zone}`);
 }
 
-/**
- * The zone a sign-in page trusts for logos and org doors: its own host minus the first label
- * ("signin.example.test" -> "example.test"). Null for a host with no parent zone.
- */
-export function trustedZoneOf(hostname: string): string | null {
-  const labels = hostname.toLowerCase().split(".").filter(Boolean);
-  return labels.length >= 3 ? labels.slice(1).join(".") : null;
-}
-
-export interface TrustOptions {
-  /** Logos and org doors must be on this zone. Default: derived from the page's own host. */
-  trustedZone?: string | null;
-}
-
-function pageZone(): string | null {
-  return typeof location === "undefined"
-    ? null
-    : trustedZoneOf(location.hostname);
-}
-
 function collectorUrlFor(region: string): string {
   return `https://amazon-cognito-assets.${region}.amazoncognito.com/amazon-cognito-advanced-security-data.min.js`;
 }
 
-/** Validate GET /v1/auth/config. Anything unexpected is refused: the page must not run on a bad config. */
-export function parseAuthConfig(
-  value: unknown,
-  options: TrustOptions = {},
-): AuthConfig {
-  const zone =
-    options.trustedZone === undefined ? pageZone() : options.trustedZone;
+function minLength(value: unknown): number {
+  if (value === undefined) return 8;
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    value < MIN_PASSWORD_LENGTH ||
+    value > MAX_PASSWORD_LENGTH
+  ) {
+    throw new ConfigError("config: password_policy.min_length");
+  }
+  return value;
+}
+
+/** Validate GET /v1/auth/config against the pins. Anything unexpected is refused. */
+export function parseAuthConfig(value: unknown, pins: ConfigPins): AuthConfig {
+  if (pins.poolIds.length === 0)
+    throw new ConfigError("config: no pool is pinned");
   if (!isObject(value)) throw new ConfigError("config: not an object");
   const pool = isObject(value.pool) ? value.pool : {};
   const poolId = str(pool.id);
   const match = POOL_ID.exec(poolId);
   if (!match) throw new ConfigError("config: pool.id");
+  if (!pins.poolIds.includes(poolId))
+    throw new ConfigError("config: pool.id is not pinned");
   const region = str(pool.region);
   if (region !== match[1])
     throw new ConfigError("config: pool.region does not match pool.id");
@@ -134,11 +146,16 @@ export function parseAuthConfig(
   const org = branding.org_slug ?? null;
   if (org !== null && !(typeof org === "string" && ORG_SLUG.test(org)))
     throw new ConfigError("config: org_slug");
-  const logoRaw = branding.logo_url;
-  const logoUrl =
-    logoRaw === null || logoRaw === undefined ? null : httpsUrl(logoRaw, zone);
-  if (logoRaw !== null && logoRaw !== undefined && logoUrl === null)
-    throw new ConfigError("config: logo_url");
+
+  let logoUrl: string | null = null;
+  if (branding.logo_url !== null && branding.logo_url !== undefined) {
+    const url = httpsUrl(branding.logo_url);
+    if (!url || !pins.logoHosts.includes(url.hostname.toLowerCase())) {
+      throw new ConfigError("config: logo_url is not on a pinned host");
+    }
+    logoUrl = url.toString();
+  }
+
   const colourRaw = branding.primary_color;
   if (
     colourRaw !== null &&
@@ -166,8 +183,9 @@ export function parseAuthConfig(
     forgotPassword: flows.forgot_password === true,
     mfaMode,
     orgSlug: org === null ? null : (org as string),
+    doorZone: pins.doorZone,
     passwordPolicy: {
-      minLength: typeof policy.min_length === "number" ? policy.min_length : 8,
+      minLength: minLength(policy.min_length),
       requireUpper: policy.require_upper === true,
       requireLower: policy.require_lower === true,
       requireDigit: policy.require_digit === true,
@@ -188,12 +206,14 @@ export function parseAuthConfig(
 }
 
 export async function fetchAuthConfig(
+  pins: ConfigPins,
   fetchImpl: FetchLike = fetch,
 ): Promise<AuthConfig> {
   let response: Response;
   try {
     response = await fetchImpl("/v1/auth/config", {
       credentials: "same-origin",
+      cache: "no-store",
       redirect: "error",
       headers: { Accept: "application/json" },
     });
@@ -202,10 +222,8 @@ export async function fetchAuthConfig(
   }
   if (response.status !== 200)
     throw new ConfigError(`config: HTTP ${response.status}`);
-  return parseAuthConfig(await response.json());
+  return parseAuthConfig(await response.json(), pins);
 }
-
-const BASE = "https://base.invalid";
 
 /** A control character (U+0000-U+001F, U+007F) or a backslash anywhere in the value. */
 function hasControlOrBackslash(value: string): boolean {
@@ -216,10 +234,19 @@ function hasControlOrBackslash(value: string): boolean {
   return false;
 }
 
+/** A "." or ".." path segment, also percent-encoded ("%2e"), which a URL parser collapses. */
+function hasDotSegment(path: string): boolean {
+  return path.split("/").some((segment) => /^(?:\.|%2e){1,2}$/i.test(segment));
+}
+
 /**
- * A same-origin path, re-serialised, or null. Browsers drop tab/CR/LF and read "\\" as "/" before
- * parsing, so "/\t/evil" would become "//evil": any control character or backslash is refused,
- * then the parsed origin must stay the base origin.
+ * The value itself when it is a plain same-origin path, else null (review H1).
+ *
+ * Browsers drop tab/CR/LF, read "\" as "/" and collapse dot segments, so "/\t/evil", "/.//evil"
+ * and "/%2e//evil" would all reach "//evil", which is protocol-relative (off-site). So: one leading
+ * "/" and never "//"; no control character or backslash; no dot segment; and the parsed URL must
+ * keep the base origin and must not start with "//". The ORIGINAL string is returned, never a
+ * re-serialised one.
  */
 export function safeNextPath(value: unknown): string | null {
   if (
@@ -229,32 +256,45 @@ export function safeNextPath(value: unknown): string | null {
   )
     return null;
   if (hasControlOrBackslash(value)) return null;
+  const pathPart = value.split(/[?#]/, 1)[0] ?? "";
+  if (hasDotSegment(pathPart)) return null;
+  const base = "https://base.invalid";
   try {
-    const url = new URL(value, BASE);
-    return url.origin === BASE ? url.pathname + url.search + url.hash : null;
+    const url = new URL(value, base);
+    if (url.origin !== base || url.pathname.startsWith("//")) return null;
+    return value;
   } catch {
     return null;
   }
 }
 
 function orgLinks(value: unknown, zone: string | null): OrgLink[] {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value) || zone === null) return [];
   return value.flatMap((o: unknown) => {
     if (!isObject(o)) return [];
-    const door = httpsUrl(o.door, zone);
+    const url = httpsUrl(o.door);
     const slug = str(o.slug);
-    return door && ORG_SLUG.test(slug)
-      ? [{ slug, display_name: str(o.display_name).slice(0, MAX_NAME), door }]
+    return url && onZone(url.hostname, zone) && ORG_SLUG.test(slug)
+      ? [
+          {
+            slug,
+            display_name: str(o.display_name).slice(0, MAX_NAME),
+            door: url.toString(),
+          },
+        ]
       : [];
   });
 }
 
+export interface SessionClientOptions {
+  /** The zone org doors must be on (from the pins); null = no door links. */
+  doorZone: string | null;
+}
+
 export function httpSessionClient(
+  options: SessionClientOptions,
   fetchImpl: FetchLike = fetch,
-  options: TrustOptions = {},
 ): SessionClient {
-  const zone =
-    options.trustedZone === undefined ? pageZone() : options.trustedZone;
   return {
     async postSession(tokens: SessionTokens) {
       let response: Response;
@@ -285,7 +325,7 @@ export function httpSessionClient(
         throw new SessionError(
           code as SessionError["code"],
           code === "not_org_member" && isObject(body)
-            ? orgLinks(body.orgs, zone)
+            ? orgLinks(body.orgs, options.doorZone)
             : [],
         );
       }
