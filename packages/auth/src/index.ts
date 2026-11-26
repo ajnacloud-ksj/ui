@@ -31,5 +31,5 @@ export type {
   StepResult,
 } from "./machine";
 export { createSignIn, SessionError } from "./machine";
-export type { SignInPageProps } from "./sign-in-page";
-export { SignInPage } from "./sign-in-page";
+export type { SignInNotice, SignInPageProps } from "./sign-in-page";
+export { noticeFromReason, SignInPage } from "./sign-in-page";

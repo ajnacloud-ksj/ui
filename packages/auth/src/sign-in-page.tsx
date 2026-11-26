@@ -45,6 +45,22 @@ export interface SignInPageProps {
   onDone: (next: string) => void;
   /** For tests and hosts that build their own machine; by default one is built from config. */
   machine?: SignInMachine;
+  /** Why the person is here (spec J2), from `noticeFromReason(?reason=)`. */
+  notice?: SignInNotice | null;
+}
+
+export type SignInNotice = "idle" | "signed_out";
+
+const NOTICES: Readonly<Record<SignInNotice, string>> = {
+  idle: "You were signed out because you were inactive. Sign in again to continue.",
+  signed_out: "You are signed out.",
+};
+
+/** The notice for a `?reason=` value: an exact literal match only, never text from the URL. */
+export function noticeFromReason(
+  reason: string | null | undefined,
+): SignInNotice | null {
+  return reason === "idle" || reason === "signed_out" ? reason : null;
 }
 
 type FormErrorCode = FlowErrorCode | "empty" | "passwords_differ";
@@ -148,6 +164,7 @@ export function SignInPage({
   config,
   onDone,
   machine: given,
+  notice = null,
 }: SignInPageProps) {
   const id = useId();
   const machine = useMemo(
@@ -258,6 +275,13 @@ export function SignInPage({
   } else if (state.step === "password") {
     body = (
       <>
+        {notice && state.notice !== "password_reset" && (
+          <Banner
+            variant="info"
+            data-testid="signin-notice"
+            title={NOTICES[notice]}
+          />
+        )}
         {state.notice === "password_reset" && (
           <Banner
             variant="success"
