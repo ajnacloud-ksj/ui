@@ -237,6 +237,10 @@
       "types": "./dist/input-otp.d.ts",
       "import": "./dist/input-otp.js"
     },
+    "./members": {
+      "types": "./dist/members.d.ts",
+      "import": "./dist/members.js"
+    },
     "./filter-bar": {
       "types": "./dist/filter-bar.d.ts",
       "import": "./dist/filter-bar.js"

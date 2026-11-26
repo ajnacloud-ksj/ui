@@ -56,6 +56,7 @@ export * from "./components/menubar";
 export * from "./components/navigation-menu";
 export * from "./components/scroll-area";
 export * from "./components/input-otp";
+export * from "./components/members";
 export * from "./components/filter-bar";
 
 export * from "./components/description-list";

@@ -1,0 +1,57 @@
+---
+title: Members
+description: An app's own user-management screen: list, invite, roles, suspend, remove, resend and cancel, with every rule enforced by the platform.
+---
+
+import { MembersExample } from "@/examples/members/members-example";
+
+<ComponentPreview>
+  <MembersExample />
+</ComponentPreview>
+
+<include>../../../examples/members/members-example.tsx</include>
+
+## Usage
+
+Complete [Installation](/docs/installation) once. Import `MembersBlock` and `membersApi` from `@ajnacloud/ui` or `@ajnacloud/ui/members`.
+
+```tsx
+import { MembersBlock, membersApi } from "@ajnacloud/ui";
+
+const api = membersApi(); // the app's own same-origin /v1/users routes
+
+export function UsersPage() {
+  return <MembersBlock api={api} />;
+}
+```
+
+Use it inside the app's own layout. The block holds **no rules**: the app's backend (the Ajna SDK) sends each change to the platform membership service, which decides. The block shows the result.
+
+## What it does
+
+- **Lists** the app's members: name, email (or a "No email" badge), role, status and who invited them, with "Show more" for long lists.
+- **Invite** opens a dialog: an email, or "This person has no email" with a Login ID, plus a name and a role. The button is hidden when the person cannot invite. It is disabled, with the reason, when the organisation does not allow app admins to invite.
+- **Role:** a role picker on each row, with the roles the app declares. A refused change goes back to the old role and shows the reason.
+- **Suspend** (a reason is required), **Restore** and **Remove** (asks first) act on this app only. The person's other apps are not affected.
+- **Resend** and **Cancel invite** show only while the person is invited.
+- **Password help:**
+  - an email account gets **Send password reset**, a code email;
+  - a no-email account gets **Temporary password**, shown once and never stored. Admins never choose a password.
+- **Errors:** each server code shows one plain message. "The change may have been made" comes with a **Refresh** button.
+- People who cannot manage members see the list with no actions.
+
+## API
+
+| Name                                  | Purpose                                                                                                                                                                |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MembersBlock`                        | The screen. Props: `api` (required), `title` (optional heading).                                                                                                       |
+| `membersApi(base?, fetch?, options?)` | The client for the app's `/v1/users` routes. It is same-origin, sends the CSRF double-submit value and one `Idempotency-Key` per action, and never follows a redirect. |
+| `MembersError`                        | A refused request: `code` (the server's code, unchanged), `status`, `retryAfter`.                                                                                      |
+| `membersErrorMessage(code)`           | The plain message for a code.                                                                                                                                          |
+
+## Accessibility
+
+- Every action is a visible button; there are no hover-only actions.
+- Each row's role picker has a label that names the person.
+- Dialogs use `Dialog`, so focus moves into them and returns on close.
+- Errors and notices use `Banner` with a live role.
