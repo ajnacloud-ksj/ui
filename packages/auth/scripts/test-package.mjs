@@ -79,6 +79,16 @@ try {
     "@aws-sdk/client-cognito-identity-provider",
   ]);
 
+  // The lowest @ajnacloud/ui this package works with: SignInPage imports QrCode, which first
+  // shipped in 0.1.0-beta.11. A consumer on an older beta fails at import time.
+  assert.equal(manifest.peerDependencies["@ajnacloud/ui"], "^0.1.0-beta.11");
+  const bundle = await readFile(join(unpacked, "dist", "index.js"), "utf8");
+  assert.match(
+    bundle,
+    /QrCode/,
+    "the peer floor is set by QrCode; update both together",
+  );
+
   run("pnpm", ["exec", "publint", unpacked]);
   run("pnpm", ["exec", "attw", "--pack", unpacked, "--profile", "esm-only"]);
   console.info("package check: ok");
