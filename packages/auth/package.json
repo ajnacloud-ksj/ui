@@ -1,7 +1,6 @@
 {
   "name": "@ajnacloud/auth",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-beta.0",
   "description": "The Ajna platform sign-in: SRP against Amazon Cognito in the browser and the sign-in screens, built from @ajnacloud/ui.",
   "license": "MIT",
   "type": "module",
@@ -54,5 +53,9 @@
     "typescript": "5.9.3",
     "vite": "^6.4.3",
     "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
   }
 }

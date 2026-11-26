@@ -66,11 +66,15 @@ try {
   const manifest = JSON.parse(
     await readFile(join(unpacked, "package.json"), "utf8"),
   );
-  assert.equal(
-    manifest.private,
-    true,
-    "the package stays private until a publish is requested (AGENTS.md)",
+  // Publish-ready (owner go via plant-ea, 2026-11-26): public, a pre-release version, the
+  // same publishConfig as @ajnacloud/ui.
+  assert.notEqual(manifest.private, true, "the package must be publishable");
+  assert.match(
+    manifest.version,
+    /^\d+\.\d+\.\d+-beta\.\d+$/,
+    "a beta pre-release version",
   );
+  assert.deepEqual(manifest.publishConfig, { access: "public", tag: "latest" });
   assert.deepEqual(Object.keys(manifest.dependencies ?? {}), [
     "@aws-sdk/client-cognito-identity-provider",
   ]);
