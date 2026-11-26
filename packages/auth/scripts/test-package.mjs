@@ -28,10 +28,18 @@ try {
   const files = (
     await readdir(join(unpacked, "dist"), { recursive: true })
   ).sort();
-  // One entry, no chunks: anything else means the bundler pulled in a module it should not.
+  // The three subpath entries, no chunks: anything else means the bundler pulled in a module
+  // it should not (the entries share no code by design).
   assert.deepEqual(
     files,
-    ["index.d.ts", "index.js"],
+    [
+      "members.d.ts",
+      "members.js",
+      "session.d.ts",
+      "session.js",
+      "signin.d.ts",
+      "signin.js",
+    ],
     `unexpected files in dist: ${files.join(", ")}`,
   );
   for (const name of files) {
@@ -50,6 +58,8 @@ try {
       "fake-cognito",
       "FakeCognito",
       "src/testing",
+      "testing/env",
+      "stubSessionEnv",
     ]) {
       assert(
         !content.includes(marker),
@@ -82,12 +92,22 @@ try {
   // The lowest @ajnacloud/ui this package works with: SignInPage imports QrCode, which first
   // shipped in 0.1.0-beta.11. A consumer on an older beta fails at import time.
   assert.equal(manifest.peerDependencies["@ajnacloud/ui"], "^0.1.0-beta.11");
-  const bundle = await readFile(join(unpacked, "dist", "index.js"), "utf8");
+  const bundle = await readFile(join(unpacked, "dist", "signin.js"), "utf8");
   assert.match(
     bundle,
     /QrCode/,
     "the peer floor is set by QrCode; update both together",
   );
+
+  assert.deepEqual(Object.keys(manifest.exports), [
+    "./signin",
+    "./session",
+    "./members",
+    "./package.json",
+  ]);
+  assert.deepEqual(manifest.peerDependenciesMeta, {
+    axios: { optional: true },
+  });
 
   run("pnpm", ["exec", "publint", unpacked]);
   run("pnpm", ["exec", "attw", "--pack", unpacked, "--profile", "esm-only"]);

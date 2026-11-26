@@ -13,7 +13,11 @@ const dependencies = Object.keys({
 
 export default defineConfig({
   cwd: fileURLToPath(new URL(".", import.meta.url)),
-  entry: { index: "src/index.ts" },
+  entry: {
+    signin: "src/signin/index.ts",
+    session: "src/session/index.ts",
+    members: "src/members/index.ts",
+  },
   format: "esm",
   platform: "neutral",
   target: "es2022",

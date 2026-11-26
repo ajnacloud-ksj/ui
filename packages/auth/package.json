@@ -1,7 +1,7 @@
 {
   "name": "@ajnacloud/auth",
   "version": "0.1.0-beta.0",
-  "description": "The Ajna platform sign-in: SRP against Amazon Cognito in the browser and the sign-in screens, built from @ajnacloud/ui.",
+  "description": "The Ajna platform sign-in (SRP against Amazon Cognito in the browser), the app session and the Members block, built from @ajnacloud/ui.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -15,12 +15,20 @@
     "README.md",
     "LICENSE"
   ],
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "./signin": {
+      "types": "./dist/signin.d.ts",
+      "import": "./dist/signin.js"
+    },
+    "./session": {
+      "types": "./dist/session.d.ts",
+      "import": "./dist/session.js"
+    },
+    "./members": {
+      "types": "./dist/members.d.ts",
+      "import": "./dist/members.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsdown --config-loader native",
@@ -34,8 +42,14 @@
   },
   "peerDependencies": {
     "@ajnacloud/ui": "^0.1.0-beta.11",
+    "axios": "^1.7.0",
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "axios": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@ajnacloud/ui": "workspace:*",
@@ -45,6 +59,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "amazon-cognito-identity-js": "6.3.22",
+    "axios": "^1.13.2",
     "jsdom": "^29.1.1",
     "publint": "^0.3.25",
     "react": "^19.2.4",
