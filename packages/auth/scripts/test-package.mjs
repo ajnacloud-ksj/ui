@@ -25,7 +25,15 @@ try {
   run("tar", ["-xzf", archive, "-C", temporary]);
   const unpacked = join(temporary, "package");
 
-  const files = await readdir(join(unpacked, "dist"), { recursive: true });
+  const files = (
+    await readdir(join(unpacked, "dist"), { recursive: true })
+  ).sort();
+  // One entry, no chunks: anything else means the bundler pulled in a module it should not.
+  assert.deepEqual(
+    files,
+    ["index.d.ts", "index.js"],
+    `unexpected files in dist: ${files.join(", ")}`,
+  );
   for (const name of files) {
     assert(!/\.(test|spec)\./.test(name), `test artifact in package: ${name}`);
     assert(
@@ -35,11 +43,19 @@ try {
     if (!/\.(js|d\.ts)$/.test(name)) continue;
     const content = await readFile(join(unpacked, "dist", name), "utf8");
     // The reference SRP library is a test-only dev dependency; it must never reach users.
-    assert.doesNotMatch(
-      content,
-      /(from\s*|import\s*\(\s*|require\(\s*)["']amazon-cognito-identity-js/,
-      `${name} imports the test-only reference library`,
-    );
+    // Test-only code must not ship in ANY form: imported, inlined or named.
+    for (const marker of [
+      "amazon-cognito-identity-js",
+      "AmazonCognitoIdentity",
+      "fake-cognito",
+      "FakeCognito",
+      "src/testing",
+    ]) {
+      assert(
+        !content.includes(marker),
+        `${name} contains test-only code: ${marker}`,
+      );
+    }
     assert.doesNotMatch(
       content,
       /FakeCognito/,

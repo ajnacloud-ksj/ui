@@ -81,6 +81,17 @@ describe("toAuthErrorCode (spec v1.1, section B)", () => {
     ).toBe("invalid_credentials");
   });
 
+  it("tells a wrong device clock apart from a wrong password", () => {
+    expect(
+      toAuthErrorCode(
+        cognitoError(
+          "NotAuthorizedException",
+          "Timestamp is not within the allowed time window",
+        ),
+      ),
+    ).toBe("clock_skew");
+  });
+
   it("maps a network failure to unavailable", () => {
     expect(toAuthErrorCode(new TypeError("Failed to fetch"))).toBe(
       "unavailable",

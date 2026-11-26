@@ -60,6 +60,8 @@ const MESSAGES: Readonly<Record<FormErrorCode, string>> = {
   password_policy: "The new password does not meet the rules below.",
   rate_limited: "Too many attempts. Wait a few minutes, then try again.",
   session_expired: "Your sign-in took too long. Start again.",
+  clock_skew:
+    "Your device clock is wrong. Set it to the correct time, then sign in again.",
   unavailable:
     "Sign-in is not available right now. Try again in a few minutes.",
   login_id_invalid: "Enter your email or your Login ID.",
@@ -395,7 +397,11 @@ export function SignInPage({
             <ul className="space-y-1">
               {state.orgs.map((org) => (
                 <li key={org.slug}>
-                  <a className="underline" href={org.door}>
+                  <a
+                    className="underline"
+                    href={org.door}
+                    rel="noopener noreferrer"
+                  >
                     {org.display_name || org.slug}
                   </a>
                 </li>

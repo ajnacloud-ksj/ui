@@ -3,7 +3,7 @@
  *
  * The group is the RFC 5054 3072-bit prime with g = 2. Hashes are SHA-256, and every hex value is
  * padded as Cognito expects (even length, a leading 00 when the top bit is set). Each step is
- * checked against the reference implementation (amazon-cognito-identity-js) and an independent
+ * checked against Cognito's own JavaScript library and an independent
  * server in srp.test.ts.
  */
 

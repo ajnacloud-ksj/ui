@@ -14,6 +14,7 @@ export const AUTH_ERROR_CODES = [
   "password_policy",
   "rate_limited",
   "session_expired",
+  "clock_skew",
   "unavailable",
 ] as const;
 
@@ -22,6 +23,8 @@ export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
 /** The text Cognito threat protection uses for a blocked sign-in (AWS docs; spike S2 confirms it in our pools). */
 const BLOCKED_TEXT = "unable to login because of security reasons";
 const SESSION_TEXT = "invalid session";
+/** Cognito refuses a PASSWORD_VERIFIER TIMESTAMP too far from its clock (exact text: spike S2). */
+const CLOCK_TEXT = "timestamp";
 
 const BY_NAME: Readonly<Record<string, AuthErrorCode>> = {
   UserNotFoundException: "invalid_credentials",
@@ -42,6 +45,7 @@ export function toAuthErrorCode(error: unknown): AuthErrorCode {
   if (error.name === "NotAuthorizedException") {
     if (message.includes(BLOCKED_TEXT)) return "SIGN_IN_BLOCKED";
     if (message.includes(SESSION_TEXT)) return "session_expired";
+    if (message.includes(CLOCK_TEXT)) return "clock_skew";
     return "invalid_credentials";
   }
   return BY_NAME[error.name] ?? "unavailable";

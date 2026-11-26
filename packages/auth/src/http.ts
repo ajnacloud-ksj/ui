@@ -65,14 +65,42 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
-function httpsUrl(value: unknown): string | null {
+function httpsUrl(value: unknown, trustedZone?: string | null): string | null {
   if (typeof value !== "string" || !value) return null;
   try {
     const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : null;
+    if (url.protocol !== "https:" || url.username || url.password) return null;
+    if (trustedZone && !onZone(url.hostname, trustedZone)) return null;
+    return url.toString();
   } catch {
     return null;
   }
+}
+
+/** The host is the zone itself or one of its subdomains (never "zone.evil.example"). */
+function onZone(hostname: string, zone: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === zone || host.endsWith(`.${zone}`);
+}
+
+/**
+ * The zone a sign-in page trusts for logos and org doors: its own host minus the first label
+ * ("signin.example.test" -> "example.test"). Null for a host with no parent zone.
+ */
+export function trustedZoneOf(hostname: string): string | null {
+  const labels = hostname.toLowerCase().split(".").filter(Boolean);
+  return labels.length >= 3 ? labels.slice(1).join(".") : null;
+}
+
+export interface TrustOptions {
+  /** Logos and org doors must be on this zone. Default: derived from the page's own host. */
+  trustedZone?: string | null;
+}
+
+function pageZone(): string | null {
+  return typeof location === "undefined"
+    ? null
+    : trustedZoneOf(location.hostname);
 }
 
 function collectorUrlFor(region: string): string {
@@ -80,7 +108,12 @@ function collectorUrlFor(region: string): string {
 }
 
 /** Validate GET /v1/auth/config. Anything unexpected is refused: the page must not run on a bad config. */
-export function parseAuthConfig(value: unknown): AuthConfig {
+export function parseAuthConfig(
+  value: unknown,
+  options: TrustOptions = {},
+): AuthConfig {
+  const zone =
+    options.trustedZone === undefined ? pageZone() : options.trustedZone;
   if (!isObject(value)) throw new ConfigError("config: not an object");
   const pool = isObject(value.pool) ? value.pool : {};
   const poolId = str(pool.id);
@@ -98,12 +131,12 @@ export function parseAuthConfig(value: unknown): AuthConfig {
   if (!MFA_MODES.includes(mfaMode)) throw new ConfigError("config: mfa.mode");
 
   const branding = isObject(value.branding) ? value.branding : {};
-  const org = branding.org_slug;
+  const org = branding.org_slug ?? null;
   if (org !== null && !(typeof org === "string" && ORG_SLUG.test(org)))
     throw new ConfigError("config: org_slug");
   const logoRaw = branding.logo_url;
   const logoUrl =
-    logoRaw === null || logoRaw === undefined ? null : httpsUrl(logoRaw);
+    logoRaw === null || logoRaw === undefined ? null : httpsUrl(logoRaw, zone);
   if (logoRaw !== null && logoRaw !== undefined && logoUrl === null)
     throw new ConfigError("config: logo_url");
   const colourRaw = branding.primary_color;
@@ -161,6 +194,7 @@ export async function fetchAuthConfig(
   try {
     response = await fetchImpl("/v1/auth/config", {
       credentials: "same-origin",
+      redirect: "error",
       headers: { Accept: "application/json" },
     });
   } catch {
@@ -171,21 +205,43 @@ export async function fetchAuthConfig(
   return parseAuthConfig(await response.json());
 }
 
-/** A same-origin path: one leading "/", never "//" or "/\" (no scheme, no host). */
-function isSameOriginPath(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    value.startsWith("/") &&
-    !value.startsWith("//") &&
-    !value.startsWith("/\\")
-  );
+const BASE = "https://base.invalid";
+
+/** A control character (U+0000-U+001F, U+007F) or a backslash anywhere in the value. */
+function hasControlOrBackslash(value: string): boolean {
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f || code === 0x5c) return true;
+  }
+  return false;
 }
 
-function orgLinks(value: unknown): OrgLink[] {
+/**
+ * A same-origin path, re-serialised, or null. Browsers drop tab/CR/LF and read "\\" as "/" before
+ * parsing, so "/\t/evil" would become "//evil": any control character or backslash is refused,
+ * then the parsed origin must stay the base origin.
+ */
+export function safeNextPath(value: unknown): string | null {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//")
+  )
+    return null;
+  if (hasControlOrBackslash(value)) return null;
+  try {
+    const url = new URL(value, BASE);
+    return url.origin === BASE ? url.pathname + url.search + url.hash : null;
+  } catch {
+    return null;
+  }
+}
+
+function orgLinks(value: unknown, zone: string | null): OrgLink[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((o: unknown) => {
     if (!isObject(o)) return [];
-    const door = httpsUrl(o.door);
+    const door = httpsUrl(o.door, zone);
     const slug = str(o.slug);
     return door && ORG_SLUG.test(slug)
       ? [{ slug, display_name: str(o.display_name).slice(0, MAX_NAME), door }]
@@ -193,7 +249,12 @@ function orgLinks(value: unknown): OrgLink[] {
   });
 }
 
-export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
+export function httpSessionClient(
+  fetchImpl: FetchLike = fetch,
+  options: TrustOptions = {},
+): SessionClient {
+  const zone =
+    options.trustedZone === undefined ? pageZone() : options.trustedZone;
   return {
     async postSession(tokens: SessionTokens) {
       let response: Response;
@@ -201,6 +262,8 @@ export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
         response = await fetchImpl("/v1/auth/session", {
           method: "POST",
           credentials: "same-origin",
+          // Never re-send the tokens to wherever a redirect points.
+          redirect: "error",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -212,8 +275,8 @@ export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
       }
       const body: unknown = await response.json().catch(() => null);
       if (response.status === 200) {
-        if (isObject(body) && isSameOriginPath(body.next))
-          return { next: body.next };
+        const next = isObject(body) ? safeNextPath(body.next) : null;
+        if (next) return { next };
         throw new SessionError("unavailable");
       }
       const code = isObject(body) ? str(body.code) : "";
@@ -222,7 +285,7 @@ export function httpSessionClient(fetchImpl: FetchLike = fetch): SessionClient {
         throw new SessionError(
           code as SessionError["code"],
           code === "not_org_member" && isObject(body)
-            ? orgLinks(body.orgs)
+            ? orgLinks(body.orgs, zone)
             : [],
         );
       }

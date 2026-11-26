@@ -5,6 +5,8 @@ import {
   fetchAuthConfig,
   httpSessionClient,
   parseAuthConfig,
+  safeNextPath,
+  trustedZoneOf,
 } from "./http";
 import { SessionError } from "./machine";
 
@@ -249,5 +251,108 @@ describe("httpSessionClient (spec A2)", () => {
     await expect(client.postSession(tokens)).rejects.toMatchObject({
       code: "unavailable",
     });
+  });
+});
+
+describe("review fixes (security review, 2026-11-26)", () => {
+  const ZONE = "example.test";
+  const tokens = { id_token: "i", access_token: "a", refresh_token: "r" };
+
+  it.each([
+    "/\t/evil.example",
+    "/\n/evil.example",
+    "/\r/evil.example",
+    "/\\evil.example",
+    "/x\\y",
+    "/%09/evil.example".replace("%09", "\t"),
+    "https://evil.example/",
+  ])("safeNextPath refuses %j", (value) => {
+    expect(safeNextPath(value)).toBeNull();
+  });
+
+  it("safeNextPath keeps a real path and re-serialises it", () => {
+    expect(safeNextPath("/v1/oidc/authorize/continue?request=r1#x")).toBe(
+      "/v1/oidc/authorize/continue?request=r1#x",
+    );
+  });
+
+  it("trustedZoneOf drops the first label of the sign-in host", () => {
+    expect(trustedZoneOf("signin.example.test")).toBe(ZONE);
+    expect(trustedZoneOf("acme.example.test")).toBe(ZONE);
+    expect(trustedZoneOf("localhost")).toBeNull();
+  });
+
+  it("accepts a logo only on the trusted zone, never with userinfo", () => {
+    const withLogo = (logo_url: string) => ({
+      ...GOOD,
+      branding: { ...GOOD.branding, logo_url },
+    });
+    expect(
+      parseAuthConfig(withLogo("https://static.example.test/a.png"), {
+        trustedZone: ZONE,
+      }).branding.logoUrl,
+    ).toBe("https://static.example.test/a.png");
+    expect(() =>
+      parseAuthConfig(withLogo("https://cdn.evil.example/a.png"), {
+        trustedZone: ZONE,
+      }),
+    ).toThrow(ConfigError);
+    expect(() =>
+      parseAuthConfig(withLogo("https://example.test.evil.example/a.png"), {
+        trustedZone: ZONE,
+      }),
+    ).toThrow(ConfigError);
+    expect(() =>
+      parseAuthConfig(withLogo("https://u:p@static.example.test/a.png"), {
+        trustedZone: ZONE,
+      }),
+    ).toThrow(ConfigError);
+  });
+
+  it("treats a missing org_slug as no org context", () => {
+    const branding = Object.fromEntries(
+      Object.entries(GOOD.branding).filter(([key]) => key !== "org_slug"),
+    );
+    expect(parseAuthConfig({ ...GOOD, branding }).orgSlug).toBeNull();
+  });
+
+  it("keeps only org doors on the trusted zone", async () => {
+    const orgs = [
+      { slug: "beta", display_name: "Beta", door: "https://beta.example.test" },
+      { slug: "evil", display_name: "Evil", door: "https://beta.evil.example" },
+      {
+        slug: "user",
+        display_name: "User",
+        door: "https://u:p@beta.example.test",
+      },
+    ];
+    const client = httpSessionClient(
+      async () => json(403, { code: "not_org_member", orgs }),
+      { trustedZone: ZONE },
+    );
+    await expect(client.postSession(tokens)).rejects.toMatchObject({
+      orgs: [
+        {
+          slug: "beta",
+          display_name: "Beta",
+          door: "https://beta.example.test/",
+        },
+      ],
+    });
+  });
+
+  it("never follows a redirect with the tokens or the config", async () => {
+    const fetchImpl = vi.fn(async () => json(200, { next: "/x" }));
+    await httpSessionClient(fetchImpl).postSession(tokens);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "/v1/auth/session",
+      expect.objectContaining({ redirect: "error" }),
+    );
+    const cfgFetch = vi.fn(async () => json(200, GOOD));
+    await fetchAuthConfig(cfgFetch);
+    expect(cfgFetch).toHaveBeenCalledWith(
+      "/v1/auth/config",
+      expect.objectContaining({ redirect: "error" }),
+    );
   });
 });
