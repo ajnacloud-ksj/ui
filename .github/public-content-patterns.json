@@ -1,0 +1,33 @@
+{
+  "$comment": "The public-content guard (scripts/check-public-content.mjs). This repo is PUBLIC: a match fails CI. Add a test fake to `allow` only as an exact string that is not a real id.",
+  "deny": [
+    {
+      "id": "cognito-pool-id",
+      "pattern": "(?<![A-Za-z0-9-])[a-z]{2}(?:-[a-z]+)+-\\d_[A-Za-z0-9]{9}(?![A-Za-z0-9])",
+      "message": "a Cognito user pool id"
+    },
+    {
+      "id": "aws-account-id",
+      "pattern": "(?<![A-Za-z0-9])\\d{12}(?![A-Za-z0-9])",
+      "message": "a 12-digit AWS account id"
+    },
+    {
+      "id": "aws-access-key",
+      "pattern": "(?<![A-Z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Z0-9])",
+      "message": "an AWS access key id"
+    },
+    {
+      "id": "internal-host",
+      "pattern": "(?<![A-Za-z0-9-])(?:[a-z0-9-]+\\.)*(?:triviz|samagra|varah|ajna)\\.cloud(?![A-Za-z0-9-])",
+      "flags": "i",
+      "message": "an internal platform host"
+    }
+  ],
+  "allow": [
+    "ap-south-1_TESTPOOL0",
+    "ap-south-1_OTHERPOOL",
+    "ap-south-1_FakePool9",
+    "ap-south-1_TestPool1"
+  ],
+  "skip": ["pnpm-lock.yaml"]
+}
