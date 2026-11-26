@@ -17,7 +17,11 @@ export interface AppSessionConfig {
   apiUrl: string;
   /** Dev only: the bare app host goes to this tenant's door. "" = none (prod). */
   defaultTenant: string;
-  /** The org portal host, when the build pins it. "" = derived from the page host. */
+  /**
+   * The org portal host, when the build pins it: a plain host name in the same zone as
+   * fallbackPortalHost (an optional leading "https://" and trailing "/" are stripped; anything
+   * else throws). It is the post-sign-out redirect target. "" = derived from the page host.
+   */
   portalOrgHost: string;
   /** The portal for a host with no zone (localhost, a bare host): a plain host name. */
   fallbackPortalHost: string;
@@ -34,6 +38,28 @@ let current: Readonly<AppSessionConfig> | null = null;
 const text = (value: unknown): string =>
   typeof value === "string" ? value.trim() : "";
 
+const zoneOf = (host: string): string => host.split(".").slice(-2).join(".");
+
+/** The pinned portal host, or "" when none: same zone as the fallback portal, or it throws. */
+function checkedPortalOrgHost(
+  value: unknown,
+  fallbackPortalHost: string,
+): string {
+  const raw = text(value);
+  if (!raw) return "";
+  const host = raw
+    .replace(/^https:\/\//i, "")
+    .replace(/\/$/, "")
+    .toLowerCase();
+  const zone = zoneOf(fallbackPortalHost);
+  if (!HOST.test(host) || host === zone || !host.endsWith(`.${zone}`)) {
+    throw new Error(
+      `configureAppSession: portalOrgHost must be a host name in ${zone}, got ${JSON.stringify(value)}`,
+    );
+  }
+  return host;
+}
+
 /** Set the settings. Call it once, before the app renders; a later call replaces them. */
 export function configureAppSession(settings: AppSessionSettings): void {
   const fallbackPortalHost = text(settings.fallbackPortalHost).toLowerCase();
@@ -47,7 +73,10 @@ export function configureAppSession(settings: AppSessionSettings): void {
   current = Object.freeze({
     apiUrl: text(settings.apiUrl),
     defaultTenant: text(settings.defaultTenant),
-    portalOrgHost: text(settings.portalOrgHost),
+    portalOrgHost: checkedPortalOrgHost(
+      settings.portalOrgHost,
+      fallbackPortalHost,
+    ),
     fallbackPortalHost,
   });
 }

@@ -15,10 +15,8 @@ export function resolvePortalUrl(
   hostname: string = window.location.hostname,
 ): string {
   const { portalOrgHost: configured, fallbackPortalHost } = sessionConfig();
-  if (configured) {
-    const host = configured.replace(/^https?:\/\//, "").replace(/\/+$/, "");
-    if (host) return `https://${host}`;
-  }
+  // Validated by configureAppSession: a plain host in the platform zone.
+  if (configured) return `https://${configured}`;
   const labels = hostname.toLowerCase().split(":")[0].split(".");
   if (labels.length < 3) return `https://${fallbackPortalHost}`;
   const zone = labels.slice(-2).join(".");
