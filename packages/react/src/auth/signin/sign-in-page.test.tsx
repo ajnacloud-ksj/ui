@@ -4,13 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AuthConfig } from "./http";
 import type { SignInMachine, SignInState, StepResult } from "./machine";
-import { SignInPage } from "./sign-in-page";
+import { noticeFromReason, SignInPage } from "./sign-in-page";
 
 const CONFIG: AuthConfig = {
   poolId: "ap-south-1_TESTPOOL0",
   region: "ap-south-1",
   clientId: "testclient0",
   doorZone: "example.test",
+  apiBase: "",
   forgotPassword: true,
   mfaMode: "OPTIONAL",
   orgSlug: "acme",
@@ -294,5 +295,59 @@ describe("review fixes (plant-ea, ui#1)", () => {
     expect(
       screen.getByRole("img", { name: "Acme" }).getAttribute("referrerpolicy"),
     ).toBe("no-referrer");
+  });
+});
+
+describe("notice (spec J2: ?reason=idle | signed_out)", () => {
+  function renderWithNotice(
+    notice: "idle" | "signed_out" | null,
+    initial?: SignInState,
+  ) {
+    const fake = fakeMachine(initial);
+    render(
+      <SignInPage
+        config={CONFIG}
+        machine={fake.machine}
+        onDone={vi.fn()}
+        notice={notice}
+      />,
+    );
+  }
+
+  it("explains an idle sign-out", () => {
+    renderWithNotice("idle");
+    expect(screen.getByTestId("signin-notice").textContent).toContain(
+      "You were signed out because you were inactive. Sign in again to continue.",
+    );
+  });
+
+  it("confirms a sign-out", () => {
+    renderWithNotice("signed_out");
+    expect(screen.getByTestId("signin-notice").textContent).toContain(
+      "You are signed out.",
+    );
+  });
+
+  it("shows no notice without a reason", () => {
+    renderWithNotice(null);
+    expect(screen.queryByTestId("signin-notice")).toBeNull();
+  });
+
+  it("shows the notice on the password step only", () => {
+    renderWithNotice("idle", { step: "totp" });
+    expect(screen.queryByTestId("signin-notice")).toBeNull();
+  });
+});
+
+describe("noticeFromReason", () => {
+  it.each([
+    ["idle", "idle"],
+    ["signed_out", "signed_out"],
+    ["IDLE", null],
+    ["<script>", null],
+    ["", null],
+    [null, null],
+  ] as const)("maps %j to %j by literal match only", (reason, expected) => {
+    expect(noticeFromReason(reason)).toBe(expected);
   });
 });

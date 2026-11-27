@@ -69,6 +69,62 @@ try {
     );
   }
 
+  // The platform sign-in code (src/auth): three subpaths, nothing test-only, and the root entry
+  // never reaches it or its optional peers, so an app that does not sign in carries none of it.
+  for (const subpath of ["./signin", "./session", "./members"]) {
+    assert(manifest.exports[subpath], `missing export ${subpath}`);
+  }
+  for (const peer of ["@aws-sdk/client-cognito-identity-provider", "axios"]) {
+    assert.deepEqual(manifest.peerDependenciesMeta?.[peer], { optional: true });
+    assert(!manifest.dependencies?.[peer], `${peer} must be an optional peer`);
+  }
+  for (const name of await readdir(join(installed, "dist"), {
+    recursive: true,
+  })) {
+    assert(!/testing|fake-cognito/.test(name), `test-only module: ${name}`);
+    if (!/\.(js|d\.ts)$/.test(name)) continue;
+    const content = await readFile(join(installed, "dist", name), "utf8");
+    for (const marker of [
+      "amazon-cognito-identity-js",
+      "AmazonCognitoIdentity",
+      "FakeCognito",
+      "fake-cognito",
+      "stubSessionEnv",
+      "testing/env",
+    ]) {
+      assert(
+        !content.includes(marker),
+        `${name} contains test-only code: ${marker}`,
+      );
+    }
+  }
+  const reachable = new Set();
+  const walk = async (file) => {
+    if (reachable.has(file)) return;
+    reachable.add(file);
+    const text = await readFile(join(installed, "dist", file), "utf8");
+    for (const m of text.matchAll(/(?:from|import)\s*["']([^"']+)["']/g)) {
+      const spec = m[1];
+      assert(
+        !/^@aws-sdk\/|^axios$/.test(spec),
+        `the root entry reaches ${spec} through ${file}`,
+      );
+      if (spec.startsWith(".")) await walk(join(dirname(file), spec));
+    }
+  };
+  await walk("index.js");
+  for (const file of reachable) {
+    assert(
+      !/^(signin|session|members)\.js$/.test(file),
+      `the root entry reaches ${file}`,
+    );
+    const text = await readFile(join(installed, "dist", file), "utf8");
+    assert(
+      !/USER_SRP_AUTH|configureAppSession|MembersBlock/.test(text),
+      `auth code in ${file}`,
+    );
+  }
+
   // Resolve dependencies from the workspace while testing only the packed Ajna files.
   for (const name of [
     ...Object.keys(manifest.dependencies),

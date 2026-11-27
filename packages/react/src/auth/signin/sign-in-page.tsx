@@ -6,21 +6,6 @@
  * shown. The page never logs a password, a code or a token.
  */
 import {
-  AjnaLogo,
-  Banner,
-  Button,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  Input,
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  PasswordInput,
-  QrCode,
-} from "@ajnacloud/ui";
-import {
   type FormEvent,
   type ReactNode,
   useEffect,
@@ -29,6 +14,20 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { AjnaLogo } from "@/components/ajna-logo";
+import { Banner } from "@/components/banner";
+import { Button } from "@/components/button";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/field";
+import { Input } from "@/components/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/input-otp";
+import { PasswordInput } from "@/components/password-input";
+import { QrCode } from "@/components/qr-code";
 
 import { awsTransport } from "./cognito/aws-transport";
 import { type AuthConfig, httpSessionClient } from "./http";
@@ -45,6 +44,22 @@ export interface SignInPageProps {
   onDone: (next: string) => void;
   /** For tests and hosts that build their own machine; by default one is built from config. */
   machine?: SignInMachine;
+  /** Why the person is here (spec J2), from `noticeFromReason(?reason=)`. */
+  notice?: SignInNotice | null;
+}
+
+export type SignInNotice = "idle" | "signed_out";
+
+const NOTICES: Readonly<Record<SignInNotice, string>> = {
+  idle: "You were signed out because you were inactive. Sign in again to continue.",
+  signed_out: "You are signed out.",
+};
+
+/** The notice for a `?reason=` value: an exact literal match only, never text from the URL. */
+export function noticeFromReason(
+  reason: string | null | undefined,
+): SignInNotice | null {
+  return reason === "idle" || reason === "signed_out" ? reason : null;
 }
 
 type FormErrorCode = FlowErrorCode | "empty" | "passwords_differ";
@@ -92,7 +107,10 @@ function defaultMachine(config: AuthConfig): SignInMachine {
       issuer: config.branding.displayName,
     },
     transport: awsTransport(config.region),
-    session: httpSessionClient({ doorZone: config.doorZone }),
+    session: httpSessionClient({
+      doorZone: config.doorZone,
+      apiBase: config.apiBase,
+    }),
     // The collector script is loaded by the host page only when config.collectorUrl is set (S1).
     userContextData: config.collectorUrl
       ? (username) =>
@@ -148,6 +166,7 @@ export function SignInPage({
   config,
   onDone,
   machine: given,
+  notice = null,
 }: SignInPageProps) {
   const id = useId();
   const machine = useMemo(
@@ -258,6 +277,13 @@ export function SignInPage({
   } else if (state.step === "password") {
     body = (
       <>
+        {notice && state.notice !== "password_reset" && (
+          <Banner
+            variant="info"
+            data-testid="signin-notice"
+            title={NOTICES[notice]}
+          />
+        )}
         {state.notice === "password_reset" && (
           <Banner
             variant="success"
@@ -307,7 +333,7 @@ export function SignInPage({
     submitLabel = "Turn on";
     body = (
       <>
-        <p className="text-ajna-muted-foreground text-sm">
+        <p className="text-sm text-ajna-muted-foreground">
           Scan this code with an authenticator app, then enter the 6-digit code
           it shows.
         </p>
@@ -325,7 +351,7 @@ export function SignInPage({
           </FieldLabel>
           <code
             id={`${id}-secret`}
-            className="bg-ajna-muted block rounded-md p-2 text-sm break-all"
+            className="block break-all rounded-md bg-ajna-muted p-2 text-sm"
           >
             {state.secret}
           </code>
@@ -346,7 +372,7 @@ export function SignInPage({
       <>
         {state.step === "forgot_code" && (
           <>
-            <p className="text-ajna-muted-foreground text-sm">
+            <p className="text-sm text-ajna-muted-foreground">
               If the account exists, we sent a code to its email. Enter it
               below.
             </p>
@@ -418,7 +444,7 @@ export function SignInPage({
   const showBack = state.step !== "password" || askingForgot;
 
   return (
-    <main className="bg-ajna-background text-ajna-foreground grid min-h-dvh place-items-center px-4 py-10">
+    <main className="grid min-h-dvh place-items-center bg-ajna-background px-4 py-10 text-ajna-foreground">
       <section className="w-full max-w-sm" aria-labelledby={`${id}-title`}>
         <header className="mb-8 flex items-center gap-3">
           {brand.logoUrl ? (
@@ -437,13 +463,13 @@ export function SignInPage({
               className="truncate text-base font-semibold"
               data-testid="signin-org"
             >
-              <span className="text-ajna-muted-foreground font-normal">
+              <span className="font-normal text-ajna-muted-foreground">
                 Organisation:{" "}
               </span>
               {brand.displayName}
             </p>
             {brand.appDisplayName && (
-              <p className="text-ajna-muted-foreground text-xs">
+              <p className="text-xs text-ajna-muted-foreground">
                 {brand.appDisplayName}
               </p>
             )}
@@ -506,7 +532,7 @@ export function SignInPage({
           body
         )}
         <footer
-          className="border-ajna-border text-ajna-muted-foreground mt-8 border-t pt-4 text-xs"
+          className="mt-8 border-t border-ajna-border pt-4 text-xs text-ajna-muted-foreground"
           data-testid="signin-secured"
         >
           Secured by Ajna{config.orgSlug ? ` · ${config.orgSlug}` : ""}
