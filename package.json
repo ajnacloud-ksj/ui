@@ -21,7 +21,8 @@
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "lint:fix": "eslint . --fix --max-warnings=0"
+    "lint:fix": "eslint . --fix --max-warnings=0",
+    "check:public": "node --test scripts/check-public-content.test.mjs && node scripts/check-public-content.mjs"
   },
   "devDependencies": {
     "@ajnacloud/ui": "workspace:*",

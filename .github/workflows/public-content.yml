@@ -1,0 +1,18 @@
+name: Public content
+# This repo is public: fail a pull request that adds a real Cognito pool id, an AWS account id,
+# an AWS access key id or an internal platform host. The rules: .github/public-content-patterns.json.
+# pull_request only (never pull_request_target), read-only, no secrets, no dependencies installed.
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/check-public-content.test.mjs
+      - run: node scripts/check-public-content.mjs
